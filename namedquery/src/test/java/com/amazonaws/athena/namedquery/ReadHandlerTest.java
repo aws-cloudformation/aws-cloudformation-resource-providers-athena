@@ -1,5 +1,7 @@
 package com.amazonaws.athena.namedquery;
 
+import com.amazonaws.cloudformation.exceptions.CfnGeneralServiceException;
+import com.amazonaws.cloudformation.exceptions.CfnInvalidRequestException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.OperationStatus;
@@ -21,6 +23,7 @@ import static org.mockito.Mockito.mock;
 
 import software.amazon.awssdk.services.athena.model.GetNamedQueryResponse;
 import software.amazon.awssdk.services.athena.model.InternalServerException;
+import software.amazon.awssdk.services.athena.model.InvalidRequestException;
 import software.amazon.awssdk.services.athena.model.NamedQuery;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,6 +95,46 @@ class ReadHandlerTest {
 
         // Mock
         doThrow(InternalServerException.builder().build())
+                .when(proxy)
+                .injectCredentialsAndInvokeV2(any(), any());
+
+        // Call
+        assertThrows(CfnGeneralServiceException.class, () ->
+                new ReadHandler().handleRequest(proxy, request, null, logger));
+    }
+
+    @Test
+    void testInvalidRequestException() {
+        // Prepare inputs
+        final ResourceModel resourceModel = ResourceModel.builder()
+                .namedQueryId("namedQueryId")
+                .build();
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(resourceModel)
+                .build();
+
+        // Mock
+        doThrow(InvalidRequestException.builder().build())
+                .when(proxy)
+                .injectCredentialsAndInvokeV2(any(), any());
+
+        // Call
+        assertThrows(CfnInvalidRequestException.class, () ->
+                new ReadHandler().handleRequest(proxy, request, null, logger));
+    }
+
+    @Test
+    void testThrowable() {
+        // Prepare inputs
+        final ResourceModel resourceModel = ResourceModel.builder()
+                .namedQueryId("namedQueryId")
+                .build();
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(resourceModel)
+                .build();
+
+        // Mock
+        doThrow(new RuntimeException())
                 .when(proxy)
                 .injectCredentialsAndInvokeV2(any(), any());
 

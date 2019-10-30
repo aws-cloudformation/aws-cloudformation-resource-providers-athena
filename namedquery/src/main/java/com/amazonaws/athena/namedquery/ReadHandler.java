@@ -1,5 +1,7 @@
 package com.amazonaws.athena.namedquery;
 
+import com.amazonaws.cloudformation.exceptions.CfnGeneralServiceException;
+import com.amazonaws.cloudformation.exceptions.CfnInvalidRequestException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ProgressEvent;
@@ -51,9 +53,9 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
                     getNamedQueryRequest,
                     athenaClient::getNamedQuery).namedQuery();
         } catch (InternalServerException e) {
-            throw new RuntimeException(e);  // Replace with exceptions from https://github.com/aws-cloudformation/aws-cloudformation-rpdk-java-plugin/tree/master/src/main/java/com/amazonaws/cloudformation/exceptions
+            throw new CfnGeneralServiceException(e);
         } catch (InvalidRequestException e) {
-            throw new RuntimeException(e);  // ditto as InternalServerException
+            throw new CfnInvalidRequestException(e);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
