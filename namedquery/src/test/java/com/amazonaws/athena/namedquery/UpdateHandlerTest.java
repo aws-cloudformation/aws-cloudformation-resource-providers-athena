@@ -1,9 +1,8 @@
 package com.amazonaws.athena.namedquery;
 
+import com.amazonaws.cloudformation.exceptions.CfnNotUpdatableException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
-import com.amazonaws.cloudformation.proxy.OperationStatus;
-import com.amazonaws.cloudformation.proxy.ProgressEvent;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,24 +30,11 @@ class UpdateHandlerTest {
 
     @Test
     void handleRequest_SimpleSuccess() {
-        final UpdateHandler handler = new UpdateHandler();
-
-        final ResourceModel model = ResourceModel.builder().build();
-
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
+            .desiredResourceState(ResourceModel.builder().build())
             .build();
 
-        final ProgressEvent<ResourceModel, CallbackContext> response
-            = handler.handleRequest(proxy, request, null, logger);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-        assertThat(response.getCallbackContext()).isNull();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
-        assertThat(response.getResourceModels()).isNull();
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isNull();
+        assertThrows(CfnNotUpdatableException.class, () ->
+                new UpdateHandler().handleRequest(proxy, request, null, logger));
     }
 }

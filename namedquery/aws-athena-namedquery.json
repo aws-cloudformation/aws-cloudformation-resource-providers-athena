@@ -27,20 +27,12 @@
             "minLength": 1,
             "maxLength": 262144
         },
-        "WorkGroup": {
-            "description": "The name of the workgroup in which the named query is being created.",
-            "type": "string",
-            "pattern": "[a-zA-z0-9._-]{1,128}",
-            "minLength": 1,
-            "maxLength": 262144
-        },
         "NamedQueryId": {
             "description": "The unique ID of the query.",
             "type": "string"
         }
     },
     "required": [
-        "Name",
         "Database",
         "QueryString"
     ],
@@ -60,19 +52,22 @@
                 "athena:ListNamedQueries"
             ]
         },
-        "update": {
-            "permissions": [
-                "athena:UpdateWorkGroup"
-            ]
-        },
         "delete": {
             "permissions": [
                 "athena:DeleteNamedQuery"
             ]
         }
     },
-    "primaryIdentifier": [
+    "readOnlyProperties": [
         "/properties/NamedQueryId"
     ],
-    "additionalProperties": false
+    "createOnlyProperties": [
+        "/properties/Name",
+        "/properties/Database",
+        "/properties/Description",
+        "/properties/QueryString"
+    ],
+    "primaryIdentifier": [
+        "/properties/NamedQueryId"
+    ]
 }

@@ -45,9 +45,9 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         try {
             clientProxy.injectCredentialsAndInvokeV2(deleteNamedQueryRequest, athenaClient::deleteNamedQuery);
         } catch (InternalServerException e) {
-            throw new CfnGeneralServiceException(e);
+            throw new CfnGeneralServiceException("deleteNamedQuery", e);
         } catch (InvalidRequestException e) {
-            throw new CfnInvalidRequestException(e);
+            throw new CfnInvalidRequestException(deleteNamedQueryRequest.toString(), e);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

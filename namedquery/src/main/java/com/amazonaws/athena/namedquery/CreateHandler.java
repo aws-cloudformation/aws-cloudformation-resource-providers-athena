@@ -44,16 +44,15 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 .description(model.getDescription())
                 .name(model.getName())
                 .queryString(model.getQueryString())
-                .workGroup(model.getWorkGroup())
                 .build();
         try {
             return clientProxy.injectCredentialsAndInvokeV2(
                     createNamedQueryRequest,
                     athenaClient::createNamedQuery).namedQueryId();
         } catch (InternalServerException e) {
-            throw new CfnGeneralServiceException(e);
+            throw new CfnGeneralServiceException("createNamedQuery", e);
         } catch (InvalidRequestException e) {
-            throw new CfnInvalidRequestException(e);
+            throw new CfnInvalidRequestException(createNamedQueryRequest.toString(), e);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

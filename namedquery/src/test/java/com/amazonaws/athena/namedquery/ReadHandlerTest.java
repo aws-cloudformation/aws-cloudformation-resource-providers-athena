@@ -54,7 +54,6 @@ class ReadHandlerTest {
                 .database("database")
                 .description("description")
                 .name("name")
-                .workGroup("workgroup")
                 .queryString("querystring")
                 .build();
 
@@ -77,7 +76,6 @@ class ReadHandlerTest {
         assertThat(response.getResourceModel().getDatabase()).isEqualTo(namedQuery.database());
         assertThat(response.getResourceModel().getDescription()).isEqualTo(namedQuery.description());
         assertThat(response.getResourceModel().getName()).isEqualTo(namedQuery.name());
-        assertThat(response.getResourceModel().getWorkGroup()).isEqualTo(namedQuery.workGroup());
         assertThat(response.getResourceModel().getQueryString()).isEqualTo(namedQuery.queryString());
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();

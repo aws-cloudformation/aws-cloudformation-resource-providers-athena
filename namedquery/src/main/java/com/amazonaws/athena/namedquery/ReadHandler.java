@@ -30,32 +30,31 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
         clientProxy = proxy;
         athenaClient = AthenaClient.create();
 
-        final NamedQuery namedQuery = getNamedQuery(model);
-        model.setNamedQueryId(namedQuery.namedQueryId());
-        model.setName(namedQuery.name());
-        model.setDatabase(namedQuery.database());
-        model.setDescription(namedQuery.description());
-        model.setQueryString(namedQuery.queryString());
-        model.setWorkGroup(namedQuery.workGroup());
-
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
-            .resourceModel(model)
+            .resourceModel(getNamedQuery(model))
             .status(OperationStatus.SUCCESS)
             .build();
     }
 
-    private NamedQuery getNamedQuery(final ResourceModel model) {
+    private ResourceModel getNamedQuery(final ResourceModel model) {
         final GetNamedQueryRequest getNamedQueryRequest = GetNamedQueryRequest.builder()
                 .namedQueryId(model.getNamedQueryId())
                 .build();
         try {
-            return clientProxy.injectCredentialsAndInvokeV2(
+            final NamedQuery namedQuery = clientProxy.injectCredentialsAndInvokeV2(
                     getNamedQueryRequest,
                     athenaClient::getNamedQuery).namedQuery();
+            return ResourceModel.builder()
+                    .namedQueryId(namedQuery.namedQueryId())
+                    .name(namedQuery.name())
+                    .database(namedQuery.database())
+                    .description(namedQuery.description())
+                    .queryString(namedQuery.queryString())
+                    .build();
         } catch (InternalServerException e) {
-            throw new CfnGeneralServiceException(e);
+            throw new CfnGeneralServiceException("getNamedQuery", e);
         } catch (InvalidRequestException e) {
-            throw new CfnInvalidRequestException(e);
+            throw new CfnInvalidRequestException(getNamedQueryRequest.toString(), e);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
