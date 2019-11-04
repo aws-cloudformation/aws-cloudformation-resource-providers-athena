@@ -4,14 +4,12 @@ import com.amazonaws.cloudformation.exceptions.CfnNotUpdatableException;
 import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
 import com.amazonaws.cloudformation.proxy.Logger;
 import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateHandlerTest {
@@ -21,12 +19,6 @@ class UpdateHandlerTest {
 
     @Mock
     private Logger logger;
-
-    @BeforeEach
-    void setup() {
-        proxy = mock(AmazonWebServicesClientProxy.class);
-        logger = mock(Logger.class);
-    }
 
     @Test
     void handleRequest_SimpleSuccess() {

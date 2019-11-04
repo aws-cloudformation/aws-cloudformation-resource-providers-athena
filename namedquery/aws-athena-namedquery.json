@@ -47,11 +47,6 @@
                 "athena:GetNamedQuery"
             ]
         },
-        "list": {
-            "permissions": [
-                "athena:ListNamedQueries"
-            ]
-        },
         "delete": {
             "permissions": [
                 "athena:DeleteNamedQuery"
