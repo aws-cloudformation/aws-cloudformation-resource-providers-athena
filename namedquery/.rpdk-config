@@ -1,0 +1,15 @@
+{
+    "typeName": "AWS::Athena::NamedQuery",
+    "language": "java",
+    "runtime": "java8",
+    "entrypoint": "com.amazonaws.athena.namedquery.HandlerWrapper::handleRequest",
+    "testEntrypoint": "com.aws.logs.metricfilter.HandlerWrapper::testEntrypoint",
+    "settings": {
+        "namespace": [
+            "com",
+            "amazonaws",
+            "athena",
+            "namedquery"
+        ]
+    }
+}
