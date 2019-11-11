@@ -7,11 +7,11 @@ import org.json.JSONTokener;
 
 class Configuration extends BaseConfiguration {
 
-    Configuration() {
+    public Configuration() {
         super("aws-athena-namedquery.json");
     }
 
-    JSONObject resourceSchemaJSONObject() {
+    public JSONObject resourceSchemaJSONObject() {
         return new JSONObject(new JSONTokener(this.getClass().getClassLoader().getResourceAsStream(schemaFilename)));
     }
 
