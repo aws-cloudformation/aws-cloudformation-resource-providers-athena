@@ -7,7 +7,7 @@ import org.json.JSONTokener;
 
 class Configuration extends BaseConfiguration {
 
-    Configuration() {
+    public Configuration() {
         super("aws-athena-namedquery.json");
     }
 
