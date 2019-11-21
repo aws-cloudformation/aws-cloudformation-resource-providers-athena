@@ -10,13 +10,13 @@ Resources:
   TypeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: com.amazonaws.athena.namedquery.HandlerWrapper::handleRequest
+      Handler: software.amazon.athena.namedquery.HandlerWrapper::handleRequest
       Runtime: java8
       CodeUri: ./target/aws-athena-namedquery-handler-1.0-SNAPSHOT.jar
 
   TestEntrypoint:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: com.amazonaws.athena.namedquery.HandlerWrapper::testEntrypoint
+      Handler: software.amazon.athena.namedquery.HandlerWrapper::testEntrypoint
       Runtime: java8
       CodeUri: ./target/aws-athena-namedquery-handler-1.0-SNAPSHOT.jar

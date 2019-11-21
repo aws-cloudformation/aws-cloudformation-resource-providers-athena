@@ -1,12 +1,5 @@
-package com.amazonaws.athena.namedquery;
+package software.amazon.athena.namedquery;
 
-import com.amazonaws.cloudformation.exceptions.CfnGeneralServiceException;
-import com.amazonaws.cloudformation.exceptions.CfnInvalidRequestException;
-import com.amazonaws.cloudformation.proxy.AmazonWebServicesClientProxy;
-import com.amazonaws.cloudformation.proxy.Logger;
-import com.amazonaws.cloudformation.proxy.OperationStatus;
-import com.amazonaws.cloudformation.proxy.ProgressEvent;
-import com.amazonaws.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,16 +11,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
-import java.util.Arrays;
-import java.util.List;
-
+import software.amazon.awssdk.services.athena.model.DeleteNamedQueryResponse;
 import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
-import software.amazon.awssdk.services.athena.model.ListNamedQueriesResponse;
+import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.OperationStatus;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 @ExtendWith(MockitoExtension.class)
-class ListHandlerTest {
-
+class DeleteHandlerTest {
     @Mock
     private AmazonWebServicesClientProxy proxy;
 
@@ -37,31 +33,28 @@ class ListHandlerTest {
     @Test
     void testSuccessState() {
         // Prepare inputs
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(ResourceModel.builder().build())
+        final ResourceModel resourceModel = ResourceModel.builder()
+                .namedQueryId("namedQueryId")
                 .build();
-        final List<String> namedQueryIds = Arrays.asList("id1", "id2");
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(resourceModel)
+                .build();
 
         // Mock
-        doReturn(
-                ListNamedQueriesResponse.builder()
-                        .nextToken("nextToken")
-                        .namedQueryIds(namedQueryIds)
-                        .build())
+        doReturn(DeleteNamedQueryResponse.builder().build())
                 .when(proxy)
                 .injectCredentialsAndInvokeV2(any(), any());
 
         // Call
         final ProgressEvent<ResourceModel, CallbackContext> response
-                = new ListHandler().handleRequest(proxy, request, null, logger);
+                = new DeleteHandler().handleRequest(proxy, request, null, logger);
 
         // Assert
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackContext()).isNull();
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModels().size()).isEqualTo(namedQueryIds.size());
-        assertThat(response.getResourceModels().get(0).getNamedQueryId()).isEqualTo(namedQueryIds.get(0));
-        assertThat(response.getResourceModels().get(1).getNamedQueryId()).isEqualTo(namedQueryIds.get(1));
+        assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
+        assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
     }
@@ -69,8 +62,11 @@ class ListHandlerTest {
     @Test
     void testInternalServerException() {
         // Prepare inputs
+        final ResourceModel resourceModel = ResourceModel.builder()
+                .namedQueryId("namedQueryId")
+                .build();
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(ResourceModel.builder().build())
+                .desiredResourceState(resourceModel)
                 .build();
 
         // Mock
@@ -80,14 +76,17 @@ class ListHandlerTest {
 
         // Call
         assertThrows(CfnGeneralServiceException.class, () ->
-                new ListHandler().handleRequest(proxy, request, null, logger));
+                new DeleteHandler().handleRequest(proxy, request, null, logger));
     }
 
     @Test
     void testInvalidRequestException() {
         // Prepare inputs
+        final ResourceModel resourceModel = ResourceModel.builder()
+                .namedQueryId("namedQueryId")
+                .build();
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(ResourceModel.builder().build())
+                .desiredResourceState(resourceModel)
                 .build();
 
         // Mock
@@ -97,24 +96,7 @@ class ListHandlerTest {
 
         // Call
         assertThrows(CfnInvalidRequestException.class, () ->
-                new ListHandler().handleRequest(proxy, request, null, logger));
-    }
-
-    @Test
-    void testThrowable() {
-        // Prepare inputs
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(ResourceModel.builder().build())
-                .build();
-
-        // Mock
-        doThrow(new RuntimeException())
-                .when(proxy)
-                .injectCredentialsAndInvokeV2(any(), any());
-
-        // Call
-        assertThrows(RuntimeException.class, () ->
-                new ListHandler().handleRequest(proxy, request, null, logger));
+                new DeleteHandler().handleRequest(proxy, request, null, logger));
     }
 
 }

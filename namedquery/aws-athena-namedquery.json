@@ -69,5 +69,6 @@
     ],
     "primaryIdentifier": [
         "/properties/NamedQueryId"
-    ]
+    ],
+    "additionalProperties": false
 }
