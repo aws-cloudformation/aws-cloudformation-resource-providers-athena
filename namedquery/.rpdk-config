@@ -2,12 +2,12 @@
     "typeName": "AWS::Athena::NamedQuery",
     "language": "java",
     "runtime": "java8",
-    "entrypoint": "com.amazonaws.athena.namedquery.HandlerWrapper::handleRequest",
-    "testEntrypoint": "com.aws.logs.metricfilter.HandlerWrapper::testEntrypoint",
+    "entrypoint": "software.amazon.athena.namedquery.HandlerWrapper::handleRequest",
+    "testEntrypoint": "software.amazon.athena.namedquery.HandlerWrapper::testEntrypoint",
     "settings": {
         "namespace": [
-            "com",
-            "amazonaws",
+            "software",
+            "amazon",
             "athena",
             "namedquery"
         ]
