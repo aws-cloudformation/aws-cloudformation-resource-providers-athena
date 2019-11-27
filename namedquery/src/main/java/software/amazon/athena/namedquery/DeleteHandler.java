@@ -14,6 +14,7 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 public class DeleteHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy clientProxy;
     private AthenaClient athenaClient;
+    private Logger logger;
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest (
@@ -24,12 +25,15 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
 
         clientProxy = proxy;
         athenaClient = AthenaClient.create();
+        this.logger = logger;
 
         return deleteResource(request.getDesiredResourceState());
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> deleteResource(ResourceModel model) {
         deleteNamedQuery(model);
+        logger.log(String.format("%s [%s] deleted successfully",
+            ResourceModel.TYPE_NAME, model.getPrimaryIdentifier().toString()));
         return ProgressEvent.defaultSuccessHandler(model);
     }
 
