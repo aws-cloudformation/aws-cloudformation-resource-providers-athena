@@ -12,6 +12,8 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class DeleteHandler extends BaseHandler<CallbackContext> {
+    static final String QUERY_NOT_FOUND_ERR_MSG = "NAMED_QUERY_NOT_FOUND";
+
     private AmazonWebServicesClientProxy clientProxy;
     private AthenaClient athenaClient;
     private Logger logger;
@@ -39,13 +41,17 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
 
     private void deleteNamedQuery(final ResourceModel model) {
         final DeleteNamedQueryRequest deleteNamedQueryRequest = DeleteNamedQueryRequest.builder()
-                .namedQueryId(model.getNamedQueryId())
+                .namedQueryId(model.getPrimaryIdentifier().toString())
                 .build();
         try {
             clientProxy.injectCredentialsAndInvokeV2(deleteNamedQueryRequest, athenaClient::deleteNamedQuery);
         } catch (InternalServerException e) {
             throw new CfnGeneralServiceException("deleteNamedQuery", e);
         } catch (InvalidRequestException e) {
+            if (e.athenaErrorCode().equalsIgnoreCase(QUERY_NOT_FOUND_ERR_MSG)) {
+                logger.log(String.format("Query with id [ %s ] not found", model.getPrimaryIdentifier()));
+                return;
+            }
             throw new CfnInvalidRequestException(deleteNamedQueryRequest.toString(), e);
         }
     }

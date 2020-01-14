@@ -90,13 +90,42 @@ class DeleteHandlerTest {
                 .build();
 
         // Mock
-        doThrow(InvalidRequestException.builder().build())
+        doThrow(InvalidRequestException.builder().athenaErrorCode("").build())
                 .when(proxy)
                 .injectCredentialsAndInvokeV2(any(), any());
 
         // Call
         assertThrows(CfnInvalidRequestException.class, () ->
                 new DeleteHandler().handleRequest(proxy, request, null, logger));
+    }
+
+    @Test
+    void testInvalidRequestExceptionWithNotFoundErrorCode() {
+        // Prepare inputs
+        final ResourceModel resourceModel = ResourceModel.builder()
+            .namedQueryId("namedQueryId")
+            .build();
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(resourceModel)
+            .build();
+
+        // Mock
+        doThrow(InvalidRequestException.builder().athenaErrorCode(DeleteHandler.QUERY_NOT_FOUND_ERR_MSG).build())
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
+
+        // Call
+        final ProgressEvent<ResourceModel, CallbackContext> response
+            = new DeleteHandler().handleRequest(proxy, request, null, logger);
+
+        // Assert
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
     }
 
 }

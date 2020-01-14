@@ -33,7 +33,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
 
     private ResourceModel getNamedQuery(final ResourceModel model) {
         final GetNamedQueryRequest getNamedQueryRequest = GetNamedQueryRequest.builder()
-                .namedQueryId(model.getNamedQueryId())
+                .namedQueryId(model.getPrimaryIdentifier().toString())
                 .build();
         try {
             final NamedQuery namedQuery = clientProxy.injectCredentialsAndInvokeV2(
