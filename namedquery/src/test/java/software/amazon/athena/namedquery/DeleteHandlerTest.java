@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -90,13 +91,33 @@ class DeleteHandlerTest {
                 .build();
 
         // Mock
-        doThrow(InvalidRequestException.builder().build())
+        doThrow(InvalidRequestException.builder().athenaErrorCode("").build())
                 .when(proxy)
                 .injectCredentialsAndInvokeV2(any(), any());
 
         // Call
         assertThrows(CfnInvalidRequestException.class, () ->
                 new DeleteHandler().handleRequest(proxy, request, null, logger));
+    }
+
+    @Test
+    void testInvalidRequestExceptionWithNotFoundErrorCode() {
+        // Prepare inputs
+        final ResourceModel resourceModel = ResourceModel.builder()
+            .namedQueryId("namedQueryId")
+            .build();
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(resourceModel)
+            .build();
+
+        // Mock
+        doThrow(InvalidRequestException.builder().athenaErrorCode(DeleteHandler.QUERY_NOT_FOUND_ERR_MSG).build())
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
+
+        // Call
+        assertThrows(CfnNotFoundException.class, () ->
+            new DeleteHandler().handleRequest(proxy, request, null, logger));
     }
 
 }
