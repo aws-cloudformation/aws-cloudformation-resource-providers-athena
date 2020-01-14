@@ -6,6 +6,7 @@ import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -49,8 +50,8 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
             throw new CfnGeneralServiceException("deleteNamedQuery", e);
         } catch (InvalidRequestException e) {
             if (e.athenaErrorCode().equalsIgnoreCase(QUERY_NOT_FOUND_ERR_MSG)) {
-                logger.log(String.format("Query with id [ %s ] not found", model.getPrimaryIdentifier()));
-                return;
+                logger.log(String.format("Query with id [ %s ] not found", model.getPrimaryIdentifier().toString()));
+                throw new CfnNotFoundException("AWS::Athena::NamedQuery", model.getPrimaryIdentifier().toString());
             }
             throw new CfnInvalidRequestException(deleteNamedQueryRequest.toString(), e);
         }

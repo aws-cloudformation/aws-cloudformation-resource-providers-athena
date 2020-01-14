@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -115,17 +116,8 @@ class DeleteHandlerTest {
             .injectCredentialsAndInvokeV2(any(), any());
 
         // Call
-        final ProgressEvent<ResourceModel, CallbackContext> response
-            = new DeleteHandler().handleRequest(proxy, request, null, logger);
-
-        // Assert
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-        assertThat(response.getCallbackContext()).isNull();
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
-        assertThat(response.getResourceModels()).isNull();
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isNull();
+        assertThrows(CfnNotFoundException.class, () ->
+            new DeleteHandler().handleRequest(proxy, request, null, logger));
     }
 
 }
