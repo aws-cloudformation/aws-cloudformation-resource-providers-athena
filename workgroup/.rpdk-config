@@ -1,0 +1,15 @@
+{
+    "typeName": "AWS::Athena::WorkGroup",
+    "language": "java",
+    "runtime": "java8",
+    "entrypoint": "software.amazon.athena.workgroup.HandlerWrapper::handleRequest",
+    "testEntrypoint": "software.amazon.athena.workgroup.HandlerWrapper::testEntrypoint",
+    "settings": {
+        "namespace": [
+            "software",
+            "amazon",
+            "athena",
+            "workgroup"
+        ]
+    }
+}
