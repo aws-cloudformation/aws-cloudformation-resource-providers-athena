@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.amazonaws.athena.namedquery</groupId>
-    <artifactId>aws-athena-namedquery-handler</artifactId>
-    <name>aws-athena-namedquery-handler</name>
+    <groupId>com.amazonaws.athena.workgroup</groupId>
+    <artifactId>aws-athena-workgroup-handler</artifactId>
+    <name>aws-athena-workgroup-handler</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -118,7 +118,7 @@
                         <configuration>
                             <executable>cfn-cli</executable>
                             <commandlineArgs>generate</commandlineArgs>
-                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <workingDirectory></workingDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -190,7 +190,7 @@
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.8</minimum>
+                                            <minimum>0.7</minimum>
                                         </limit>
                                         <limit>
                                             <counter>INSTRUCTION</counter>
@@ -207,9 +207,9 @@
         </plugins>
         <resources>
             <resource>
-                <directory>${project.basedir}</directory>
+                <directory></directory>
                 <includes>
-                    <include>aws-athena-namedquery.json</include>
+                    <include>aws-athena-workgroup.json</include>
                 </includes>
             </resource>
         </resources>
