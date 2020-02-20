@@ -60,7 +60,7 @@ public class ListHandler extends BaseHandler<CallbackContext> {
     } catch (InternalServerException e) {
       throw new CfnGeneralServiceException("listWorkGroupsRequest", e);
     } catch (InvalidRequestException e) {
-      throw new CfnInvalidRequestException(listWorkGroupsRequest.toString(), e);
+      throw new CfnInvalidRequestException(e.getMessage(), e);
     }
   }
 }

@@ -41,7 +41,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
 
   private void deleteWorkGroup(final ResourceModel model) {
     final DeleteWorkGroupRequest deleteWorkGroupRequest = DeleteWorkGroupRequest.builder()
-      .workGroup(model.getPrimaryIdentifier().toString())
+      .workGroup(model.getName())
       .recursiveDeleteOption(model.getRecursiveDeleteOption())
       .build();
     try {
@@ -50,9 +50,9 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
       throw new CfnGeneralServiceException("deleteWorkGroup", e);
     } catch (InvalidRequestException e) {
       if (e.athenaErrorCode().equalsIgnoreCase(WORKGROUP_NOT_EMPTY_ERROR_MSG)) {
-        logger.log(String.format("Workgroup [ %s ] not empty", model.getPrimaryIdentifier().toString()));
+        logger.log(String.format("Workgroup [ %s ] not empty", model.getName()));
       }
-      throw new CfnInvalidRequestException(deleteWorkGroupRequest.toString(), e);
+      throw new CfnInvalidRequestException(e.getMessage(), e);
     }
   }
 }
