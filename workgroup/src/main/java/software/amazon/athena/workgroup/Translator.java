@@ -1,6 +1,5 @@
 package software.amazon.athena.workgroup;
 
-import com.google.common.annotations.VisibleForTesting;
 import software.amazon.awssdk.services.athena.model.ResultConfigurationUpdates;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfiguration;
 import software.amazon.awssdk.services.athena.model.ResultConfiguration;

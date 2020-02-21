@@ -55,7 +55,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
     } catch (InternalServerException e) {
       throw new CfnGeneralServiceException("createWorkGroup", e);
     } catch (InvalidRequestException e) {
-      throw new CfnInvalidRequestException(createWorkGroupRequest.toString(), e);
+      throw new CfnInvalidRequestException(e.getMessage(), e);
     }
   }
 

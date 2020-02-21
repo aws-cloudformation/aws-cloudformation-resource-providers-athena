@@ -50,7 +50,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
     } catch (InternalServerException e) {
       throw new CfnGeneralServiceException("getWorkGroup", e);
     } catch (InvalidRequestException e) {
-      throw new CfnInvalidRequestException(getWorkGroupRequest.toString(), e);
+      throw new CfnInvalidRequestException(e.getMessage(), e);
     }
   }
 }

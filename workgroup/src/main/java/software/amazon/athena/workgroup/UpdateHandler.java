@@ -57,7 +57,7 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
     } catch (InternalServerException e) {
       throw new CfnGeneralServiceException("updateWorkGroup", e);
     } catch (InvalidRequestException e) {
-      throw new CfnInvalidRequestException(updateWorkGroupRequest.toString(), e);
+      throw new CfnInvalidRequestException(e.getMessage(), e);
     }
   }
 
