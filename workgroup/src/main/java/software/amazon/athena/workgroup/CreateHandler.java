@@ -58,5 +58,4 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
       throw new CfnInvalidRequestException(e.getMessage(), e);
     }
   }
-
 }

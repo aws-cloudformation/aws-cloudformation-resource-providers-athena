@@ -61,7 +61,7 @@ class ReadHandlerTest {
     assertThat(response.getResourceModel().getName()).isEqualTo(workGroup.name());
     assertThat(response.getResourceModel().getDescription()).isEqualTo(workGroup.description());
     assertThat(response.getResourceModel().getState()).isEqualTo(workGroup.stateAsString());
-    assertThat(response.getResourceModel().getCreationTime()).isEqualTo((double) workGroup.creationTime().getEpochSecond());
+    assertThat(response.getResourceModel().getCreationTime()).isEqualTo(Long.toString(workGroup.creationTime().getEpochSecond()));
     assertThat(response.getMessage()).isNull();
     assertThat(response.getErrorCode()).isNull();
   }
@@ -104,7 +104,7 @@ class ReadHandlerTest {
     assertThat(response.getResourceModel().getName()).isEqualTo(workGroup.name());
     assertThat(response.getResourceModel().getDescription()).isEqualTo(workGroup.description());
     assertThat(response.getResourceModel().getState()).isEqualTo(workGroup.stateAsString());
-    assertThat(response.getResourceModel().getCreationTime()).isEqualTo((double) workGroup.creationTime().getEpochSecond());
+    assertThat(response.getResourceModel().getCreationTime()).isEqualTo(Long.toString(workGroup.creationTime().getEpochSecond()));
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getBytesScannedCutoffPerQuery())
       .isEqualTo(workGroup.configuration().bytesScannedCutoffPerQuery().intValue());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEnforceWorkGroupConfiguration())
@@ -153,7 +153,7 @@ class ReadHandlerTest {
     assertThat(response.getResourceModel().getName()).isEqualTo(workGroup.name());
     assertThat(response.getResourceModel().getDescription()).isEqualTo(workGroup.description());
     assertThat(response.getResourceModel().getState()).isEqualTo(workGroup.stateAsString());
-    assertThat(response.getResourceModel().getCreationTime()).isEqualTo((double) workGroup.creationTime().getEpochSecond());
+    assertThat(response.getResourceModel().getCreationTime()).isEqualTo(Long.toString(workGroup.creationTime().getEpochSecond()));
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getBytesScannedCutoffPerQuery())
       .isEqualTo(workGroup.configuration().bytesScannedCutoffPerQuery().intValue());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEnforceWorkGroupConfiguration())

@@ -193,7 +193,7 @@
         },
         "CreationTime": {
             "description": "The date and time the workgroup was created.",
-            "type": "number"
+            "type": "string"
         },
         "State": {
             "description": "The state of the workgroup: ENABLED or DISABLED.",
@@ -214,7 +214,8 @@
     "handlers": {
         "create": {
             "permissions": [
-                "athena:CreateWorkGroup"
+                "athena:CreateWorkGroup",
+                "athena:TagResource"
             ]
         },
         "read": {
@@ -229,12 +230,15 @@
         },
         "delete": {
             "permissions": [
-                "athena:DeleteWorkGroup"
+                "athena:DeleteWorkGroup",
+                "athena:UntagResource"
             ]
         },
         "update": {
             "permissions": [
-                "athena:UpdateWorkGroup"
+                "athena:UpdateWorkGroup",
+                "athena:TagResource",
+                "athena:UntagResource"
             ]
         }
     },

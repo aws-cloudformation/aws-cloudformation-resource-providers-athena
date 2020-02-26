@@ -27,6 +27,8 @@ Resources:
                 - "athena:DeleteWorkGroup"
                 - "athena:GetWorkGroup"
                 - "athena:ListWorkGroups"
+                - "athena:TagResource"
+                - "athena:UntagResource"
                 - "athena:UpdateWorkGroup"
                 Resource: "*"
 Outputs:
