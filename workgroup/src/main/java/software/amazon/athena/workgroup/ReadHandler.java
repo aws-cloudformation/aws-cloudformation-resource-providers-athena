@@ -35,7 +35,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
 
   private ResourceModel getWorkGroup(final ResourceModel model) {
     final GetWorkGroupRequest getWorkGroupRequest = GetWorkGroupRequest.builder()
-      .workGroup(model.getPrimaryIdentifier().toString())
+      .workGroup(model.getName())
       .build();
     try {
       final WorkGroup workGroup = clientProxy.injectCredentialsAndInvokeV2(
@@ -44,7 +44,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
         .name(workGroup.name())
         .state(workGroup.stateAsString())
         .description(workGroup.description())
-        .creationTime((double) workGroup.creationTime().getEpochSecond())
+        .creationTime(Long.toString(workGroup.creationTime().getEpochSecond()))
         .workGroupConfiguration(workGroup.configuration() != null ? translator.createCfnWorkgroupConfigurationFromSdkConfiguration(workGroup.configuration()) : null)
         .build();
     } catch (InternalServerException e) {

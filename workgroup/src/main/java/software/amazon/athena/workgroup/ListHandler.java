@@ -38,7 +38,7 @@ public class ListHandler extends BaseHandler<CallbackContext> {
       workGroups.add(ResourceModel.builder()
         .name(q.name())
         .description(q.description())
-        .creationTime((double) q.creationTime().getEpochSecond())
+        .creationTime(Long.toString(q.creationTime().getEpochSecond()))
         .state(q.stateAsString())
         .build())
     );
