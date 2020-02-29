@@ -122,6 +122,8 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
       case "cn-northwest-1": return "aws-cn";
       case "us-gov-west-1":
       case "us-gov-east-1": return "aws-us-gov";
+      case "us-iso-east-1": return "aws-iso";
+      case "us-isob-east-1": return "aws-iso-b";
       default: return "aws";
     }
   }
