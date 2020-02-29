@@ -24,10 +24,11 @@ import java.util.stream.Collectors;
 public class UpdateHandler extends BaseHandler<CallbackContext> {
 
   /**
-   * arn:aws:athena:$region:$AWSAcctID:workgroup/$workgroup-name
+   * arn:$partition:athena:$region:$AWSAcctID:workgroup/$workgroup-name
    * See https://docs.aws.amazon.com/athena/latest/ug/workgroups-access.html
+   * https://docs.aws.amazon.com/IAM/latest/UserGuide/list_amazonathena.html#amazonathena-resources-for-iam-policies
    */
-  private static final String WORKGROUP_ARN_FORMAT = "arn:aws:athena:%s:%s:workgroup/%s";
+  private static final String WORKGROUP_ARN_FORMAT = "arn:%s:athena:%s:%s:workgroup/%s";
 
   private AmazonWebServicesClientProxy clientProxy;
   private AthenaClient athenaClient;
@@ -68,7 +69,11 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
       .configurationUpdates(model.getWorkGroupConfigurationUpdates() != null ?
         translator.createSdkConfigurationUpdatesFromCfnConfigurationUpdates(model.getWorkGroupConfigurationUpdates()) : null)
       .build();
-    final String workGroupARN = String.format(WORKGROUP_ARN_FORMAT, request.getRegion(), request.getAwsAccountId(), model.getName());
+    final String workGroupARN = String.format(WORKGROUP_ARN_FORMAT,
+        request.getAwsPartition(),
+        request.getRegion(),
+        request.getAwsAccountId(),
+        model.getName());
     final ResourceModel oldModel = request.getPreviousResourceState();
     final Set<Tag> oldTags = (oldModel == null || oldModel.getTags() == null) ?
       new HashSet<>() : new HashSet<>(translator.createSdkTagsFromCfnTags(oldModel.getTags()));
