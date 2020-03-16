@@ -16,14 +16,12 @@
                 "Key": {
                     "type": "string",
                     "minLength": 1,
-                    "maxLength": 128,
-                    "pattern": "^(?!aws:.*)[a-zA-Z0-9\\@\\_\\.\\/\\=\\+\\-\\:]+$"
+                    "maxLength": 128
                 },
                 "Value": {
                     "type": "string",
                     "minLength": 0,
-                    "maxLength": 256,
-                    "pattern": "^(?!aws:.*)[a-zA-Z0-9\\@\\_\\.\\/\\=\\+\\-\\:]+$"
+                    "maxLength": 256
                 }
             },
             "required": [
