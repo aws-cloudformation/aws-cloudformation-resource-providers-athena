@@ -36,13 +36,13 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
     private ProgressEvent<ResourceModel, CallbackContext> deleteResource(ResourceModel model) {
         deleteNamedQuery(model);
         logger.log(String.format("%s [%s] deleted successfully",
-            ResourceModel.TYPE_NAME, model.getPrimaryIdentifier().toString()));
+            ResourceModel.TYPE_NAME, model.getNamedQueryId()));
         return ProgressEvent.defaultSuccessHandler(model);
     }
 
     private void deleteNamedQuery(final ResourceModel model) {
         final DeleteNamedQueryRequest deleteNamedQueryRequest = DeleteNamedQueryRequest.builder()
-                .namedQueryId(model.getPrimaryIdentifier().toString())
+                .namedQueryId(model.getNamedQueryId())
                 .build();
         try {
             clientProxy.injectCredentialsAndInvokeV2(deleteNamedQueryRequest, athenaClient::deleteNamedQuery);
@@ -50,10 +50,10 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
             throw new CfnGeneralServiceException("deleteNamedQuery", e);
         } catch (InvalidRequestException e) {
             if (e.athenaErrorCode().equalsIgnoreCase(QUERY_NOT_FOUND_ERR_MSG)) {
-                logger.log(String.format("Query with id [ %s ] not found", model.getPrimaryIdentifier().toString()));
-                throw new CfnNotFoundException("AWS::Athena::NamedQuery", model.getPrimaryIdentifier().toString());
+                logger.log(String.format("Query with id [ %s ] not found", model.getNamedQueryId()));
+                throw new CfnNotFoundException("AWS::Athena::NamedQuery", model.getNamedQueryId());
             }
-            throw new CfnInvalidRequestException(deleteNamedQueryRequest.toString(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         }
     }
 }

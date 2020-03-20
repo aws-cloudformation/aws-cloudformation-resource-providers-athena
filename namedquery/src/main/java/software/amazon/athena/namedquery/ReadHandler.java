@@ -33,7 +33,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
 
     private ResourceModel getNamedQuery(final ResourceModel model) {
         final GetNamedQueryRequest getNamedQueryRequest = GetNamedQueryRequest.builder()
-                .namedQueryId(model.getPrimaryIdentifier().toString())
+                .namedQueryId(model.getNamedQueryId())
                 .build();
         try {
             final NamedQuery namedQuery = clientProxy.injectCredentialsAndInvokeV2(
@@ -49,7 +49,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
         } catch (InternalServerException e) {
             throw new CfnGeneralServiceException("getNamedQuery", e);
         } catch (InvalidRequestException e) {
-            throw new CfnInvalidRequestException(getNamedQueryRequest.toString(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         }
     }
 }

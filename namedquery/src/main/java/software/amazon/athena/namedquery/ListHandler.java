@@ -58,7 +58,7 @@ public class ListHandler extends BaseHandler<CallbackContext> {
         } catch (InternalServerException e) {
             throw new CfnGeneralServiceException("listNamedQueriesRequest", e);
         } catch (InvalidRequestException e) {
-            throw new CfnInvalidRequestException(listNamedQueriesRequest.toString(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         }
     }
 }

@@ -50,7 +50,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
     private ProgressEvent<ResourceModel, CallbackContext> createResource(ResourceModel model) {
         model.setNamedQueryId(createNamedQuery(model));
         logger.log(String.format("%s [%s] created successfully",
-            ResourceModel.TYPE_NAME, model.getPrimaryIdentifier().toString()));
+            ResourceModel.TYPE_NAME, model.getNamedQueryId()));
         return ProgressEvent.defaultSuccessHandler(model);
     }
 
@@ -68,7 +68,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         } catch (InternalServerException e) {
             throw new CfnGeneralServiceException("createNamedQuery", e);
         } catch (InvalidRequestException e) {
-            throw new CfnInvalidRequestException(createNamedQueryRequest.toString(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         }
     }
 }
