@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.INTEGER;
 
 @ExtendWith(MockitoExtension.class)
 public class TranslatorTest {
@@ -36,7 +37,7 @@ public class TranslatorTest {
   void testCreateSdkWorkgroupConfigurationFromCfnConfiguration() {
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
       .enforceWorkGroupConfiguration(true)
-      .bytesScannedCutoffPerQuery(10)
+      .bytesScannedCutoffPerQuery(10.0)
       .publishCloudWatchMetricsEnabled(true)
       .requesterPaysEnabled(false)
       .resultConfiguration(software.amazon.athena.workgroup.ResultConfiguration.builder()
@@ -64,7 +65,7 @@ public class TranslatorTest {
   void testCreateSdkWorkgroupConfigurationFromCfnConfigurationWithResultConfigurationNullable() {
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
       .enforceWorkGroupConfiguration(true)
-      .bytesScannedCutoffPerQuery(10)
+      .bytesScannedCutoffPerQuery(10.0)
       .publishCloudWatchMetricsEnabled(true)
       .requesterPaysEnabled(false)
       .resultConfiguration(null)
@@ -84,7 +85,7 @@ public class TranslatorTest {
   void testCreateSdkConfigurationUpdatesFromCfnConfigurationUpdates() {
     software.amazon.athena.workgroup.WorkGroupConfigurationUpdates cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfigurationUpdates.builder()
       .enforceWorkGroupConfiguration(true)
-      .bytesScannedCutoffPerQuery(10)
+      .bytesScannedCutoffPerQuery(10.0)
       .publishCloudWatchMetricsEnabled(true)
       .removeBytesScannedCutoffPerQuery(true)
       .requesterPaysEnabled(false)
@@ -117,7 +118,7 @@ public class TranslatorTest {
   void testCreateSdkConfigurationUpdatesFromCfnConfigurationUpdatesWithResultUpdatesNullable() {
     software.amazon.athena.workgroup.WorkGroupConfigurationUpdates cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfigurationUpdates.builder()
       .enforceWorkGroupConfiguration(true)
-      .bytesScannedCutoffPerQuery(10)
+      .bytesScannedCutoffPerQuery(10.0)
       .publishCloudWatchMetricsEnabled(true)
       .removeBytesScannedCutoffPerQuery(true)
       .requesterPaysEnabled(false)

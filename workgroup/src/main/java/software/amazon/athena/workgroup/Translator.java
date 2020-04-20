@@ -5,6 +5,7 @@ import software.amazon.awssdk.services.athena.model.WorkGroupConfiguration;
 import software.amazon.awssdk.services.athena.model.ResultConfiguration;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +21,10 @@ class Translator {
     return sdkTags;
   }
 
-  WorkGroupConfiguration createSdkWorkgroupConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.WorkGroupConfiguration cfnConfiguration) {
+  WorkGroupConfiguration createSdkWorkgroupConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.WorkGroupConfiguration cfnConfiguration) throws CfnInvalidRequestException {
     return WorkGroupConfiguration.builder()
-      .bytesScannedCutoffPerQuery(cfnConfiguration.getBytesScannedCutoffPerQuery() != null ? cfnConfiguration.getBytesScannedCutoffPerQuery().longValue() : null)
+      .bytesScannedCutoffPerQuery(cfnConfiguration.getBytesScannedCutoffPerQuery() != null ? validateAndConvertByteScannedCutOffPerQueryToLong(cfnConfiguration.getBytesScannedCutoffPerQuery())
+        : null)
       .enforceWorkGroupConfiguration(cfnConfiguration.getEnforceWorkGroupConfiguration())
       .publishCloudWatchMetricsEnabled(cfnConfiguration.getPublishCloudWatchMetricsEnabled())
       .requesterPaysEnabled(cfnConfiguration.getRequesterPaysEnabled())
@@ -44,9 +46,10 @@ class Translator {
       .build();
   }
 
-  WorkGroupConfigurationUpdates createSdkConfigurationUpdatesFromCfnConfigurationUpdates(software.amazon.athena.workgroup.WorkGroupConfigurationUpdates configuration) {
+  WorkGroupConfigurationUpdates createSdkConfigurationUpdatesFromCfnConfigurationUpdates(software.amazon.athena.workgroup.WorkGroupConfigurationUpdates configuration) throws CfnInvalidRequestException {
     return WorkGroupConfigurationUpdates.builder()
-      .bytesScannedCutoffPerQuery(configuration.getBytesScannedCutoffPerQuery() != null ? configuration.getBytesScannedCutoffPerQuery().longValue() : null)
+      .bytesScannedCutoffPerQuery(configuration.getBytesScannedCutoffPerQuery() != null ? validateAndConvertByteScannedCutOffPerQueryToLong(configuration.getBytesScannedCutoffPerQuery())
+        : null)
       .enforceWorkGroupConfiguration(configuration.getEnforceWorkGroupConfiguration())
       .publishCloudWatchMetricsEnabled(configuration.getPublishCloudWatchMetricsEnabled())
       .requesterPaysEnabled(configuration.getRequesterPaysEnabled())
@@ -68,7 +71,7 @@ class Translator {
 
   software.amazon.athena.workgroup.WorkGroupConfiguration createCfnWorkgroupConfigurationFromSdkConfiguration(WorkGroupConfiguration sdkConfiguration) {
     return software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
-      .bytesScannedCutoffPerQuery(sdkConfiguration.bytesScannedCutoffPerQuery() != null ? sdkConfiguration.bytesScannedCutoffPerQuery().intValue() : null)
+      .bytesScannedCutoffPerQuery(sdkConfiguration.bytesScannedCutoffPerQuery() != null ? sdkConfiguration.bytesScannedCutoffPerQuery().doubleValue() : null)
       .enforceWorkGroupConfiguration(sdkConfiguration.enforceWorkGroupConfiguration())
       .publishCloudWatchMetricsEnabled(sdkConfiguration.publishCloudWatchMetricsEnabled())
       .requesterPaysEnabled(sdkConfiguration.requesterPaysEnabled())
@@ -89,5 +92,13 @@ class Translator {
       .encryptionOption(encryptionConfiguration.encryptionOption().toString())
       .kmsKey(encryptionConfiguration.kmsKey())
       .build();
+  }
+
+  private Long validateAndConvertByteScannedCutOffPerQueryToLong(Double doubleValue) throws CfnInvalidRequestException {
+    Boolean isValueIntegral = doubleValue % 1 == 0;
+    if (!isValueIntegral) {
+      throw new CfnInvalidRequestException("Invalid value for BytesScannedCutOffPerQuery:only integral values permitted.");
+    }
+    return doubleValue.longValue();
   }
 }
