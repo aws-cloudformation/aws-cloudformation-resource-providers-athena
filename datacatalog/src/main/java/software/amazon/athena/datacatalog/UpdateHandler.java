@@ -51,10 +51,6 @@ public class UpdateHandler extends BaseHandlerAthena {
                     readHandler.handleRequest(proxy, request, callbackContext, proxy.newProxy(this::getClient), logger);
                 if (readprogress.isFailed()) {
                     readprogress.setResourceModel(null);
-                } else if (updatesCreateOnlyProperties(readprogress.getResourceModel(), resourceModel)) {
-                    return ProgressEvent.<ResourceModel, CallbackContext>builder()
-                        .status(OperationStatus.FAILED)
-                        .errorCode(HandlerErrorCode.NotUpdatable).build();
                 }
                 return readprogress;
             })
@@ -64,11 +60,6 @@ public class UpdateHandler extends BaseHandlerAthena {
                 .progress()
                 .then(progress -> updateTags(request, athenaProxyClient, request.getPreviousResourceState(),
                     request.getDesiredResourceState())));
-    }
-
-    private boolean updatesCreateOnlyProperties(ResourceModel oldModel, ResourceModel newModel) {
-        return !oldModel.getName().equals(newModel.getName()) ||
-            !oldModel.getType().equals(newModel.getType());
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> updateTags(

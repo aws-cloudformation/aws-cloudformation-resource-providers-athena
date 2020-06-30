@@ -62,19 +62,6 @@ public class UpdateHandlerTest extends BaseHandlerTest {
     }
 
     @Test
-    public void testFailedState_updateCreateOnlyProperties() {
-        final ResourceModel oldModel = buildSimpleTestResourceModel();
-        final ResourceModel newModel = buildSimpleTestResourceModel2();
-        final ResourceHandlerRequest<ResourceModel> request = getUpdateResourceHandlerRequest(oldModel, newModel);
-
-        mockSuccessfulReadhandler(oldModel);
-        final ProgressEvent<ResourceModel, CallbackContext> response = testHandleRequest(request);
-
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
-        assertThat(response.getErrorCode()).isEqualTo(HandlerErrorCode.NotUpdatable);
-    }
-
-    @Test
     public void testSuccessState_WithAddingTags() {
         final ResourceModel oldModel = buildTestResourceModelWithNullTags(); // no tags
         final ResourceModel newModel = buildTestResourceModel(); // with tags
