@@ -39,7 +39,7 @@ public class DeleteHandler extends BaseHandlerAthena {
     private DeleteDataCatalogResponse deleteDataCatalog(
             final DeleteDataCatalogRequest deleteDataCatalogRequest,
             final ProxyClient<AthenaClient> athenaProxyClient) {
-      DeleteDataCatalogResponse response;
+        DeleteDataCatalogResponse response;
         try {
             response = athenaProxyClient.injectCredentialsAndInvokeV2(
                 deleteDataCatalogRequest, athenaProxyClient.client()::deleteDataCatalog);

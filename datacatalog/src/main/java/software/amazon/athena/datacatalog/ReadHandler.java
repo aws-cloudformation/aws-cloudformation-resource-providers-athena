@@ -29,16 +29,12 @@ public class ReadHandler extends BaseHandlerAthena {
         ProxyClient<AthenaClient> athenaProxyClient,
         final Logger logger) {
 
-        return
-            proxy.initiate("athena::getDataCatalog", athenaProxyClient,
-            request.getDesiredResourceState(), callbackContext)
+        return proxy.initiate("athena::getDataCatalog", athenaProxyClient, request.getDesiredResourceState(), callbackContext)
             .translateToServiceRequest(Translator::getDataCatalogRequest)
             .makeServiceCall(this::getDataCatalog)
             .done((getDataCatalogRequest, getDataCatalogResponse, proxyInvocation, resourceModel, context) -> {
-            // get tags
-
+                // get tags
                 String arn = getDatacatalogArn(request, resourceModel.getName());
-                System.err.println(arn);
                 ListTagsForResourceRequest listTagsRequest = ListTagsForResourceRequest.builder()
                     .resourceARN(arn)
                     .maxResults(100)
