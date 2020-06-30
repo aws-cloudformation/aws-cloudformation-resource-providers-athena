@@ -24,9 +24,9 @@ Resources:
               - Effect: Allow
                 Action:
                 - "athena:CreateNamedQuery"
-                - "athena:ListNamedQueries"
                 - "athena:DeleteNamedQuery"
                 - "athena:GetNamedQuery"
+                - "athena:ListNamedQueries"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:
