@@ -20,4 +20,3 @@ Resources:
       Handler: software.amazon.athena.datacatalog.HandlerWrapper::testEntrypoint
       Runtime: java8
       CodeUri: ./target/aws-athena-datacatalog-handler-1.0-SNAPSHOT.jar
-

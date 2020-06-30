@@ -38,7 +38,7 @@ Properties:
 
 #### Name
 
-The name of the data catalog to create. The catalog name must be unique for the AWS account and can use a maximum of 128 alphanumeric, underscore, at sign, or hyphen characters. 
+The name of the data catalog to create. The catalog name must be unique for the AWS account and can use a maximum of 128 alphanumeric, underscore, at sign, or hyphen characters.
 
 _Required_: Yes
 
@@ -52,7 +52,7 @@ _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/l
 
 #### Description
 
-A description of the data catalog to be created. 
+A description of the data catalog to be created.
 
 _Required_: No
 
@@ -66,7 +66,7 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### Parameters
 
-Specifies the Lambda function or functions to use for creating the data catalog. This is a mapping whose values depend on the catalog type. 
+Specifies the Lambda function or functions to use for creating the data catalog. This is a mapping whose values depend on the catalog type.
 
 _Required_: No
 
@@ -84,7 +84,7 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### Type
 
-The type of data catalog to create: LAMBDA for a federated catalog, GLUE for AWS Glue Catalog, or HIVE for an external hive metastore. 
+The type of data catalog to create: LAMBDA for a federated catalog, GLUE for AWS Glue Catalog, or HIVE for an external hive metastore.
 
 _Required_: Yes
 

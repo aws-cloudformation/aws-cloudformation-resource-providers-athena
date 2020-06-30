@@ -2,7 +2,6 @@
     "typeName": "AWS::Athena::DataCatalog",
     "description": "Resource schema for AWS::Athena::DataCatalog",
     "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-athena.git",
-
     "definitions": {
         "Tags": {
             "type": "array",
@@ -10,7 +9,6 @@
                 "$ref": "#/definitions/Tag"
             }
         },
-
         "Tag": {
             "type": "object",
             "properties": {
@@ -32,7 +30,6 @@
             "additionalProperties": false
         }
     },
-
     "properties": {
         "Name": {
             "description": "The name of the data catalog to create. The catalog name must be unique for the AWS account and can use a maximum of 128 alphanumeric, underscore, at sign, or hyphen characters. ",
@@ -40,15 +37,13 @@
             "minLength": 1,
             "maxLength": 256
         },
-
         "Description": {
             "description": "A description of the data catalog to be created. ",
             "type": "string",
             "minLength": 1,
             "maxLength": 1024
         },
-
-        "Parameters" : {
+        "Parameters": {
             "description": "Specifies the Lambda function or functions to use for creating the data catalog. This is a mapping whose values depend on the catalog type. ",
             "type": "object",
             "patternProperties": {
@@ -58,12 +53,10 @@
                 }
             }
         },
-
         "Tags": {
             "description": "A list of comma separated tags to add to the data catalog that is created. ",
             "$ref": "#/definitions/Tags"
         },
-
         "Type": {
             "description": "The type of data catalog to create: LAMBDA for a federated catalog, GLUE for AWS Glue Catalog, or HIVE for an external hive metastore. ",
             "type": "string",
@@ -74,12 +67,10 @@
             ]
         }
     },
-
     "required": [
         "Name",
         "Type"
     ],
-
     "handlers": {
         "create": {
             "permissions": [
@@ -112,15 +103,12 @@
             ]
         }
     },
-
     "createOnlyProperties": [
         "/properties/Name",
         "/properties/Type"
     ],
-
     "primaryIdentifier": [
         "/properties/Name"
     ],
-
     "additionalProperties": false
 }
