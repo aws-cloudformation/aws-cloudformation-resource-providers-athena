@@ -46,18 +46,14 @@ public class ReadHandler extends BaseHandlerAthena {
                 String nextToken;
                 List<software.amazon.awssdk.services.athena.model.Tag> tags = Lists.newArrayList();
                 do {
-                    try {
-                      ListTagsForResourceResponse listTagsResponse = athenaProxyClient
-                          .injectCredentialsAndInvokeV2(
-                              listTagsRequest,
-                              athenaProxyClient.client()::listTagsForResource);
-                      tags.addAll(listTagsResponse.tags());
-                      nextToken = listTagsResponse.nextToken();
-                      if (nextToken != null) {
-                        listTagsRequest = listTagsRequest.toBuilder().nextToken(nextToken).build();
-                      }
-                    } catch (Exception e) {
-                      throw new RuntimeException(arn);
+                    ListTagsForResourceResponse listTagsResponse = athenaProxyClient
+                        .injectCredentialsAndInvokeV2(
+                            listTagsRequest,
+                            athenaProxyClient.client()::listTagsForResource);
+                    tags.addAll(listTagsResponse.tags());
+                    nextToken = listTagsResponse.nextToken();
+                    if (nextToken != null) {
+                      listTagsRequest = listTagsRequest.toBuilder().nextToken(nextToken).build();
                     }
                 } while (nextToken != null);
 
