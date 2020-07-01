@@ -23,10 +23,14 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                - "athena:CreateNamedQuery"
-                - "athena:DeleteNamedQuery"
-                - "athena:GetNamedQuery"
-                - "athena:ListNamedQueries"
+                - "athena:CreateDataCatalog"
+                - "athena:DeleteDataCatalog"
+                - "athena:GetDataCatalog"
+                - "athena:ListDataCatalog"
+                - "athena:ListTagsForResource"
+                - "athena:TagResource"
+                - "athena:UntagResource"
+                - "athena:UpdateDataCatalog"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:
