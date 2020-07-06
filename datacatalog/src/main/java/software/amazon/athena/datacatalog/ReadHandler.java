@@ -40,7 +40,7 @@ public class ReadHandler extends BaseHandlerAthena {
                     .maxResults(100)
                     .build();
                 String nextToken;
-                List<Tag> tags = Lists.newArrayList();
+                List<software.amazon.awssdk.services.athena.model.Tag> tags = Lists.newArrayList();
                 do {
                     ListTagsForResourceResponse listTagsResponse = athenaProxyClient
                         .injectCredentialsAndInvokeV2(
