@@ -93,8 +93,7 @@
         },
         "delete": {
             "permissions": [
-                "athena:DeleteDataCatalog",
-                "athena:UntagResource"
+                "athena:DeleteDataCatalog"
             ]
         },
         "list": {

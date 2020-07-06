@@ -16,7 +16,6 @@ import software.amazon.awssdk.services.athena.model.UntagResourceRequest;
 import software.amazon.awssdk.services.athena.model.UntagResourceResponse;
 import software.amazon.awssdk.services.athena.model.UpdateDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.UpdateDataCatalogResponse;
-import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
@@ -134,7 +133,7 @@ public class UpdateHandlerTest extends BaseHandlerTest {
     }
 
     @Test
-    public void testSuccessState_ExceptionHandling() {
+    public void testFailedState_ExceptionHandling() {
         final ResourceModel oldModel = buildTestResourceModel();
         final ResourceModel newModel = buildTestResourceModelWithUpdatedParameters();
         final ResourceHandlerRequest<ResourceModel> request = getUpdateResourceHandlerRequest(oldModel, newModel);

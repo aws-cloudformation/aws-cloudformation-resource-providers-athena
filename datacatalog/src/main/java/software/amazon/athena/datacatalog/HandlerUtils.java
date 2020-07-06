@@ -20,6 +20,7 @@ class HandlerUtils {
 
   private static final Map<String, String> NONDEFAULT_AWS_PARTITION = ImmutableMap.of(
       "cn-northwest-1", "aws-cn",
+      "cn-north-1", "aws-cn",
       "us-gov-east-1", "aws-us-gov",
       "us-iso-east-1", "aws-iso",
       "us-isob-east-1", "aws-iso-b"
