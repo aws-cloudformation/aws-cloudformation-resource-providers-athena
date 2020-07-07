@@ -1,0 +1,17 @@
+{
+    "typeName": "AWS::Athena::DataCatalog",
+    "language": "java",
+    "runtime": "java8",
+    "entrypoint": "software.amazon.athena.datacatalog.HandlerWrapper::handleRequest",
+    "testEntrypoint": "software.amazon.athena.datacatalog.HandlerWrapper::testEntrypoint",
+    "settings": {
+        "namespace": [
+            "software",
+            "amazon",
+            "athena",
+            "datacatalog"
+        ],
+        "codegen_template_path": "default",
+        "protocolVersion": "2.0.0"
+    }
+}
