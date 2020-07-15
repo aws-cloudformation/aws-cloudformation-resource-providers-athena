@@ -18,19 +18,9 @@ class HandlerUtils {
 
   public static final String RESOURCE_TYPE = "AWS::Athena::DataCatalog";
 
-  private static final String DEFAULT_AWS_PARTITION = "aws";
-  private static final Map<String, String> NONDEFAULT_AWS_PARTITION = ImmutableMap.<String, String>builder()
-      .put("cn-northwest-1", "aws-cn")
-      .put("cn-north-1", "aws-cn")
-      .put("us-gov-east-1", "aws-us-gov")
-      .put("us-gov-west-1", "aws-us-gov")
-      .put("us-iso-east-1", "aws-iso")
-      .put("us-isob-east-1", "aws-iso-b")
-      .build();
-
   static String getDatacatalogArn(ResourceHandlerRequest<ResourceModel> request, String catalogName) {
     return String.format(DATACATALOG_ARN_FORMAT,
-        NONDEFAULT_AWS_PARTITION.getOrDefault(request.getRegion(), DEFAULT_AWS_PARTITION),
+        request.getAwsPartition(),
         request.getRegion(),
         request.getAwsAccountId(),
         catalogName);
