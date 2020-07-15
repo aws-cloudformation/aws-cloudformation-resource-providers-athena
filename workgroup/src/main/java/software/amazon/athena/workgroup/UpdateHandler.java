@@ -78,7 +78,7 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
       // Handle modifications to WorkGroup tags
       if (!oldTags.equals(newTags)) {
         final String workGroupARN = String.format(WORKGROUP_ARN_FORMAT,
-            getAwsPartitionForRegion(request.getRegion()),
+            request.getAwsPartition(),
             request.getRegion(),
             request.getAwsAccountId(),
             model.getName());
@@ -110,21 +110,6 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
       throw new CfnGeneralServiceException("updateWorkGroup", e);
     } catch (InvalidRequestException | ResourceNotFoundException e) {
       throw new CfnInvalidRequestException(e.getMessage(), e);
-    }
-  }
-
-  /**
-   * Using this method in place of "request.getAwsPartition()" as this value not being populated by the service.
-   */
-  private static String getAwsPartitionForRegion(String region) {
-    switch (region) {
-      case "cn-north-1":
-      case "cn-northwest-1": return "aws-cn";
-      case "us-gov-west-1":
-      case "us-gov-east-1": return "aws-us-gov";
-      case "us-iso-east-1": return "aws-iso";
-      case "us-isob-east-1": return "aws-iso-b";
-      default: return "aws";
     }
   }
 }
