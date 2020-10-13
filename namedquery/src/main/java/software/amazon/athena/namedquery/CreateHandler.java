@@ -60,6 +60,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 .description(model.getDescription())
                 .name(model.getName())
                 .queryString(model.getQueryString())
+                .workGroup(model.getWorkGroup())
                 .build();
         try {
             return clientProxy.injectCredentialsAndInvokeV2(

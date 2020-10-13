@@ -72,6 +72,48 @@ class ReadHandlerTest {
     }
 
     @Test
+    void testSuccessStateWithWorkGroup() {
+        // Prepare inputs
+        final ResourceModel resourceModel = ResourceModel.builder()
+                .namedQueryId("namedQueryId")
+                .build();
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(resourceModel)
+                .build();
+        final NamedQuery namedQuery = NamedQuery.builder()
+                .database("database")
+                .description("description")
+                .name("name")
+                .queryString("querystring")
+                .workGroup("myWorkGroup")
+                .build();
+
+        // Mock
+        doReturn(
+                GetNamedQueryResponse.builder()
+                        .namedQuery(namedQuery)
+                        .build())
+                .when(proxy)
+                .injectCredentialsAndInvokeV2(any(), any());
+
+        // Call
+        final ProgressEvent<ResourceModel, CallbackContext> response
+                = new ReadHandler().handleRequest(proxy, request, null, logger);
+
+        // Assert
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel().getDatabase()).isEqualTo(namedQuery.database());
+        assertThat(response.getResourceModel().getDescription()).isEqualTo(namedQuery.description());
+        assertThat(response.getResourceModel().getName()).isEqualTo(namedQuery.name());
+        assertThat(response.getResourceModel().getQueryString()).isEqualTo(namedQuery.queryString());
+        assertThat(response.getResourceModel().getWorkGroup()).isEqualTo(namedQuery.workGroup());
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
     void testInternalServerException() {
         // Prepare inputs
         final ResourceModel resourceModel = ResourceModel.builder()

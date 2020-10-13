@@ -27,6 +27,12 @@
             "minLength": 1,
             "maxLength": 262144
         },
+        "WorkGroup": {
+            "description": "The name of the workgroup that contains the named query.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+        },
         "NamedQueryId": {
             "description": "The unique ID of the query.",
             "type": "string"
@@ -56,6 +62,9 @@
             "permissions": [
                 "athena:DeleteNamedQuery"
             ]
+        },
+        "update": {
+            "permissions": []
         }
     },
     "readOnlyProperties": [
@@ -65,7 +74,8 @@
         "/properties/Name",
         "/properties/Database",
         "/properties/Description",
-        "/properties/QueryString"
+        "/properties/QueryString",
+        "/properties/WorkGroup"
     ],
     "primaryIdentifier": [
         "/properties/NamedQueryId"

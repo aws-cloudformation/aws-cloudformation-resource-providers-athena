@@ -16,9 +16,13 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
         final CallbackContext callbackContext,
         final Logger logger) {
 
+        logger.log(String.format("%s [%s] calling dummy update handler",
+            ResourceModel.TYPE_NAME, request.getDesiredResourceState().getNamedQueryId()));
+
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
-            .errorCode(HandlerErrorCode.NotUpdatable)
-            .status(OperationStatus.FAILED)
+            .resourceModel(request.getDesiredResourceState())
+            .status(OperationStatus.SUCCESS)
             .build();
+
     }
 }
