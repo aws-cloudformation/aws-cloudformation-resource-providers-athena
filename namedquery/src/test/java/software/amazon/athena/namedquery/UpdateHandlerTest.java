@@ -32,12 +32,12 @@ class UpdateHandlerTest {
             new UpdateHandler().handleRequest(proxy, request, null, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackContext()).isNull();
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isNull();
+        assertThat(response.getResourceModel()).isEqualTo(ResourceModel.builder().build());
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isEqualTo(HandlerErrorCode.NotUpdatable);
+        assertThat(response.getErrorCode()).isNull();
     }
 }

@@ -45,6 +45,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
                     .database(namedQuery.database())
                     .description(namedQuery.description())
                     .queryString(namedQuery.queryString())
+                    .workGroup(namedQuery.workGroup())
                     .build();
         } catch (InternalServerException e) {
             throw new CfnGeneralServiceException("getNamedQuery", e);
