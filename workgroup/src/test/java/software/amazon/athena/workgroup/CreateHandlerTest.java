@@ -40,7 +40,7 @@ public class CreateHandlerTest {
       .description("Primary workgroup")
       .tags(Lists.newArrayList(tag))
       .workGroupConfiguration(WorkGroupConfiguration.builder()
-                                                    .bytesScannedCutoffPerQuery(200)
+                                                    .bytesScannedCutoffPerQuery(200.0)
                                                     .enforceWorkGroupConfiguration(false)
                                                     .publishCloudWatchMetricsEnabled(true)
                                                     .requesterPaysEnabled(true)
@@ -104,6 +104,27 @@ public class CreateHandlerTest {
     assertThat(response.getErrorCode()).isNull();
   }
 
+  @Test
+  void testInvalidRequestExceptionWithNonIntegralBytesScannedCutOffProperty() {
+    final ResourceModel resourceModel = ResourceModel.builder()
+      .name("Primary")
+      .description("Primary workgroup")
+      .tags(null)
+      .workGroupConfiguration(WorkGroupConfiguration.builder()
+        .requesterPaysEnabled(true)
+        .resultConfiguration(null)
+        .bytesScannedCutoffPerQuery(10.123)
+        .build())
+      .build();
+    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+      .desiredResourceState(resourceModel)
+      .build();
+
+    // Call
+    assertThrows(CfnInvalidRequestException.class, () ->
+      new CreateHandler().handleRequest(proxy, request, null, logger));
+  }
+
 
   @Test
   void testSuccessStateWithNullableResultConfiguration() {
@@ -115,7 +136,7 @@ public class CreateHandlerTest {
       .description("Primary workgroup")
       .tags(Lists.newArrayList(tag))
       .workGroupConfiguration(WorkGroupConfiguration.builder()
-        .bytesScannedCutoffPerQuery(200)
+        .bytesScannedCutoffPerQuery(200.0)
         .enforceWorkGroupConfiguration(false)
         .publishCloudWatchMetricsEnabled(true)
         .requesterPaysEnabled(true)

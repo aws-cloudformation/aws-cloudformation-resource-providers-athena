@@ -31,8 +31,9 @@
         },
         "BytesScannedCutoffPerQuery": {
             "description": "The upper data usage limit (cutoff) for the amount of bytes a single query in a workgroup is allowed to scan.",
-            "type": "integer",
-            "minimum": 10000000
+            "type": "number",
+            "minimum": 10000000,
+            "maximum": 9223372036854775808
         },
         "EnforceWorkGroupConfiguration": {
             "description": "If set to \"true\", the settings for the workgroup override client-side settings. If set to \"false\", client-side settings are used",
