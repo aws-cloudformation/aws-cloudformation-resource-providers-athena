@@ -36,7 +36,7 @@ public class TranslatorTest {
   void testCreateSdkWorkgroupConfigurationFromCfnConfiguration() {
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
       .enforceWorkGroupConfiguration(true)
-      .bytesScannedCutoffPerQuery(10)
+      .bytesScannedCutoffPerQuery(10_000_000_000L)
       .publishCloudWatchMetricsEnabled(true)
       .requesterPaysEnabled(false)
       .resultConfiguration(software.amazon.athena.workgroup.ResultConfiguration.builder()
@@ -51,7 +51,7 @@ public class TranslatorTest {
       new Translator().createSdkWorkgroupConfigurationFromCfnConfiguration(cfnWorkGroupConfiguration);
 
     assertThat(cfnWorkGroupConfiguration.getEnforceWorkGroupConfiguration()).isEqualTo(sdkWorkGroupConfiguration.enforceWorkGroupConfiguration());
-    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery().intValue());
+    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery());
     assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfiguration.publishCloudWatchMetricsEnabled());
     assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
     assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getOutputLocation()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().outputLocation());
@@ -64,7 +64,7 @@ public class TranslatorTest {
   void testCreateSdkWorkgroupConfigurationFromCfnConfigurationWithResultConfigurationNullable() {
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
       .enforceWorkGroupConfiguration(true)
-      .bytesScannedCutoffPerQuery(10)
+      .bytesScannedCutoffPerQuery(10_000_000_000L)
       .publishCloudWatchMetricsEnabled(true)
       .requesterPaysEnabled(false)
       .resultConfiguration(null)
@@ -74,7 +74,7 @@ public class TranslatorTest {
       new Translator().createSdkWorkgroupConfigurationFromCfnConfiguration(cfnWorkGroupConfiguration);
 
     assertThat(cfnWorkGroupConfiguration.getEnforceWorkGroupConfiguration()).isEqualTo(sdkWorkGroupConfiguration.enforceWorkGroupConfiguration());
-    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery().intValue());
+    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery());
     assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfiguration.publishCloudWatchMetricsEnabled());
     assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
 
@@ -84,7 +84,7 @@ public class TranslatorTest {
   void testCreateSdkConfigurationUpdatesFromCfnConfigurationUpdates() {
     software.amazon.athena.workgroup.WorkGroupConfigurationUpdates cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfigurationUpdates.builder()
       .enforceWorkGroupConfiguration(true)
-      .bytesScannedCutoffPerQuery(10)
+      .bytesScannedCutoffPerQuery(10_000_000_000L)
       .publishCloudWatchMetricsEnabled(true)
       .removeBytesScannedCutoffPerQuery(true)
       .requesterPaysEnabled(false)
@@ -117,7 +117,7 @@ public class TranslatorTest {
   void testCreateSdkConfigurationUpdatesFromCfnConfigurationUpdatesWithResultUpdatesNullable() {
     software.amazon.athena.workgroup.WorkGroupConfigurationUpdates cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfigurationUpdates.builder()
       .enforceWorkGroupConfiguration(true)
-      .bytesScannedCutoffPerQuery(10)
+      .bytesScannedCutoffPerQuery(10_000_000_000L)
       .publishCloudWatchMetricsEnabled(true)
       .removeBytesScannedCutoffPerQuery(true)
       .requesterPaysEnabled(false)
@@ -139,7 +139,7 @@ public class TranslatorTest {
   void testCreateCfnWorkgroupConfigurationFromSdkConfiguration() {
     WorkGroupConfiguration sdkWorkGroupConfiguration = WorkGroupConfiguration.builder()
                                                                              .enforceWorkGroupConfiguration(true)
-                                                                             .bytesScannedCutoffPerQuery(10L)
+                                                                             .bytesScannedCutoffPerQuery(10_000_000_000L)
                                                                              .publishCloudWatchMetricsEnabled(true)
                                                                              .requesterPaysEnabled(false)
                                                                              .resultConfiguration(ResultConfiguration.builder()
@@ -154,7 +154,7 @@ public class TranslatorTest {
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = new Translator().createCfnWorkgroupConfigurationFromSdkConfiguration(sdkWorkGroupConfiguration);
 
     assertThat(cfnWorkGroupConfiguration.getEnforceWorkGroupConfiguration()).isEqualTo(sdkWorkGroupConfiguration.enforceWorkGroupConfiguration());
-    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery().intValue());
+    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery());
     assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfiguration.publishCloudWatchMetricsEnabled());
     assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
     assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getOutputLocation()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().outputLocation());
@@ -166,7 +166,7 @@ public class TranslatorTest {
   void testCreateCfnWorkgroupConfigurationFromSdkConfigurationResultConfigurationNullable() {
     WorkGroupConfiguration sdkWorkGroupConfiguration = WorkGroupConfiguration.builder()
       .enforceWorkGroupConfiguration(true)
-      .bytesScannedCutoffPerQuery(10L)
+      .bytesScannedCutoffPerQuery(10_000_000_000L)
       .publishCloudWatchMetricsEnabled(true)
       .requesterPaysEnabled(false)
       .build();
@@ -174,7 +174,7 @@ public class TranslatorTest {
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = new Translator().createCfnWorkgroupConfigurationFromSdkConfiguration(sdkWorkGroupConfiguration);
 
     assertThat(cfnWorkGroupConfiguration.getEnforceWorkGroupConfiguration()).isEqualTo(sdkWorkGroupConfiguration.enforceWorkGroupConfiguration());
-    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery().intValue());
+    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery());
     assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfiguration.publishCloudWatchMetricsEnabled());
     assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
   }

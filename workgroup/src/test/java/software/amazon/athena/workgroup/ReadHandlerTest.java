@@ -79,7 +79,7 @@ class ReadHandlerTest {
       .creationTime(Instant.now())
       .configuration(WorkGroupConfiguration.builder()
         .enforceWorkGroupConfiguration(true)
-        .bytesScannedCutoffPerQuery(Long.valueOf(100))
+        .bytesScannedCutoffPerQuery(10_000_000_000L)
         .requesterPaysEnabled(true)
         .publishCloudWatchMetricsEnabled(true)
         .resultConfiguration(ResultConfiguration.builder()
@@ -106,7 +106,7 @@ class ReadHandlerTest {
     assertThat(response.getResourceModel().getState()).isEqualTo(workGroup.stateAsString());
     assertThat(response.getResourceModel().getCreationTime()).isEqualTo(Long.toString(workGroup.creationTime().getEpochSecond()));
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getBytesScannedCutoffPerQuery())
-      .isEqualTo(workGroup.configuration().bytesScannedCutoffPerQuery().intValue());
+      .isEqualTo(workGroup.configuration().bytesScannedCutoffPerQuery());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEnforceWorkGroupConfiguration())
       .isEqualTo(workGroup.configuration().enforceWorkGroupConfiguration());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getRequesterPaysEnabled())
@@ -134,7 +134,7 @@ class ReadHandlerTest {
       .creationTime(Instant.now())
       .configuration(WorkGroupConfiguration.builder()
         .enforceWorkGroupConfiguration(true)
-        .bytesScannedCutoffPerQuery(Long.valueOf(100))
+        .bytesScannedCutoffPerQuery(10_000_000_000L)
         .requesterPaysEnabled(true)
         .publishCloudWatchMetricsEnabled(true)
         .build())
@@ -155,7 +155,7 @@ class ReadHandlerTest {
     assertThat(response.getResourceModel().getState()).isEqualTo(workGroup.stateAsString());
     assertThat(response.getResourceModel().getCreationTime()).isEqualTo(Long.toString(workGroup.creationTime().getEpochSecond()));
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getBytesScannedCutoffPerQuery())
-      .isEqualTo(workGroup.configuration().bytesScannedCutoffPerQuery().intValue());
+      .isEqualTo(workGroup.configuration().bytesScannedCutoffPerQuery());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEnforceWorkGroupConfiguration())
       .isEqualTo(workGroup.configuration().enforceWorkGroupConfiguration());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getRequesterPaysEnabled())

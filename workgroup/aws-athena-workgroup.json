@@ -32,6 +32,7 @@
         "BytesScannedCutoffPerQuery": {
             "description": "The upper data usage limit (cutoff) for the amount of bytes a single query in a workgroup is allowed to scan.",
             "type": "integer",
+            "format": "int64",
             "minimum": 10000000
         },
         "EnforceWorkGroupConfiguration": {
