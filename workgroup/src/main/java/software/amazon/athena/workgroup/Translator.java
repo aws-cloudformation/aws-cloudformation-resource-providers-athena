@@ -22,7 +22,7 @@ class Translator {
 
   WorkGroupConfiguration createSdkWorkgroupConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.WorkGroupConfiguration cfnConfiguration) {
     return WorkGroupConfiguration.builder()
-      .bytesScannedCutoffPerQuery(cfnConfiguration.getBytesScannedCutoffPerQuery() != null ? cfnConfiguration.getBytesScannedCutoffPerQuery().longValue() : null)
+      .bytesScannedCutoffPerQuery(cfnConfiguration.getBytesScannedCutoffPerQuery())
       .enforceWorkGroupConfiguration(cfnConfiguration.getEnforceWorkGroupConfiguration())
       .publishCloudWatchMetricsEnabled(cfnConfiguration.getPublishCloudWatchMetricsEnabled())
       .requesterPaysEnabled(cfnConfiguration.getRequesterPaysEnabled())
@@ -46,7 +46,7 @@ class Translator {
 
   WorkGroupConfigurationUpdates createSdkConfigurationUpdatesFromCfnConfigurationUpdates(software.amazon.athena.workgroup.WorkGroupConfigurationUpdates configuration) {
     return WorkGroupConfigurationUpdates.builder()
-      .bytesScannedCutoffPerQuery(configuration.getBytesScannedCutoffPerQuery() != null ? configuration.getBytesScannedCutoffPerQuery().longValue() : null)
+      .bytesScannedCutoffPerQuery(configuration.getBytesScannedCutoffPerQuery())
       .enforceWorkGroupConfiguration(configuration.getEnforceWorkGroupConfiguration())
       .publishCloudWatchMetricsEnabled(configuration.getPublishCloudWatchMetricsEnabled())
       .requesterPaysEnabled(configuration.getRequesterPaysEnabled())
@@ -68,7 +68,7 @@ class Translator {
 
   software.amazon.athena.workgroup.WorkGroupConfiguration createCfnWorkgroupConfigurationFromSdkConfiguration(WorkGroupConfiguration sdkConfiguration) {
     return software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
-      .bytesScannedCutoffPerQuery(sdkConfiguration.bytesScannedCutoffPerQuery() != null ? sdkConfiguration.bytesScannedCutoffPerQuery().intValue() : null)
+      .bytesScannedCutoffPerQuery(sdkConfiguration.bytesScannedCutoffPerQuery())
       .enforceWorkGroupConfiguration(sdkConfiguration.enforceWorkGroupConfiguration())
       .publishCloudWatchMetricsEnabled(sdkConfiguration.publishCloudWatchMetricsEnabled())
       .requesterPaysEnabled(sdkConfiguration.requesterPaysEnabled())

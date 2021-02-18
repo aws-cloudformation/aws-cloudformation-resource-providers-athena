@@ -24,6 +24,7 @@ import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateHandlerTest {
+
   @Mock
   private AmazonWebServicesClientProxy proxy;
 
@@ -40,7 +41,7 @@ public class CreateHandlerTest {
       .description("Primary workgroup")
       .tags(Lists.newArrayList(tag))
       .workGroupConfiguration(WorkGroupConfiguration.builder()
-                                                    .bytesScannedCutoffPerQuery(200)
+                                                    .bytesScannedCutoffPerQuery(10_000_000_000L)
                                                     .enforceWorkGroupConfiguration(false)
                                                     .publishCloudWatchMetricsEnabled(true)
                                                     .requesterPaysEnabled(true)
@@ -115,7 +116,7 @@ public class CreateHandlerTest {
       .description("Primary workgroup")
       .tags(Lists.newArrayList(tag))
       .workGroupConfiguration(WorkGroupConfiguration.builder()
-        .bytesScannedCutoffPerQuery(200)
+        .bytesScannedCutoffPerQuery(10_000_000_000L)
         .enforceWorkGroupConfiguration(false)
         .publishCloudWatchMetricsEnabled(true)
         .requesterPaysEnabled(true)
