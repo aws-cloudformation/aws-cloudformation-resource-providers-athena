@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
+import software.amazon.awssdk.services.athena.model.EngineVersion;
 import software.amazon.awssdk.services.athena.model.GetWorkGroupResponse;
 import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
@@ -43,7 +44,8 @@ class ReadHandlerTest {
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
 
     final WorkGroup workGroup = WorkGroup.builder()
-      .name("primary workgroup").description("the primary workgroup")
+      .name("primary workgroup")
+      .description("the primary workgroup")
       .state("enabled")
       .creationTime(Instant.now())
       .build();
@@ -73,6 +75,10 @@ class ReadHandlerTest {
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
 
+    software.amazon.awssdk.services.athena.model.EngineVersion engineVersion1 = EngineVersion.builder()
+            .selectedEngineVersion("Auto")
+            .effectiveEngineVersion("Athena engine version 1").build();
+
     final WorkGroup workGroup = WorkGroup.builder()
       .name("primary workgroup").description("the primary workgroup")
       .state("enabled")
@@ -88,6 +94,7 @@ class ReadHandlerTest {
             .encryptionOption("SSE_S3")
             .build())
           .build())
+        .engineVersion(engineVersion1)
         .build())
       .build();
 
@@ -117,6 +124,10 @@ class ReadHandlerTest {
       .isEqualTo(workGroup.configuration().resultConfiguration().outputLocation());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getEncryptionConfiguration().getEncryptionOption())
       .isEqualTo(workGroup.configuration().resultConfiguration().encryptionConfiguration().encryptionOption().toString());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getSelectedEngineVersion())
+            .isEqualTo(engineVersion1.selectedEngineVersion());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getEffectiveEngineVersion())
+            .isEqualTo(engineVersion1.effectiveEngineVersion());
     assertThat(response.getMessage()).isNull();
     assertThat(response.getErrorCode()).isNull();
   }

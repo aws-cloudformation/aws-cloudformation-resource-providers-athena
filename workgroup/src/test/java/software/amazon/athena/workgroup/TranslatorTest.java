@@ -3,6 +3,7 @@ package software.amazon.athena.workgroup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.athena.model.EngineVersion;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.ResultConfiguration;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfiguration;
@@ -34,6 +35,10 @@ public class TranslatorTest {
 
   @Test
   void testCreateSdkWorkgroupConfigurationFromCfnConfiguration() {
+    software.amazon.athena.workgroup.EngineVersion engineVersion = software.amazon.athena.workgroup.EngineVersion.builder()
+            .selectedEngineVersion("AUTO")
+            .effectiveEngineVersion("Athena engine version 2")
+            .build();
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
       .enforceWorkGroupConfiguration(true)
       .bytesScannedCutoffPerQuery(10_000_000_000L)
@@ -45,6 +50,7 @@ public class TranslatorTest {
                                                                                                                                                                 .encryptionOption("SSE_S3")
                                                                                                                                                                 .build())
                                                                                .build())
+      .engineVersion(engineVersion)
       .build();
 
     WorkGroupConfiguration sdkWorkGroupConfiguration =
@@ -57,7 +63,10 @@ public class TranslatorTest {
     assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getOutputLocation()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().outputLocation());
     assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getEncryptionConfiguration().getEncryptionOption())
       .isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().encryptionConfiguration().encryptionOption().toString());
-
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion().getSelectedEngineVersion())
+            .isEqualTo(sdkWorkGroupConfiguration.engineVersion().selectedEngineVersion());
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion().getEffectiveEngineVersion())
+            .isEqualTo(sdkWorkGroupConfiguration.engineVersion().effectiveEngineVersion());
   }
 
   @Test
@@ -68,6 +77,7 @@ public class TranslatorTest {
       .publishCloudWatchMetricsEnabled(true)
       .requesterPaysEnabled(false)
       .resultConfiguration(null)
+      .engineVersion(null)
       .build();
 
     WorkGroupConfiguration sdkWorkGroupConfiguration =
@@ -77,11 +87,15 @@ public class TranslatorTest {
     assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery());
     assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfiguration.publishCloudWatchMetricsEnabled());
     assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
-
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion()).isEqualTo(sdkWorkGroupConfiguration.engineVersion());
   }
 
   @Test
   void testCreateSdkConfigurationUpdatesFromCfnConfigurationUpdates() {
+    software.amazon.athena.workgroup.EngineVersion engineVersion = software.amazon.athena.workgroup.EngineVersion.builder()
+            .selectedEngineVersion("AUTO")
+            .effectiveEngineVersion("Athena engine version 2")
+            .build();
     software.amazon.athena.workgroup.WorkGroupConfigurationUpdates cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfigurationUpdates.builder()
       .enforceWorkGroupConfiguration(true)
       .bytesScannedCutoffPerQuery(10_000_000_000L)
@@ -92,11 +106,12 @@ public class TranslatorTest {
                                                                                              .outputLocation("s3://test/")
                                                                                              .encryptionConfiguration(software.amazon.athena.workgroup.EncryptionConfiguration.builder()
                                                                                                                                                                               .encryptionOption("CSE_KMS")
-                                                                                                                                                                              .kmsKey("eiifcckijivuintgreglhehugckffvndljgrkfbfcgdg")
+                                                                                                                                                                              .kmsKey("some_key")
                                                                                                                                                                               .build())
                                                                                              .removeOutputLocation(true)
                                                                                              .removeEncryptionConfiguration(true)
                                                                                              .build())
+      .engineVersion(engineVersion)
       .build();
 
     WorkGroupConfigurationUpdates sdkWorkGroupConfigurationUpdates =
@@ -110,7 +125,10 @@ public class TranslatorTest {
       .isEqualTo(sdkWorkGroupConfigurationUpdates.resultConfigurationUpdates().removeOutputLocation());
     assertThat(cfnWorkGroupConfiguration.getResultConfigurationUpdates().getRemoveEncryptionConfiguration())
       .isEqualTo(sdkWorkGroupConfigurationUpdates.resultConfigurationUpdates().removeEncryptionConfiguration());
-
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion().getSelectedEngineVersion())
+            .isEqualTo(sdkWorkGroupConfigurationUpdates.engineVersion().selectedEngineVersion());
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion().getEffectiveEngineVersion())
+            .isEqualTo(sdkWorkGroupConfigurationUpdates.engineVersion().effectiveEngineVersion());
   }
 
   @Test
@@ -122,6 +140,7 @@ public class TranslatorTest {
       .removeBytesScannedCutoffPerQuery(true)
       .requesterPaysEnabled(false)
       .resultConfigurationUpdates(null)
+      .engineVersion(null)
       .build();
 
     WorkGroupConfigurationUpdates sdkWorkGroupConfigurationUpdates =
@@ -131,12 +150,16 @@ public class TranslatorTest {
     assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfigurationUpdates.publishCloudWatchMetricsEnabled());
     assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfigurationUpdates.requesterPaysEnabled());
     assertThat(cfnWorkGroupConfiguration.getRemoveBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfigurationUpdates.removeBytesScannedCutoffPerQuery());
-
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion()).isEqualTo(sdkWorkGroupConfigurationUpdates.engineVersion());
   }
 
 
   @Test
   void testCreateCfnWorkgroupConfigurationFromSdkConfiguration() {
+    EngineVersion engineVersion = EngineVersion.builder()
+            .selectedEngineVersion("AUTO")
+            .effectiveEngineVersion("Athena engine version 1")
+            .build();
     WorkGroupConfiguration sdkWorkGroupConfiguration = WorkGroupConfiguration.builder()
                                                                              .enforceWorkGroupConfiguration(true)
                                                                              .bytesScannedCutoffPerQuery(10_000_000_000L)
@@ -146,9 +169,10 @@ public class TranslatorTest {
                                                                                                                      .outputLocation("s3://abc/")
                                                                                                                      .encryptionConfiguration(EncryptionConfiguration.builder()
                                                                                                                                                                      .encryptionOption("CSE_KMS")
-                                                                                                                                                                     .kmsKey("eiifcckijivuujrbgftugjutulndhjdbdvuihldhriee")
+                                                                                                                                                                     .kmsKey("some_key")
                                                                                                                                                                      .build())
                                                                                                                      .build())
+                                                                             .engineVersion(engineVersion)
       .build();
 
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = new Translator().createCfnWorkgroupConfigurationFromSdkConfiguration(sdkWorkGroupConfiguration);
@@ -159,6 +183,10 @@ public class TranslatorTest {
     assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
     assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getOutputLocation()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().outputLocation());
     assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getEncryptionConfiguration().getEncryptionOption()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().encryptionConfiguration().encryptionOption().toString());
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion().getSelectedEngineVersion())
+            .isEqualTo(sdkWorkGroupConfiguration.engineVersion().selectedEngineVersion());
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion().getEffectiveEngineVersion())
+            .isEqualTo(sdkWorkGroupConfiguration.engineVersion().effectiveEngineVersion());
   }
 
 
@@ -177,5 +205,6 @@ public class TranslatorTest {
     assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery());
     assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfiguration.publishCloudWatchMetricsEnabled());
     assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion()).isEqualTo(sdkWorkGroupConfiguration.engineVersion());
   }
 }

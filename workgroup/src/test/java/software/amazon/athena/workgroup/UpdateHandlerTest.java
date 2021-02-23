@@ -75,6 +75,11 @@ public class UpdateHandlerTest {
   @Test
   void testSuccessStateWithWorkGroupConfigurationUpdates() {
     // Prepare inputs
+    final EngineVersion engineVersion = EngineVersion.builder()
+            .selectedEngineVersion("AUTO")
+            .effectiveEngineVersion("Athena engine version 2")
+            .build();
+
     final ResourceModel resourceModel = ResourceModel.builder()
       .name("Primary")
       .description("Primary workgroup update description")
@@ -82,6 +87,7 @@ public class UpdateHandlerTest {
                                                                   .enforceWorkGroupConfiguration(true)
                                                                   .bytesScannedCutoffPerQuery(10_000_000_000L)
                                                                   .requesterPaysEnabled(true)
+                                                                  .engineVersion(engineVersion)
                                                                   .build())
       .state("disabled")
       .build();

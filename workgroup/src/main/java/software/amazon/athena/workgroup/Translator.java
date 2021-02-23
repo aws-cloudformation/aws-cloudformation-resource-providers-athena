@@ -1,9 +1,10 @@
 package software.amazon.athena.workgroup;
 
+import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
+import software.amazon.awssdk.services.athena.model.EngineVersion;
+import software.amazon.awssdk.services.athena.model.ResultConfiguration;
 import software.amazon.awssdk.services.athena.model.ResultConfigurationUpdates;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfiguration;
-import software.amazon.awssdk.services.athena.model.ResultConfiguration;
-import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates;
 
 import java.util.ArrayList;
@@ -27,7 +28,15 @@ class Translator {
       .publishCloudWatchMetricsEnabled(cfnConfiguration.getPublishCloudWatchMetricsEnabled())
       .requesterPaysEnabled(cfnConfiguration.getRequesterPaysEnabled())
       .resultConfiguration(cfnConfiguration.getResultConfiguration() != null ? createSdkResultConfigurationFromCfnConfiguration(cfnConfiguration.getResultConfiguration()) : null)
+      .engineVersion(cfnConfiguration.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(cfnConfiguration.getEngineVersion()) : null)
       .build();
+  }
+
+  private EngineVersion createSdkEngineVersionFromCfnConfiguration(software.amazon.athena.workgroup.EngineVersion engineVersion) {
+    return EngineVersion.builder()
+            .selectedEngineVersion(engineVersion.getSelectedEngineVersion())
+            .effectiveEngineVersion(engineVersion.getEffectiveEngineVersion())
+            .build();
   }
 
   private ResultConfiguration createSdkResultConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.ResultConfiguration resultConfiguration) {
@@ -53,6 +62,7 @@ class Translator {
       .removeBytesScannedCutoffPerQuery(configuration.getRemoveBytesScannedCutoffPerQuery())
       .resultConfigurationUpdates(configuration.getResultConfigurationUpdates() != null ?
         createSdkResultConfigurationUpdatesFromCfnConfigurationUpdate(configuration.getResultConfigurationUpdates()) : null)
+      .engineVersion(configuration.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(configuration.getEngineVersion()) : null)
       .build();
   }
 
@@ -74,7 +84,16 @@ class Translator {
       .requesterPaysEnabled(sdkConfiguration.requesterPaysEnabled())
       .resultConfiguration(sdkConfiguration.resultConfiguration() != null ? createCfnResultConfigurationFromSdkConfiguration(sdkConfiguration.resultConfiguration())
         : null)
+      .engineVersion(sdkConfiguration.engineVersion() != null ? createCfnEngineVersionFromSdkConfiguration(sdkConfiguration.engineVersion())
+              : null)
       .build();
+  }
+
+  private software.amazon.athena.workgroup.EngineVersion createCfnEngineVersionFromSdkConfiguration(EngineVersion engineVersion) {
+    return software.amazon.athena.workgroup.EngineVersion.builder()
+            .selectedEngineVersion(engineVersion.selectedEngineVersion())
+            .effectiveEngineVersion(engineVersion.effectiveEngineVersion())
+            .build();
   }
 
   private software.amazon.athena.workgroup.ResultConfiguration createCfnResultConfigurationFromSdkConfiguration(ResultConfiguration resultConfiguration) {
