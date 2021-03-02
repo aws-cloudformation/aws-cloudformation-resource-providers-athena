@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.athena.model.EngineVersion;
 import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
 import software.amazon.awssdk.services.athena.model.ListWorkGroupsResponse;
@@ -42,10 +43,17 @@ class ListHandlerTest {
       .desiredResourceState(ResourceModel.builder().build())
       .build();
 
+    EngineVersion engineVersion1 = EngineVersion.builder()
+            .selectedEngineVersion("Auto")
+            .effectiveEngineVersion("Athena engine version 1").build();
+    EngineVersion engineVersion2 = EngineVersion.builder()
+            .selectedEngineVersion("Athena engine version 2")
+            .effectiveEngineVersion("Athena engine version 2").build();
+
     WorkGroupSummary workGroup1 = WorkGroupSummary.builder().name("primary").creationTime(Instant.now())
-      .state("enabled").build();
+      .state("enabled").engineVersion(engineVersion1).build();
     WorkGroupSummary workGroup2= WorkGroupSummary.builder().name("secondary").creationTime(Instant.now())
-      .state("disabled").build();
+      .state("disabled").engineVersion(engineVersion2).build();
 
     List<WorkGroupSummary> workgroups = new ArrayList<>();
     workgroups.add(workGroup1);

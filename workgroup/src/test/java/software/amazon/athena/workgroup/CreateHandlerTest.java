@@ -51,6 +51,9 @@ public class CreateHandlerTest {
                                                                                                                      .encryptionOption("SSE_S3")
                                                                                                                      .build())
                                                                                             .build())
+                                                    .engineVersion(EngineVersion.builder()
+                                                                                .selectedEngineVersion("Athena engine version 1")
+                                                                                .build())
                                                    .build())
       .build();
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -121,6 +124,7 @@ public class CreateHandlerTest {
         .publishCloudWatchMetricsEnabled(true)
         .requesterPaysEnabled(true)
         .resultConfiguration(null)
+        .engineVersion(null)
         .build())
       .build();
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
