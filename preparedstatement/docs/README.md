@@ -35,7 +35,7 @@ Properties:
 
 #### StatementName
 
-The name of the prepared statement. 
+The name of the prepared statement.
 
 _Required_: Yes
 
@@ -49,7 +49,7 @@ _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/l
 
 #### WorkGroup
 
-The name of the workgroup to which the prepared statement belongs. 
+The name of the workgroup to which the prepared statement belongs.
 
 _Required_: Yes
 
@@ -63,7 +63,7 @@ _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/l
 
 #### Description
 
-The description of the prepared statement. 
+The description of the prepared statement.
 
 _Required_: No
 
@@ -77,7 +77,7 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### QueryStatement
 
-The query string for the prepared statement. 
+The query string for the prepared statement.
 
 _Required_: Yes
 
@@ -88,4 +88,3 @@ _Minimum_: <code>1</code>
 _Maximum_: <code>262144</code>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
-

@@ -21,4 +21,3 @@ Resources:
       Handler: software.amazon.athena.preparedstatement.HandlerWrapper::testEntrypoint
       Runtime: java8
       CodeUri: ./target/aws-athena-preparedstatement-handler-1.0-SNAPSHOT.jar
-
