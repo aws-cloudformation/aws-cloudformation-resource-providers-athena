@@ -39,8 +39,6 @@ public class Translator {
         .description(model.getDescription())
         .queryStatement(model.getQueryStatement())
         .build();
-    // TODO: construct a request
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L39-L43
     return awsRequest;
   }
 
@@ -51,8 +49,6 @@ public class Translator {
    */
   static GetPreparedStatementRequest translateToReadRequest(final ResourceModel model) {
     GetPreparedStatementRequest awsRequest;
-    // TODO: construct a request
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L20-L24
     awsRequest = GetPreparedStatementRequest.builder()
         .statementName(model.getStatementName())
         .workGroup(model.getWorkGroup())
@@ -66,7 +62,6 @@ public class Translator {
    * @return model resource model
    */
   static ResourceModel translateFromReadResponse(final AwsResponse awsResponse) {
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L58-L73
     PreparedStatement readResponse = ((GetPreparedStatementResponse)awsResponse).preparedStatement();
     return ResourceModel.builder()
         .statementName(readResponse.statementName())
@@ -86,8 +81,6 @@ public class Translator {
         .statementName(model.getStatementName())
         .workGroup(model.getWorkGroup())
         .build();
-    // TODO: construct a request
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L33-L37
     return awsRequest;
   }
 
@@ -103,19 +96,6 @@ public class Translator {
         .queryStatement(model.getQueryStatement())
         .description(model.getDescription())
         .build();
-    // TODO: construct a request
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L45-L50
-    return awsRequest;
-  }
-
-  /**
-   * Request to update some other properties that could not be provisioned through first update request
-   * @param model resource model
-   * @return awsRequest the aws service request to modify a resource
-   */
-  static AwsRequest translateToSecondUpdateRequest(final ResourceModel model) {
-    final AwsRequest awsRequest = null;
-    // TODO: construct a request
     return awsRequest;
   }
 
@@ -130,8 +110,6 @@ public class Translator {
         .workGroup(model.getWorkGroup())
         .maxResults(50) // max is 50
         .build();
-    // TODO: construct a request
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L26-L31
     return awsRequest;
   }
 
@@ -141,12 +119,9 @@ public class Translator {
    * @return list of resource models
    */
   static List<ResourceModel> translateFromListRequest(final ListPreparedStatementsResponse response, String workgroup) {
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L75-L82
     return streamOfOrEmpty(response.preparedStatements())
         .map(psSummary -> ResourceModel.builder()
-            // include only primary identifier
             .statementName(psSummary.statementName())
-            // todo: add lastModifedTime?
             .workGroup(workgroup)
             .build())
         .collect(Collectors.toList());
