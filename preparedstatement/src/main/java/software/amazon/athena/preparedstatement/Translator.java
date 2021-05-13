@@ -1,7 +1,5 @@
 package software.amazon.athena.preparedstatement;
 
-import com.google.common.collect.Lists;
-import software.amazon.awssdk.awscore.AwsRequest;
 import software.amazon.awssdk.awscore.AwsResponse;
 
 import java.util.Collection;

@@ -4,25 +4,25 @@
     "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-athena.git",
     "properties": {
         "StatementName": {
-            "description": "The name of the prepared statement. ",
+            "description": "The name of the prepared statement.",
             "type": "string",
             "minLength": 1,
             "maxLength": 256
         },
         "WorkGroup": {
-            "description": "The name of the workgroup to which the prepared statement belongs. ",
+            "description": "The name of the workgroup to which the prepared statement belongs.",
             "type": "string",
             "minLength": 1,
             "maxLength": 128
         },
         "Description": {
-            "description": "The description of the prepared statement. ",
+            "description": "The description of the prepared statement.",
             "type": "string",
             "minLength": 1,
             "maxLength": 1024
         },
         "QueryStatement": {
-            "description": "The query string for the prepared statement. ",
+            "description": "The query string for the prepared statement.",
             "type": "string",
             "minLength": 1,
             "maxLength": 262144

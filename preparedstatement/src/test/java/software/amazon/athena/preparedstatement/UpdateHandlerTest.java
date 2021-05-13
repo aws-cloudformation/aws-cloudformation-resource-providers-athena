@@ -7,6 +7,7 @@ import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.GetPreparedStatementRequest;
 import software.amazon.awssdk.services.athena.model.GetPreparedStatementResponse;
 import software.amazon.awssdk.services.athena.model.PreparedStatement;
+import software.amazon.awssdk.services.athena.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.athena.model.UpdatePreparedStatementRequest;
 import software.amazon.awssdk.services.athena.model.UpdatePreparedStatementResponse;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -99,5 +100,27 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
+    public void handleRequest_Nonexist() {
+        final UpdateHandler handler = new UpdateHandler();
+        when(athenaClient.getPreparedStatement(any(GetPreparedStatementRequest.class)))
+            .thenThrow(ResourceNotFoundException.builder().build());
+
+        final ResourceModel model = ResourceModel.builder()
+            .statementName("name")
+            .workGroup("wg-v2")
+            .description("test")
+            .queryStatement("select 1234")
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(model)
+            .build();
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response.isFailed());
     }
 }

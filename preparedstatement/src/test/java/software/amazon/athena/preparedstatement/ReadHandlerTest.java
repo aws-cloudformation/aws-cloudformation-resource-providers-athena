@@ -5,6 +5,8 @@ import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.GetPreparedStatementRequest;
 import software.amazon.awssdk.services.athena.model.GetPreparedStatementResponse;
 import software.amazon.awssdk.services.athena.model.PreparedStatement;
+import software.amazon.awssdk.services.athena.model.ResourceNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -18,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.atLeastOnce;
@@ -83,5 +86,25 @@ public class ReadHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
+    public void handleRequest_Nonexist() {
+        final ReadHandler handler = new ReadHandler();
+        when(athenaClient.getPreparedStatement(any(GetPreparedStatementRequest.class)))
+            .thenThrow(ResourceNotFoundException.builder().build());
+        final ResourceModel model = ResourceModel.builder()
+            .statementName("name")
+            .workGroup("wg-v2")
+            .description("test")
+            .queryStatement("select ?")
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(model)
+            .build();
+
+        assertThrows(CfnNotFoundException.class, () ->
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger));
     }
 }
