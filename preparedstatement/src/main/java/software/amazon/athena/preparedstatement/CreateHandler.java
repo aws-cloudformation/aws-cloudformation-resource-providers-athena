@@ -41,12 +41,10 @@ public class CreateHandler extends BaseHandlerStd {
                     })
 
                     .handleError((awsRequest, exception, client, model, context) -> {
-                        if (exception instanceof ResourceNotFoundException) { // no preparedstatement
+                        if (exception instanceof ResourceNotFoundException) {
                             return ProgressEvent.progress(model, context);
                         } else if (exception instanceof InvalidRequestException &&
-                            exception.getMessage().contains("is not found")) { // no workgroup
-                            // if primary workgroup is not found, it could be
-                            // created during preparedStatement creation
+                            exception.getMessage().contains("is not found")) {
                             return ProgressEvent.progress(model, context);
                         }
                         throw exception;
