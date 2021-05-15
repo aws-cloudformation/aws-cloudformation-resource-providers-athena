@@ -1,0 +1,25 @@
+{
+    "artifact_type": "RESOURCE",
+    "typeName": "AWS::Athena::PreparedStatement",
+    "language": "java",
+    "runtime": "java8",
+    "entrypoint": "software.amazon.athena.preparedstatement.HandlerWrapper::handleRequest",
+    "testEntrypoint": "software.amazon.athena.preparedstatement.HandlerWrapper::testEntrypoint",
+    "settings": {
+        "version": false,
+        "subparser_name": null,
+        "verbose": 0,
+        "force": false,
+        "type_name": null,
+        "artifact_type": null,
+        "namespace": [
+            "software",
+            "amazon",
+            "athena",
+            "preparedstatement"
+        ],
+        "codegen_template_path": "guided_aws",
+        "protocolVersion": "2.0.0"
+    },
+    "executableEntrypoint": "software.amazon.athena.preparedstatement.HandlerWrapperExecutable"
+}
