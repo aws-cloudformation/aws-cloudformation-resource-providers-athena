@@ -54,7 +54,7 @@ class DeleteHandlerTest {
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackContext()).isNull();
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
+        assertThat(response.getResourceModel()).isNull();
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
@@ -111,7 +111,7 @@ class DeleteHandlerTest {
             .build();
 
         // Mock
-        doThrow(InvalidRequestException.builder().athenaErrorCode(DeleteHandler.QUERY_NOT_FOUND_ERR_MSG).build())
+        doThrow(InvalidRequestException.builder().message("does not exist").athenaErrorCode(DeleteHandler.QUERY_NOT_FOUND_ERR_MSG).build())
             .when(proxy)
             .injectCredentialsAndInvokeV2(any(), any());
 
