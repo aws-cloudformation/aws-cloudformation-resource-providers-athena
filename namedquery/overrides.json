@@ -1,6 +1,6 @@
 {
-  "CREATE": {
-    "/Database": "sampledb",
-    "/WorkGroup": "primary"
-  }
+    "CREATE": {
+        "/Database": "sampledb",
+        "/WorkGroup": "primary"
+    }
 }
