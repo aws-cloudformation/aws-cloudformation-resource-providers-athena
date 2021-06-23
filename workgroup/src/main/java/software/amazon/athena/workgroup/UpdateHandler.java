@@ -2,16 +2,12 @@ package software.amazon.athena.workgroup;
 
 import com.google.common.collect.Sets;
 import software.amazon.awssdk.services.athena.AthenaClient;
-import software.amazon.awssdk.services.athena.model.InternalServerException;
-import software.amazon.awssdk.services.athena.model.InvalidRequestException;
-import software.amazon.awssdk.services.athena.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.athena.model.AthenaException;
 import software.amazon.awssdk.services.athena.model.Tag;
 import software.amazon.awssdk.services.athena.model.TagResourceRequest;
 import software.amazon.awssdk.services.athena.model.UntagResourceRequest;
 import software.amazon.awssdk.services.athena.model.UpdateWorkGroupRequest;
 import software.amazon.awssdk.services.athena.model.UpdateWorkGroupResponse;
-import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
-import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -21,15 +17,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static software.amazon.athena.workgroup.HandlerUtils.getWorkGroupArn;
+import static software.amazon.athena.workgroup.HandlerUtils.translateAthenaException;
+
 public class UpdateHandler extends BaseHandler<CallbackContext> {
-
-  /**
-   * arn:$partition:athena:$region:$AWSAcctID:workgroup/$workgroup-name
-   * See https://docs.aws.amazon.com/athena/latest/ug/workgroups-access.html
-   * https://docs.aws.amazon.com/IAM/latest/UserGuide/list_amazonathena.html#amazonathena-resources-for-iam-policies
-   */
-  private static final String WORKGROUP_ARN_FORMAT = "arn:%s:athena:%s:%s:workgroup/%s";
-
   private AmazonWebServicesClientProxy clientProxy;
   private AthenaClient athenaClient;
   private Logger logger;
@@ -77,11 +68,7 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
     try {
       // Handle modifications to WorkGroup tags
       if (!oldTags.equals(newTags)) {
-        final String workGroupARN = String.format(WORKGROUP_ARN_FORMAT,
-            request.getAwsPartition(),
-            request.getRegion(),
-            request.getAwsAccountId(),
-            model.getName());
+        String workGroupARN = getWorkGroupArn(request, model.getName());
 
         // {old tags} - {new tags} = {tags to remove}
         Set<Tag> tagsToRemove = Sets.difference(oldTags, newTags);
@@ -106,10 +93,8 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
 
       // Handle modifications to WorkGroup configuration
       return clientProxy.injectCredentialsAndInvokeV2(updateWorkGroupRequest, athenaClient::updateWorkGroup);
-    } catch (InternalServerException e) {
-      throw new CfnGeneralServiceException("updateWorkGroup", e);
-    } catch (InvalidRequestException | ResourceNotFoundException e) {
-      throw new CfnInvalidRequestException(e.getMessage(), e);
+    } catch (AthenaException e) {
+      throw translateAthenaException(e, model.getName());
     }
   }
 }

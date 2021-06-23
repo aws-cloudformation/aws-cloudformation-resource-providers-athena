@@ -1,16 +1,15 @@
 package software.amazon.athena.workgroup;
 
 import software.amazon.awssdk.services.athena.AthenaClient;
+import software.amazon.awssdk.services.athena.model.AthenaException;
 import software.amazon.awssdk.services.athena.model.CreateWorkGroupRequest;
 import software.amazon.awssdk.services.athena.model.CreateWorkGroupResponse;
-import software.amazon.awssdk.services.athena.model.InternalServerException;
-import software.amazon.awssdk.services.athena.model.InvalidRequestException;
-import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
-import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+
+import static software.amazon.athena.workgroup.HandlerUtils.translateAthenaException;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
   private AmazonWebServicesClientProxy clientProxy;
@@ -52,10 +51,8 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
       .build();
     try {
       return clientProxy.injectCredentialsAndInvokeV2(createWorkGroupRequest, athenaClient::createWorkGroup);
-    } catch (InternalServerException e) {
-      throw new CfnGeneralServiceException("createWorkGroup", e);
-    } catch (InvalidRequestException e) {
-      throw new CfnInvalidRequestException(e.getMessage(), e);
+    } catch (AthenaException e) {
+      throw translateAthenaException(e, model.getName());
     }
   }
 }

@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.athena.model.UpdateWorkGroupRequest;
 import software.amazon.awssdk.services.athena.model.UpdateWorkGroupResponse;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -50,8 +51,12 @@ public class UpdateHandlerTest {
       .description("Primary workgroup update description")
       .state("disabled")
       .build();
+    final ResourceModel oldModel = ResourceModel.builder()
+      .name("Primary")
+      .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+      .previousResourceState(oldModel)
       .desiredResourceState(resourceModel)
       .build();
 
@@ -77,7 +82,6 @@ public class UpdateHandlerTest {
     // Prepare inputs
     final EngineVersion engineVersion = EngineVersion.builder()
             .selectedEngineVersion("AUTO")
-            .effectiveEngineVersion("Athena engine version 2")
             .build();
 
     final ResourceModel resourceModel = ResourceModel.builder()
@@ -91,8 +95,12 @@ public class UpdateHandlerTest {
                                                                   .build())
       .state("disabled")
       .build();
+    final ResourceModel oldModel = ResourceModel.builder()
+      .name("Primary")
+      .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+      .previousResourceState(oldModel)
       .desiredResourceState(resourceModel)
       .build();
 
@@ -298,8 +306,12 @@ public class UpdateHandlerTest {
                                                                   .build())
       .state("disabled")
       .build();
+    final ResourceModel oldModel = ResourceModel.builder()
+      .name("Primary")
+      .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+      .previousResourceState(oldModel)
       .desiredResourceState(resourceModel)
       .build();
 
@@ -328,8 +340,12 @@ public class UpdateHandlerTest {
       .name("Primary")
       .description("Primary workgroup")
       .build();
+    final ResourceModel oldModel = ResourceModel.builder()
+      .name("Primary")
+      .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+      .previousResourceState(oldModel)
       .desiredResourceState(resourceModel)
       .build();
 
@@ -350,7 +366,12 @@ public class UpdateHandlerTest {
       .name("Primary")
       .description("Primary workgroup")
       .build();
+    final ResourceModel oldModel = ResourceModel.builder()
+      .name("Primary")
+      .build();
+
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+      .previousResourceState(oldModel)
       .desiredResourceState(resourceModel)
       .build();
 
@@ -364,4 +385,20 @@ public class UpdateHandlerTest {
       new UpdateHandler().handleRequest(proxy, request, null, logger));
   }
 
+  @Test
+  void testWorkGroupNotFound() {
+    // Prepare inputs
+    String workGroup = "someWorkGroup";
+    final ResourceModel resourceModel = ResourceModel.builder().name(workGroup).build();
+    final ResourceHandlerRequest<ResourceModel> request =
+        ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
+
+    // Mock
+    String message = String.format("WorkGroup %s is not found.", workGroup);
+    InvalidRequestException invalidRequestException = InvalidRequestException.builder().message(message).build();
+    doThrow(invalidRequestException).when(proxy).injectCredentialsAndInvokeV2(any(), any());
+
+    // Call
+    assertThrows(CfnNotFoundException.class, () -> new ReadHandler().handleRequest(proxy, request, null, logger));
+  }
 }

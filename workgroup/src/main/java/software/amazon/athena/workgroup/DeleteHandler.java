@@ -1,19 +1,22 @@
 package software.amazon.athena.workgroup;
 
 import software.amazon.awssdk.services.athena.AthenaClient;
+import software.amazon.awssdk.services.athena.model.AthenaException;
 import software.amazon.awssdk.services.athena.model.DeleteWorkGroupRequest;
+import software.amazon.awssdk.services.athena.model.GetWorkGroupRequest;
 import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
-public class DeleteHandler extends BaseHandler<CallbackContext> {
-  static final String WORKGROUP_NOT_EMPTY_ERROR_MSG = "WORKGROUP_NOT_EMPTY";
+import static software.amazon.athena.workgroup.HandlerUtils.translateAthenaException;
 
+public class DeleteHandler extends BaseHandler<CallbackContext> {
   private AmazonWebServicesClientProxy clientProxy;
   private AthenaClient athenaClient;
   private Logger logger;
@@ -29,7 +32,26 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
     athenaClient = AthenaClient.create();
     this.logger = logger;
 
-    return deleteResource(request.getDesiredResourceState());
+    ResourceModel model = request.getDesiredResourceState();
+    return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
+        .then(progress -> ensureResourceExists(progress, model))
+        .then(progress -> deleteResource(model))
+        .onSuccess(progress -> ProgressEvent.<ResourceModel, CallbackContext>builder()
+            .status(OperationStatus.SUCCESS)
+            .build());
+  }
+
+  private ProgressEvent<ResourceModel, CallbackContext> ensureResourceExists(
+      ProgressEvent<ResourceModel, CallbackContext> progress, ResourceModel model) {
+    final GetWorkGroupRequest getWorkGroupRequest = GetWorkGroupRequest.builder()
+        .workGroup(model.getName())
+        .build();
+    try {
+      clientProxy.injectCredentialsAndInvokeV2(getWorkGroupRequest, athenaClient::getWorkGroup);
+      return progress;
+    } catch (AthenaException e) {
+      throw translateAthenaException(e, model.getName());
+    }
   }
 
   private ProgressEvent<ResourceModel, CallbackContext> deleteResource(ResourceModel model) {
@@ -46,13 +68,8 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
       .build();
     try {
       clientProxy.injectCredentialsAndInvokeV2(deleteWorkGroupRequest, athenaClient::deleteWorkGroup);
-    } catch (InternalServerException e) {
-      throw new CfnGeneralServiceException("deleteWorkGroup", e);
-    } catch (InvalidRequestException e) {
-      if (e.athenaErrorCode().equalsIgnoreCase(WORKGROUP_NOT_EMPTY_ERROR_MSG)) {
-        logger.log(String.format("Workgroup [ %s ] not empty", model.getName()));
-      }
-      throw new CfnInvalidRequestException(e.getMessage(), e);
+    } catch (AthenaException e) {
+      throw translateAthenaException(e, model.getName());
     }
   }
 }
