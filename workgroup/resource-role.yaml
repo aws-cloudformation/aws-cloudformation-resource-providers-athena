@@ -26,10 +26,10 @@ Resources:
                 - "athena:CreateWorkGroup"
                 - "athena:DeleteWorkGroup"
                 - "athena:GetWorkGroup"
+                - "athena:ListTagsForResource"
                 - "athena:ListWorkGroups"
                 - "athena:TagResource"
                 - "athena:UntagResource"
-                - "athena:ListTagsForResource"
                 - "athena:UpdateWorkGroup"
                 Resource: "*"
 Outputs:
