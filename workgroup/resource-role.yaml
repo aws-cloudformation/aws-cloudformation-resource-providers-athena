@@ -29,6 +29,7 @@ Resources:
                 - "athena:ListWorkGroups"
                 - "athena:TagResource"
                 - "athena:UntagResource"
+                - "athena:ListTagsForResource"
                 - "athena:UpdateWorkGroup"
                 Resource: "*"
 Outputs:

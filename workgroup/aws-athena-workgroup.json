@@ -250,7 +250,8 @@
         },
         "read": {
             "permissions": [
-                "athena:GetWorkGroup"
+                "athena:GetWorkGroup",
+                "athena:ListTagsForResource"
             ]
         },
         "list": {
