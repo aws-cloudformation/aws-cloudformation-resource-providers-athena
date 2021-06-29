@@ -15,11 +15,11 @@ final class HandlerUtils {
     // Intentionally left blank
   }
 
-  private static final String NAMEDQUERY_NOT_FOUND = "does not exist";
+  private static final String NAMED_QUERY_NOT_FOUND = "does not exist";
 
   static RuntimeException translateAthenaException(AthenaException e, String resourceIdentifier) {
     if (e instanceof InvalidRequestException) {
-      if (e.getMessage() != null && e.getMessage().contains(NAMEDQUERY_NOT_FOUND)) {
+      if (e.getMessage() != null && e.getMessage().contains(NAMED_QUERY_NOT_FOUND)) {
         return new CfnNotFoundException(TYPE_NAME, resourceIdentifier, e);
       } else {
         return new CfnInvalidRequestException(e.getMessage(), e);
