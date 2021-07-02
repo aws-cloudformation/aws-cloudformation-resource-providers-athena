@@ -15,6 +15,8 @@ out/
 
 # auto-generated files
 target/
+docs/
+.hypothesis/
 
 # our logs
 rpdk.log

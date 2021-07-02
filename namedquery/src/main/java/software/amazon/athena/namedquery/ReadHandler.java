@@ -1,6 +1,7 @@
 package software.amazon.athena.namedquery;
 
 import software.amazon.awssdk.services.athena.AthenaClient;
+import software.amazon.awssdk.services.athena.model.AthenaException;
 import software.amazon.awssdk.services.athena.model.GetNamedQueryRequest;
 import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
@@ -11,6 +12,8 @@ import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+
+import static software.amazon.athena.namedquery.HandlerUtils.translateAthenaException;
 
 public class ReadHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy clientProxy;
@@ -47,10 +50,8 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
                     .queryString(namedQuery.queryString())
                     .workGroup(namedQuery.workGroup())
                     .build();
-        } catch (InternalServerException e) {
-            throw new CfnGeneralServiceException("getNamedQuery", e);
-        } catch (InvalidRequestException e) {
-            throw new CfnInvalidRequestException(e.getMessage(), e);
+        } catch (AthenaException e) {
+            throw translateAthenaException(e, model.getNamedQueryId());
         }
     }
 }

@@ -21,6 +21,16 @@ class Translator {
     return sdkTags;
   }
 
+  List<software.amazon.athena.workgroup.Tag> createCfnTagsFromSdkTags(List<software.amazon.awssdk.services.athena.model.Tag> sdkTags) {
+    List<software.amazon.athena.workgroup.Tag> cfnTags = new ArrayList<>();
+    sdkTags.forEach(tag -> cfnTags.add(
+        software.amazon.athena.workgroup.Tag.builder()
+          .key(tag.key())
+          .value(tag.value())
+          .build()));
+    return cfnTags;
+  }
+
   WorkGroupConfiguration createSdkWorkgroupConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.WorkGroupConfiguration cfnConfiguration) {
     return WorkGroupConfiguration.builder()
       .bytesScannedCutoffPerQuery(cfnConfiguration.getBytesScannedCutoffPerQuery())

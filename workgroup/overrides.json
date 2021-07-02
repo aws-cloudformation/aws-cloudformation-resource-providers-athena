@@ -1,0 +1,38 @@
+{
+    "CREATE": {
+        "/Tags": [
+            {
+                "Key": "tagKey1",
+                "Value": "tagValue1"
+            },
+            {
+                "Key": "tagKey2",
+                "Value": "tagValue2"
+            }
+        ],
+        "/WorkGroupConfiguration/ResultConfiguration/OutputLocation": "s3://bucket",
+        "/WorkGroupConfiguration/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
+        "/WorkGroupConfiguration/EngineVersion/SelectedEngineVersion": "AUTO",
+        "/WorkGroupConfigurationUpdates/ResultConfigurationUpdates/OutputLocation": "s3://bucket",
+        "/WorkGroupConfigurationUpdates/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
+        "/WorkGroupConfigurationUpdates/EngineVersion/SelectedEngineVersion": "AUTO"
+    },
+    "UPDATE": {
+        "/Tags": [
+            {
+                "Key": "tagKey1",
+                "Value": "tagValue1"
+            },
+            {
+                "Key": "tagKey2",
+                "Value": "tagValue2"
+            }
+        ],
+        "/WorkGroupConfiguration/ResultConfiguration/OutputLocation": "s3://bucket",
+        "/WorkGroupConfiguration/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
+        "/WorkGroupConfiguration/EngineVersion/SelectedEngineVersion": "AUTO",
+        "/WorkGroupConfigurationUpdates/ResultConfigurationUpdates/OutputLocation": "s3://bucket",
+        "/WorkGroupConfigurationUpdates/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
+        "/WorkGroupConfigurationUpdates/EngineVersion/SelectedEngineVersion": "AUTO"
+    }
+}

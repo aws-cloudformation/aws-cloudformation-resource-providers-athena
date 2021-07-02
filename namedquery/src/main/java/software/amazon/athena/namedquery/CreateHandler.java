@@ -3,6 +3,7 @@ package software.amazon.athena.namedquery;
 import com.amazonaws.util.StringUtils;
 
 import software.amazon.awssdk.services.athena.AthenaClient;
+import software.amazon.awssdk.services.athena.model.AthenaException;
 import software.amazon.awssdk.services.athena.model.CreateNamedQueryRequest;
 import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
@@ -13,6 +14,8 @@ import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import software.amazon.cloudformation.resource.IdentifierUtils;
+
+import static software.amazon.athena.namedquery.HandlerUtils.translateAthenaException;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
     public static final int MAX_NAME_LENGTH = 128;
@@ -66,10 +69,8 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             return clientProxy.injectCredentialsAndInvokeV2(
                     createNamedQueryRequest,
                     athenaClient::createNamedQuery).namedQueryId();
-        } catch (InternalServerException e) {
-            throw new CfnGeneralServiceException("createNamedQuery", e);
-        } catch (InvalidRequestException e) {
-            throw new CfnInvalidRequestException(e.getMessage(), e);
+        } catch (AthenaException e) {
+            throw translateAthenaException(e, model.getNamedQueryId());
         }
     }
 }

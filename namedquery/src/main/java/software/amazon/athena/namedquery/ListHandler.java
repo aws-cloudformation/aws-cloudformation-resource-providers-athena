@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import software.amazon.awssdk.services.athena.AthenaClient;
+import software.amazon.awssdk.services.athena.model.AthenaException;
 import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
 import software.amazon.awssdk.services.athena.model.ListNamedQueriesRequest;
@@ -15,6 +16,8 @@ import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+
+import static software.amazon.athena.namedquery.HandlerUtils.translateAthenaException;
 
 public class ListHandler extends BaseHandler<CallbackContext> {
     private AmazonWebServicesClientProxy clientProxy;
@@ -32,7 +35,7 @@ public class ListHandler extends BaseHandler<CallbackContext> {
 
         final List<ResourceModel> namedQueries = new ArrayList<>();
         final ListNamedQueriesResponse listNamedQueriesResponse =
-                listNamedQueries(request.getNextToken());
+                listNamedQueries(request.getDesiredResourceState(), request.getNextToken());
         listNamedQueriesResponse.namedQueryIds().forEach(q ->
                 namedQueries.add(ResourceModel.builder()
                         .namedQueryId(q)
@@ -46,7 +49,7 @@ public class ListHandler extends BaseHandler<CallbackContext> {
             .build();
     }
 
-    private ListNamedQueriesResponse listNamedQueries(final String nextToken) {
+    private ListNamedQueriesResponse listNamedQueries(ResourceModel model, final String nextToken) {
         final ListNamedQueriesRequest listNamedQueriesRequest = ListNamedQueriesRequest.builder()
                 .nextToken(nextToken)
                 .maxResults(50)
@@ -55,10 +58,8 @@ public class ListHandler extends BaseHandler<CallbackContext> {
             return clientProxy.injectCredentialsAndInvokeV2(
                     listNamedQueriesRequest,
                     athenaClient::listNamedQueries);
-        } catch (InternalServerException e) {
-            throw new CfnGeneralServiceException("listNamedQueriesRequest", e);
-        } catch (InvalidRequestException e) {
-            throw new CfnInvalidRequestException(e.getMessage(), e);
+        } catch (AthenaException e) {
+            throw translateAthenaException(e, model.getNamedQueryId());
         }
     }
 }
