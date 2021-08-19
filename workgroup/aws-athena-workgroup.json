@@ -6,6 +6,7 @@
     "definitions": {
         "Tags": {
             "type": "array",
+            "insertionOrder": false,
             "items": {
                 "$ref": "#/definitions/Tag"
             }
@@ -284,5 +285,6 @@
     "primaryIdentifier": [
         "/properties/Name"
     ],
-    "additionalProperties": false
+    "additionalProperties": false,
+    "taggable": true
 }
