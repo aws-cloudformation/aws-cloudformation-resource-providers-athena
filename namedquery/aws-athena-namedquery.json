@@ -77,5 +77,6 @@
     "primaryIdentifier": [
         "/properties/NamedQueryId"
     ],
-    "additionalProperties": false
+    "additionalProperties": false,
+    "taggable": false
 }

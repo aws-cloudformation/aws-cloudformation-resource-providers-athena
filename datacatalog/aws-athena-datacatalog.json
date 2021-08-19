@@ -5,6 +5,7 @@
     "definitions": {
         "Tags": {
             "type": "array",
+            "insertionOrder": false,
             "items": {
                 "$ref": "#/definitions/Tag"
             }
@@ -106,5 +107,9 @@
     "primaryIdentifier": [
         "/properties/Name"
     ],
-    "additionalProperties": false
+    "createOnlyProperties": [
+        "/properties/Name"
+    ],
+    "additionalProperties": false,
+    "taggable": true
 }
