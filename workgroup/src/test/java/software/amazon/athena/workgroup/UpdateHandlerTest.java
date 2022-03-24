@@ -225,12 +225,7 @@ public class UpdateHandlerTest {
     assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
-    assertEquals(HandlerUtils.DEFAULT_STATE, receivedRequest.state().toString());
-    assertEquals(defaultUpdates.enforceWorkGroupConfiguration(), receivedRequest.configurationUpdates().enforceWorkGroupConfiguration());
-    assertEquals(defaultUpdates.publishCloudWatchMetricsEnabled(), receivedRequest.configurationUpdates().publishCloudWatchMetricsEnabled());
-    assertEquals(defaultUpdates.requesterPaysEnabled(), receivedRequest.configurationUpdates().requesterPaysEnabled());
-
-    assertTrue(receivedRequest.configurationUpdates().removeBytesScannedCutoffPerQuery());
+    assertEquals(configUpdatesBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
 
     assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
     assertThat(response.getCallbackContext()).isNull();
