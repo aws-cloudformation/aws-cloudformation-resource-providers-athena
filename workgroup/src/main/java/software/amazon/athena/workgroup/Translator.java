@@ -86,6 +86,39 @@ class Translator {
       .build();
   }
 
+  WorkGroupConfigurationUpdates createSdkConfigurationUpdatesFromCfnConfiguration(software.amazon.athena.workgroup.WorkGroupConfiguration requestedConfig) {
+    WorkGroupConfigurationUpdates defaults = HandlerUtils.getDefaultWorkGroupConfiguration();
+    WorkGroupConfigurationUpdates.Builder configUpdates = WorkGroupConfigurationUpdates.builder()
+        .enforceWorkGroupConfiguration(requestedConfig.getEnforceWorkGroupConfiguration() != null ? requestedConfig.getEnforceWorkGroupConfiguration() : defaults.enforceWorkGroupConfiguration())
+        .engineVersion(requestedConfig.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(requestedConfig.getEngineVersion()) : EngineVersion.builder().selectedEngineVersion(defaults.engineVersion().selectedEngineVersion()).build())
+        .publishCloudWatchMetricsEnabled(requestedConfig.getPublishCloudWatchMetricsEnabled() != null ? requestedConfig.getPublishCloudWatchMetricsEnabled() : defaults.publishCloudWatchMetricsEnabled())
+        .requesterPaysEnabled(requestedConfig.getRequesterPaysEnabled() != null ? requestedConfig.getRequesterPaysEnabled() : defaults.requesterPaysEnabled())
+        .resultConfigurationUpdates(createSdkResultConfigurationUpdatesFromCfnConfiguration(requestedConfig.getResultConfiguration()));
+    if (requestedConfig.getBytesScannedCutoffPerQuery() == null) {
+      configUpdates.removeBytesScannedCutoffPerQuery(true);
+    } else {
+      configUpdates.bytesScannedCutoffPerQuery(requestedConfig.getBytesScannedCutoffPerQuery());
+    }
+    return configUpdates.build();
+  }
+
+  private ResultConfigurationUpdates createSdkResultConfigurationUpdatesFromCfnConfiguration(software.amazon.athena.workgroup.ResultConfiguration resultConfiguration) {
+    ResultConfigurationUpdates.Builder updatesBuilder = ResultConfigurationUpdates.builder();
+    if (resultConfiguration == null || resultConfiguration.getOutputLocation() == null) {
+      updatesBuilder.removeOutputLocation(true);
+      updatesBuilder.removeExpectedBucketOwner(true);
+      updatesBuilder.removeAclConfiguration(true);
+    } else {
+      updatesBuilder.outputLocation(resultConfiguration.getOutputLocation());
+    }
+    if (resultConfiguration == null || resultConfiguration.getEncryptionConfiguration() == null) {
+      updatesBuilder.removeEncryptionConfiguration(true);
+    } else {
+      updatesBuilder.encryptionConfiguration(createSdkEncryptionConfigurationFromCfnConfiguration(resultConfiguration.getEncryptionConfiguration()));
+    }
+    return updatesBuilder.build();
+  }
+
   software.amazon.athena.workgroup.WorkGroupConfiguration createCfnWorkgroupConfigurationFromSdkConfiguration(WorkGroupConfiguration sdkConfiguration) {
     return software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
       .bytesScannedCutoffPerQuery(sdkConfiguration.bytesScannedCutoffPerQuery())

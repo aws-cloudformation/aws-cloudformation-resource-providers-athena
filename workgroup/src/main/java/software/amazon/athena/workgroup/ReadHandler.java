@@ -74,7 +74,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
         .recursiveDeleteOption(model.getRecursiveDeleteOption())
         .creationTime(Long.toString(workGroup.creationTime().getEpochSecond()))
         .workGroupConfiguration(workGroup.configuration() != null ? translator.createCfnWorkgroupConfigurationFromSdkConfiguration(workGroup.configuration()) : null)
-        .workGroupConfigurationUpdates(model.getWorkGroupConfigurationUpdates())
+        .workGroupConfigurationUpdates(null)
         .tags(translator.createCfnTagsFromSdkTags(tags))
         .build();
     } catch (AthenaException e) {

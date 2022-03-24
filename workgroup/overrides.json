@@ -1,6 +1,6 @@
 {
     "CREATE": {
-        "/Name": "ContractTestWorkGroup",
+        "/Name": "WorkgroupContractTests",
         "/Tags": [
             {
                 "Key": "tagKey1",
