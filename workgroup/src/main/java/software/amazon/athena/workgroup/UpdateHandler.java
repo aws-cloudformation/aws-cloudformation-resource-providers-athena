@@ -94,10 +94,10 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
           .state(newModel.getState() != null ? newModel.getState() : HandlerUtils.DEFAULT_STATE);
 
       // Prioritize looking at WorkGroupConfigurationUpdates field
-      if (newModel.getWorkGroupConfigurationUpdates() != null) {
-        updateRequestBuilder.configurationUpdates(translator.createSdkConfigurationUpdatesFromCfnConfigurationUpdates(newModel.getWorkGroupConfigurationUpdates()));
-      } else if (newModel.getWorkGroupConfiguration() != null) {
+      if (newModel.getWorkGroupConfiguration() != null) {
         updateRequestBuilder.configurationUpdates(translator.createSdkConfigurationUpdatesFromCfnConfiguration(newModel.getWorkGroupConfiguration()));
+      }else if (newModel.getWorkGroupConfigurationUpdates() != null) {
+        updateRequestBuilder.configurationUpdates(translator.createSdkConfigurationUpdatesFromCfnConfigurationUpdates(newModel.getWorkGroupConfigurationUpdates()));
       } else {
         // Both fields are null, apply default WorkGroup settings
         updateRequestBuilder.configurationUpdates(HandlerUtils.getDefaultWorkGroupConfiguration());

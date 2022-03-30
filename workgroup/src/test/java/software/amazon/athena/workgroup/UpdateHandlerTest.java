@@ -181,7 +181,7 @@ public class UpdateHandlerTest {
   }
 
   @Test
-  void testSuccessStateWithWorkGroupConfigurationUpdatesRevertToDefaults() {
+  void testSuccessStateWithBothWorkGroupConfigurationFields() {
     // Provide both WG and WG updates as input and assert it picks the right values
     final software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates defaultUpdates = HandlerUtils.getDefaultWorkGroupConfiguration();
     final String workgroupName = "primary";
@@ -225,7 +225,7 @@ public class UpdateHandlerTest {
     assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
-    assertEquals(configUpdatesBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
+    assertEquals(configBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
 
     assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
     assertThat(response.getCallbackContext()).isNull();
@@ -237,7 +237,104 @@ public class UpdateHandlerTest {
 
   @Test
   void testSuccessStateWithoutWorkgroupConfigurationUpdatesField() {
-    // TODO
+    // Provide both WG and WG updates as input and assert it picks the right values
+    final software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates defaultUpdates = HandlerUtils.getDefaultWorkGroupConfiguration();
+    final String workgroupName = "primary";
+    final long oldBytes = 11_111_111_111L;
+    final long configBytes = 22_222_222_222L;
+    final ResourceModel oldModel = ResourceModel.builder()
+            .name(workgroupName)
+            .workGroupConfiguration(WorkGroupConfiguration.builder()
+                    .bytesScannedCutoffPerQuery(oldBytes)
+                    .build())
+            .build();
+    final ResourceModel newModel = ResourceModel.builder()
+            .name(workgroupName)
+            .workGroupConfiguration(WorkGroupConfiguration.builder()
+                    .bytesScannedCutoffPerQuery(configBytes)
+                    .build())
+            .build();
+
+    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .previousResourceState(oldModel)
+            .desiredResourceState(newModel)
+            .build();
+
+    // Mock
+    doReturn(UpdateWorkGroupResponse.builder().build())
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
+
+    // Call
+    final ProgressEvent<ResourceModel, CallbackContext> response
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
+
+    // Assert
+    ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
+    verify(proxy, times(1)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
+    List<AthenaRequest> requests = requestCaptor.getAllValues();
+    assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
+    UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
+
+    assertEquals(configBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
+
+    assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+    assertThat(response.getCallbackContext()).isNull();
+    assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+    assertThat(response.getMessage()).isNull();
+    assertThat(response.getErrorCode()).isNull();
+
+  }
+
+  @Test
+  void testSuccessStateWithoutWorkgroupConfigurationField() {
+    // Provide both WG and WG updates as input and assert it picks the right values
+    final software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates defaultUpdates = HandlerUtils.getDefaultWorkGroupConfiguration();
+    final String workgroupName = "primary";
+    final long oldBytes = 11_111_111_111L;
+    final long configUpdatesBytes = 33_333_333_333L;
+    final ResourceModel oldModel = ResourceModel.builder()
+            .name(workgroupName)
+            .workGroupConfiguration(WorkGroupConfiguration.builder()
+                    .bytesScannedCutoffPerQuery(oldBytes)
+                    .build())
+            .build();
+    final ResourceModel newModel = ResourceModel.builder()
+            .name(workgroupName)
+            .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
+                    .bytesScannedCutoffPerQuery(configUpdatesBytes)
+                    .build())
+            .build();
+
+    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .previousResourceState(oldModel)
+            .desiredResourceState(newModel)
+            .build();
+
+    // Mock
+    doReturn(UpdateWorkGroupResponse.builder().build())
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
+
+    // Call
+    final ProgressEvent<ResourceModel, CallbackContext> response
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
+
+    // Assert
+    ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
+    verify(proxy, times(1)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
+    List<AthenaRequest> requests = requestCaptor.getAllValues();
+    assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
+    UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
+
+    assertEquals(configUpdatesBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
+
+    assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+    assertThat(response.getCallbackContext()).isNull();
+    assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+    assertThat(response.getMessage()).isNull();
+    assertThat(response.getErrorCode()).isNull();
+
   }
 
   @Test
