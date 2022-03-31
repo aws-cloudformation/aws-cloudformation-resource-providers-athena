@@ -1,6 +1,7 @@
 {
     "CREATE": {
-        "/Name": "ContractTestWorkGroup",
+        "/Name": "WorkgroupContractTests",
+        "/State": "ENABLED",
         "/Tags": [
             {
                 "Key": "tagKey1",
@@ -12,6 +13,7 @@
             }
         ],
         "/WorkGroupConfiguration/ResultConfiguration/OutputLocation": "s3://bucket",
+        "/WorkGroupConfiguration/ResultConfiguration/EncryptionConfiguration/KmsKey": "abcdef54hi",
         "/WorkGroupConfiguration/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
         "/WorkGroupConfiguration/EngineVersion/SelectedEngineVersion": "AUTO",
         "/WorkGroupConfigurationUpdates/ResultConfigurationUpdates/OutputLocation": "s3://bucket",
@@ -30,6 +32,7 @@
             }
         ],
         "/WorkGroupConfiguration/ResultConfiguration/OutputLocation": "s3://bucket",
+        "/WorkGroupConfiguration/ResultConfiguration/EncryptionConfiguration/KmsKey": "abcdef54hi",
         "/WorkGroupConfiguration/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
         "/WorkGroupConfiguration/EngineVersion/SelectedEngineVersion": "AUTO",
         "/WorkGroupConfigurationUpdates/ResultConfigurationUpdates/OutputLocation": "s3://bucket",

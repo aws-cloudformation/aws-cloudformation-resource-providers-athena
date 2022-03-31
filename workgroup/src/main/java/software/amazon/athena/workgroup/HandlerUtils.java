@@ -1,8 +1,11 @@
 package software.amazon.athena.workgroup;
 
 import software.amazon.awssdk.services.athena.model.AthenaException;
+import software.amazon.awssdk.services.athena.model.EngineVersion;
 import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
+import software.amazon.awssdk.services.athena.model.ResultConfigurationUpdates;
+import software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates;
 import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
@@ -12,6 +15,9 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import static software.amazon.athena.workgroup.ResourceModel.TYPE_NAME;
 
 final class HandlerUtils {
+
+  public final static String DEFAULT_STATE = "ENABLED";
+  public final static String DEFAULT_DESCRIPTION = "";
 
   private HandlerUtils() {
     // Intentionally left blank
@@ -49,5 +55,25 @@ final class HandlerUtils {
     }
 
     return e;
+  }
+
+  static WorkGroupConfigurationUpdates getDefaultWorkGroupConfiguration() {
+    return WorkGroupConfigurationUpdates.builder()
+        .enforceWorkGroupConfiguration(true)
+        .engineVersion(EngineVersion.builder().selectedEngineVersion("AUTO").build())
+        .publishCloudWatchMetricsEnabled(true)
+        .requesterPaysEnabled(false)
+        .resultConfigurationUpdates(getDefaultResultConfiguration())
+        .removeBytesScannedCutoffPerQuery(true)
+        .build();
+  }
+
+  private static ResultConfigurationUpdates getDefaultResultConfiguration() {
+    return ResultConfigurationUpdates.builder()
+        .removeOutputLocation(true)
+        .removeEncryptionConfiguration(true)
+        .removeExpectedBucketOwner(true)
+        .removeAclConfiguration(true)
+        .build();
   }
 }

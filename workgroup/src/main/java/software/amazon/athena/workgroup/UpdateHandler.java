@@ -3,11 +3,14 @@ package software.amazon.athena.workgroup;
 import com.google.common.collect.Sets;
 import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.AthenaException;
+import software.amazon.awssdk.services.athena.model.EngineVersion;
+import software.amazon.awssdk.services.athena.model.ResultConfigurationUpdates;
 import software.amazon.awssdk.services.athena.model.Tag;
 import software.amazon.awssdk.services.athena.model.TagResourceRequest;
 import software.amazon.awssdk.services.athena.model.UntagResourceRequest;
 import software.amazon.awssdk.services.athena.model.UpdateWorkGroupRequest;
 import software.amazon.awssdk.services.athena.model.UpdateWorkGroupResponse;
+import software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -52,23 +55,16 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
     return ProgressEvent.defaultSuccessHandler(model);
   }
 
-  private UpdateWorkGroupResponse updateWorkgroup(final ResourceModel model) {
-    final UpdateWorkGroupRequest updateWorkGroupRequest = UpdateWorkGroupRequest.builder()
-      .workGroup(model.getName())
-      .description(model.getDescription())
-      .state(model.getState())
-      .configurationUpdates(model.getWorkGroupConfigurationUpdates() != null ?
-        translator.createSdkConfigurationUpdatesFromCfnConfigurationUpdates(model.getWorkGroupConfigurationUpdates()) : null)
-      .build();
+  private UpdateWorkGroupResponse updateWorkgroup(final ResourceModel newModel) {
     final ResourceModel oldModel = request.getPreviousResourceState();
     final Set<Tag> oldTags = (oldModel == null || oldModel.getTags() == null) ?
       new HashSet<>() : new HashSet<>(translator.createSdkTagsFromCfnTags(oldModel.getTags()));
-    final Set<Tag> newTags = model.getTags() == null ?
-      new HashSet<>() : new HashSet<>(translator.createSdkTagsFromCfnTags(model.getTags()));
+    final Set<Tag> newTags = newModel.getTags() == null ?
+        new HashSet<>() : new HashSet<>(translator.createSdkTagsFromCfnTags(newModel.getTags()));
     try {
       // Handle modifications to WorkGroup tags
       if (!oldTags.equals(newTags)) {
-        String workGroupARN = getWorkGroupArn(request, model.getName());
+        String workGroupARN = getWorkGroupArn(request, newModel.getName());
 
         // {old tags} - {new tags} = {tags to remove}
         Set<Tag> tagsToRemove = Sets.difference(oldTags, newTags);
@@ -92,9 +88,25 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
       }
 
       // Handle modifications to WorkGroup configuration
-      return clientProxy.injectCredentialsAndInvokeV2(updateWorkGroupRequest, athenaClient::updateWorkGroup);
+      final UpdateWorkGroupRequest.Builder updateRequestBuilder = UpdateWorkGroupRequest.builder()
+          .workGroup(newModel.getName())
+          .description(newModel.getDescription() != null ? newModel.getDescription() : HandlerUtils.DEFAULT_DESCRIPTION)
+          .state(newModel.getState() != null ? newModel.getState() : HandlerUtils.DEFAULT_STATE);
+
+      // Prioritize looking at WorkGroupConfiguration field
+      if (newModel.getWorkGroupConfiguration() != null) {
+        updateRequestBuilder.configurationUpdates(translator.createSdkConfigurationUpdatesFromCfnConfiguration(newModel.getWorkGroupConfiguration()));
+      } else if (newModel.getWorkGroupConfigurationUpdates() != null) {
+        updateRequestBuilder.configurationUpdates(translator.createSdkConfigurationUpdatesFromCfnConfigurationUpdates(newModel.getWorkGroupConfigurationUpdates()));
+      } else {
+        // Both fields are null, apply default WorkGroup settings
+        updateRequestBuilder.configurationUpdates(HandlerUtils.getDefaultWorkGroupConfiguration());
+      }
+
+      // Submit UpdateWorkGroup request to Athena
+      return clientProxy.injectCredentialsAndInvokeV2(updateRequestBuilder.build(), athenaClient::updateWorkGroup);
     } catch (AthenaException e) {
-      throw translateAthenaException(e, model.getName());
+      throw translateAthenaException(e, newModel.getName());
     }
   }
 }
