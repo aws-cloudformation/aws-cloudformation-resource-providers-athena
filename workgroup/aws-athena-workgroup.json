@@ -111,7 +111,7 @@
             "type": "boolean"
         },
         "AdditionalConfiguration": {
-            "description": "Additional Configurations that are passed to Athena Spark Calculations running in this workgroup",
+            "description": "Additional Configuration that are passed to Athena Spark Calculations running in this workgroup",
             "type": "string"
         },
         "ExecutionRole": {
@@ -164,7 +164,7 @@
             ],
             "additionalProperties": false
         },
-        "RemoveCustomerContentEncryptionConfiguration" : {
+        "RemoveCustomerContentEncryptionConfiguration": {
             "type": "boolean"
         },
         "ResultConfiguration": {
