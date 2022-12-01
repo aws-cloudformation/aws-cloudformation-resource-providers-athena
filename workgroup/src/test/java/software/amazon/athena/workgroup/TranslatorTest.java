@@ -3,6 +3,8 @@ package software.amazon.athena.workgroup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.athena.model.AclConfiguration;
+import software.amazon.awssdk.services.athena.model.CustomerContentEncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.EngineVersion;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.ResultConfiguration;
@@ -48,9 +50,15 @@ public class TranslatorTest {
                                                                                .outputLocation("s3://abc/")
                                                                                .encryptionConfiguration(software.amazon.athena.workgroup.EncryptionConfiguration.builder()
                                                                                                                                                                 .encryptionOption("SSE_S3")
-                                                                                                                                                                .build())
+                                                                                       .build())
+                                                                                       .expectedBucketOwner("123456789012")
+                                                                                       .aclConfiguration(software.amazon.athena.workgroup.AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
                                                                                .build())
       .engineVersion(engineVersion)
+      .additionalConfiguration("{\"additionalConfig\": \"some_config\"}")
+      .executionRole("arn:aws:iam::123456789012:role/service-role/fake-execution-role")
+      .customerContentEncryptionConfiguration(software.amazon.athena.workgroup.CustomerContentEncryptionConfiguration.builder()
+              .kmsKey("arn:aws:kms:us-east-1:123456789012:key/fake-kms-key-id").build())
       .build();
 
     WorkGroupConfiguration sdkWorkGroupConfiguration =
@@ -67,6 +75,9 @@ public class TranslatorTest {
             .isEqualTo(sdkWorkGroupConfiguration.engineVersion().selectedEngineVersion());
     assertThat(cfnWorkGroupConfiguration.getEngineVersion().getEffectiveEngineVersion())
             .isEqualTo(sdkWorkGroupConfiguration.engineVersion().effectiveEngineVersion());
+    assertThat(cfnWorkGroupConfiguration.getAdditionalConfiguration()).isEqualTo(sdkWorkGroupConfiguration.additionalConfiguration());
+    assertThat(cfnWorkGroupConfiguration.getExecutionRole()).isEqualTo(sdkWorkGroupConfiguration.executionRole());
+    assertThat(cfnWorkGroupConfiguration.getCustomerContentEncryptionConfiguration().getKmsKey()).isEqualTo(sdkWorkGroupConfiguration.customerContentEncryptionConfiguration().kmsKey());
   }
 
   @Test
@@ -78,6 +89,7 @@ public class TranslatorTest {
       .requesterPaysEnabled(false)
       .resultConfiguration(null)
       .engineVersion(null)
+      .customerContentEncryptionConfiguration(null)
       .build();
 
     WorkGroupConfiguration sdkWorkGroupConfiguration =
@@ -88,6 +100,7 @@ public class TranslatorTest {
     assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfiguration.publishCloudWatchMetricsEnabled());
     assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
     assertThat(cfnWorkGroupConfiguration.getEngineVersion()).isEqualTo(sdkWorkGroupConfiguration.engineVersion());
+    assertThat(cfnWorkGroupConfiguration.getCustomerContentEncryptionConfiguration()).isEqualTo(sdkWorkGroupConfiguration.customerContentEncryptionConfiguration());
   }
 
   @Test
@@ -108,10 +121,19 @@ public class TranslatorTest {
                                                                                                                                                                               .encryptionOption("CSE_KMS")
                                                                                                                                                                               .kmsKey("some_key")
                                                                                                                                                                               .build())
+                                                                                             .expectedBucketOwner("123456789012")
+                                                                                             .aclConfiguration(software.amazon.athena.workgroup.AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
                                                                                              .removeOutputLocation(true)
                                                                                              .removeEncryptionConfiguration(true)
+                                                                                             .removeExpectedBucketOwner(true)
+                                                                                             .removeAclConfiguration(true)
                                                                                              .build())
       .engineVersion(engineVersion)
+      .additionalConfiguration("{\"additionalConfig\": \"some_config\"}")
+      .executionRole("arn:aws:iam::123456789012:role/service-role/fake-execution-role")
+      .customerContentEncryptionConfiguration(software.amazon.athena.workgroup.CustomerContentEncryptionConfiguration.builder()
+              .kmsKey("arn:aws:kms:us-east-1:123456789012:key/fake-kms-key-id").build())
+      .removeCustomerContentEncryptionConfiguration(true)
       .build();
 
     WorkGroupConfigurationUpdates sdkWorkGroupConfigurationUpdates =
@@ -125,10 +147,20 @@ public class TranslatorTest {
       .isEqualTo(sdkWorkGroupConfigurationUpdates.resultConfigurationUpdates().removeOutputLocation());
     assertThat(cfnWorkGroupConfiguration.getResultConfigurationUpdates().getRemoveEncryptionConfiguration())
       .isEqualTo(sdkWorkGroupConfigurationUpdates.resultConfigurationUpdates().removeEncryptionConfiguration());
+    assertThat(cfnWorkGroupConfiguration.getResultConfigurationUpdates().getRemoveExpectedBucketOwner())
+            .isEqualTo(sdkWorkGroupConfigurationUpdates.resultConfigurationUpdates().removeExpectedBucketOwner());
+    assertThat(cfnWorkGroupConfiguration.getResultConfigurationUpdates().getRemoveAclConfiguration())
+            .isEqualTo(sdkWorkGroupConfigurationUpdates.resultConfigurationUpdates().removeAclConfiguration());
     assertThat(cfnWorkGroupConfiguration.getEngineVersion().getSelectedEngineVersion())
             .isEqualTo(sdkWorkGroupConfigurationUpdates.engineVersion().selectedEngineVersion());
     assertThat(cfnWorkGroupConfiguration.getEngineVersion().getEffectiveEngineVersion())
             .isEqualTo(sdkWorkGroupConfigurationUpdates.engineVersion().effectiveEngineVersion());
+    assertThat(cfnWorkGroupConfiguration.getAdditionalConfiguration()).isEqualTo(sdkWorkGroupConfigurationUpdates.additionalConfiguration());
+    assertThat(cfnWorkGroupConfiguration.getExecutionRole()).isEqualTo(sdkWorkGroupConfigurationUpdates.executionRole());
+    assertThat(cfnWorkGroupConfiguration.getCustomerContentEncryptionConfiguration().getKmsKey())
+            .isEqualTo(sdkWorkGroupConfigurationUpdates.customerContentEncryptionConfiguration().kmsKey());
+    assertThat(cfnWorkGroupConfiguration.getRemoveCustomerContentEncryptionConfiguration())
+            .isEqualTo(sdkWorkGroupConfigurationUpdates.removeCustomerContentEncryptionConfiguration());
   }
 
   @Test
@@ -171,9 +203,15 @@ public class TranslatorTest {
                                                                                                                                                                      .encryptionOption("CSE_KMS")
                                                                                                                                                                      .kmsKey("some_key")
                                                                                                                                                                      .build())
-                                                                                                                     .build())
+                                                                                                                     .expectedBucketOwner("123456789012")
+                                                                                                                     .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
+                                                                                     .build())
                                                                              .engineVersion(engineVersion)
-      .build();
+                                                                             .additionalConfiguration("{\"additionalConfig\": \"some_config\"}")
+                                                                             .executionRole("arn:aws:iam::123456789012:role/service-role/fake-execution-role")
+                                                                             .customerContentEncryptionConfiguration(CustomerContentEncryptionConfiguration.builder()
+                                                                                     .kmsKey("arn:aws:kms:us-east-1:123456789012:key/fake-kms-key-id").build())
+            .build();
 
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = new Translator().createCfnWorkgroupConfigurationFromSdkConfiguration(sdkWorkGroupConfiguration);
 
