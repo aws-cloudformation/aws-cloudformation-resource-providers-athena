@@ -12,30 +12,6 @@ phases:
   build:
     commands:
       # pre-build check for commit hooks
-      - cd "$CODEBUILD_SRC_DIR"
       - pre-commit run --all-files
-      # install aws-cloudformation-resource-schema
-      - cd "$CODEBUILD_SRC_DIR_SCHEMA"
-      - >
-        mvn package org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install
-        --batch-mode
-        --no-transfer-progress
-      # install internal SDK
-      - >
-        mvn org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file
-        --batch-mode
-        --no-transfer-progress
-        -Dfile="$CODEBUILD_SRC_DIR_SDK/cloudformation-2.8.1.jar"
       # install aws-cloudformation-rpdk
-      - cd "$CODEBUILD_SRC_DIR_JAVA_PLUGIN"
-      - >
-        mvn package org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install
-        --batch-mode
-        --no-transfer-progress
-      - pip install "$CODEBUILD_SRC_DIR_RPDK" .
-      # end-to-end test child repo(s)
-      - cd "$CODEBUILD_SRC_DIR"
-      - cd namedquery
-      - mvn clean verify
-    finally:
-      - cat "$CODEBUILD_SRC_DIR/namedquery/rpdk.log"
+      - pip install cloudformation-cli cloudformation-cli-java-plugin

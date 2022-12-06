@@ -1,5 +1,7 @@
 package software.amazon.athena.workgroup;
 
+import software.amazon.awssdk.services.athena.model.AclConfiguration;
+import software.amazon.awssdk.services.athena.model.CustomerContentEncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.EngineVersion;
 import software.amazon.awssdk.services.athena.model.ResultConfiguration;
@@ -14,32 +16,36 @@ class Translator {
   List<software.amazon.awssdk.services.athena.model.Tag> createSdkTagsFromCfnTags(List<software.amazon.athena.workgroup.Tag> cfnTags) {
     List<software.amazon.awssdk.services.athena.model.Tag> sdkTags = new ArrayList<>();
     cfnTags.forEach(q -> sdkTags.add(
-      software.amazon.awssdk.services.athena.model.Tag.builder()
-        .key(q.getKey())
-        .value(q.getValue())
-        .build()));
+            software.amazon.awssdk.services.athena.model.Tag.builder()
+                    .key(q.getKey())
+                    .value(q.getValue())
+                    .build()));
     return sdkTags;
   }
 
   List<software.amazon.athena.workgroup.Tag> createCfnTagsFromSdkTags(List<software.amazon.awssdk.services.athena.model.Tag> sdkTags) {
     List<software.amazon.athena.workgroup.Tag> cfnTags = new ArrayList<>();
     sdkTags.forEach(tag -> cfnTags.add(
-        software.amazon.athena.workgroup.Tag.builder()
-          .key(tag.key())
-          .value(tag.value())
-          .build()));
+            software.amazon.athena.workgroup.Tag.builder()
+                    .key(tag.key())
+                    .value(tag.value())
+                    .build()));
     return cfnTags;
   }
 
   WorkGroupConfiguration createSdkWorkgroupConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.WorkGroupConfiguration cfnConfiguration) {
     return WorkGroupConfiguration.builder()
-      .bytesScannedCutoffPerQuery(cfnConfiguration.getBytesScannedCutoffPerQuery())
-      .enforceWorkGroupConfiguration(cfnConfiguration.getEnforceWorkGroupConfiguration())
-      .publishCloudWatchMetricsEnabled(cfnConfiguration.getPublishCloudWatchMetricsEnabled())
-      .requesterPaysEnabled(cfnConfiguration.getRequesterPaysEnabled())
-      .resultConfiguration(cfnConfiguration.getResultConfiguration() != null ? createSdkResultConfigurationFromCfnConfiguration(cfnConfiguration.getResultConfiguration()) : null)
-      .engineVersion(cfnConfiguration.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(cfnConfiguration.getEngineVersion()) : null)
-      .build();
+            .bytesScannedCutoffPerQuery(cfnConfiguration.getBytesScannedCutoffPerQuery())
+            .enforceWorkGroupConfiguration(cfnConfiguration.getEnforceWorkGroupConfiguration())
+            .publishCloudWatchMetricsEnabled(cfnConfiguration.getPublishCloudWatchMetricsEnabled())
+            .requesterPaysEnabled(cfnConfiguration.getRequesterPaysEnabled())
+            .resultConfiguration(cfnConfiguration.getResultConfiguration() != null ? createSdkResultConfigurationFromCfnConfiguration(cfnConfiguration.getResultConfiguration()) : null)
+            .engineVersion(cfnConfiguration.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(cfnConfiguration.getEngineVersion()) : null)
+            .additionalConfiguration(cfnConfiguration.getAdditionalConfiguration())
+            .executionRole(cfnConfiguration.getExecutionRole())
+            .customerContentEncryptionConfiguration(cfnConfiguration.getCustomerContentEncryptionConfiguration() != null ?
+                    createSdkCustomerContentEncryptionConfigurationFromCfnConfiguration(cfnConfiguration.getCustomerContentEncryptionConfiguration()) : null)
+            .build();
   }
 
   private EngineVersion createSdkEngineVersionFromCfnConfiguration(software.amazon.athena.workgroup.EngineVersion engineVersion) {
@@ -49,55 +55,89 @@ class Translator {
             .build();
   }
 
+  private CustomerContentEncryptionConfiguration createSdkCustomerContentEncryptionConfigurationFromCfnConfiguration(
+          software.amazon.athena.workgroup.CustomerContentEncryptionConfiguration customerContentEncryptionConfiguration) {
+    return CustomerContentEncryptionConfiguration.builder()
+            .kmsKey(customerContentEncryptionConfiguration.getKmsKey())
+            .build();
+  }
+
+  private AclConfiguration createSdkAclConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.AclConfiguration aclConfiguration) {
+    return AclConfiguration.builder()
+            .s3AclOption(aclConfiguration.getS3AclOption())
+            .build();
+  }
+
   private ResultConfiguration createSdkResultConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.ResultConfiguration resultConfiguration) {
     return ResultConfiguration.builder()
-      .encryptionConfiguration(resultConfiguration.getEncryptionConfiguration() != null ? createSdkEncryptionConfigurationFromCfnConfiguration(resultConfiguration.getEncryptionConfiguration()) : null)
-      .outputLocation(resultConfiguration.getOutputLocation())
-      .build();
+            .encryptionConfiguration(resultConfiguration.getEncryptionConfiguration() != null ?
+                    createSdkEncryptionConfigurationFromCfnConfiguration(resultConfiguration.getEncryptionConfiguration()) : null)
+            .outputLocation(resultConfiguration.getOutputLocation())
+            .aclConfiguration(resultConfiguration.getAclConfiguration() != null ? createSdkAclConfigurationFromCfnConfiguration(resultConfiguration.getAclConfiguration()) : null)
+            .expectedBucketOwner(resultConfiguration.getExpectedBucketOwner())
+            .build();
   }
 
   private EncryptionConfiguration createSdkEncryptionConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.EncryptionConfiguration encryptionConfiguration) {
     return EncryptionConfiguration.builder()
-      .encryptionOption(encryptionConfiguration.getEncryptionOption())
-      .kmsKey(encryptionConfiguration.getKmsKey())
-      .build();
+            .encryptionOption(encryptionConfiguration.getEncryptionOption())
+            .kmsKey(encryptionConfiguration.getKmsKey())
+            .build();
   }
 
   WorkGroupConfigurationUpdates createSdkConfigurationUpdatesFromCfnConfigurationUpdates(software.amazon.athena.workgroup.WorkGroupConfigurationUpdates configuration) {
     return WorkGroupConfigurationUpdates.builder()
-      .bytesScannedCutoffPerQuery(configuration.getBytesScannedCutoffPerQuery())
-      .enforceWorkGroupConfiguration(configuration.getEnforceWorkGroupConfiguration())
-      .publishCloudWatchMetricsEnabled(configuration.getPublishCloudWatchMetricsEnabled())
-      .requesterPaysEnabled(configuration.getRequesterPaysEnabled())
-      .removeBytesScannedCutoffPerQuery(configuration.getRemoveBytesScannedCutoffPerQuery())
-      .resultConfigurationUpdates(configuration.getResultConfigurationUpdates() != null ?
-        createSdkResultConfigurationUpdatesFromCfnConfigurationUpdate(configuration.getResultConfigurationUpdates()) : null)
-      .engineVersion(configuration.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(configuration.getEngineVersion()) : null)
-      .build();
+            .bytesScannedCutoffPerQuery(configuration.getBytesScannedCutoffPerQuery())
+            .enforceWorkGroupConfiguration(configuration.getEnforceWorkGroupConfiguration())
+            .publishCloudWatchMetricsEnabled(configuration.getPublishCloudWatchMetricsEnabled())
+            .requesterPaysEnabled(configuration.getRequesterPaysEnabled())
+            .removeBytesScannedCutoffPerQuery(configuration.getRemoveBytesScannedCutoffPerQuery())
+            .resultConfigurationUpdates(configuration.getResultConfigurationUpdates() != null ?
+                    createSdkResultConfigurationUpdatesFromCfnConfigurationUpdate(configuration.getResultConfigurationUpdates()) : null)
+            .engineVersion(configuration.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(configuration.getEngineVersion()) : null)
+            .additionalConfiguration(configuration.getAdditionalConfiguration())
+            .executionRole(configuration.getExecutionRole())
+            .customerContentEncryptionConfiguration(configuration.getCustomerContentEncryptionConfiguration() != null ?
+                    createSdkCustomerContentEncryptionConfigurationFromCfnConfiguration(configuration.getCustomerContentEncryptionConfiguration()) : null)
+            .removeCustomerContentEncryptionConfiguration(configuration.getRemoveCustomerContentEncryptionConfiguration())
+            .build();
   }
 
   private ResultConfigurationUpdates createSdkResultConfigurationUpdatesFromCfnConfigurationUpdate(software.amazon.athena.workgroup.ResultConfigurationUpdates resultConfigurationUpdate) {
     return ResultConfigurationUpdates.builder()
-      .encryptionConfiguration(resultConfigurationUpdate.getEncryptionConfiguration() != null ?
-        createSdkEncryptionConfigurationFromCfnConfiguration(resultConfigurationUpdate.getEncryptionConfiguration()) : null)
-      .outputLocation(resultConfigurationUpdate.getOutputLocation())
-      .removeEncryptionConfiguration(resultConfigurationUpdate.getRemoveEncryptionConfiguration())
-      .removeOutputLocation(resultConfigurationUpdate.getRemoveOutputLocation())
-      .build();
+            .encryptionConfiguration(resultConfigurationUpdate.getEncryptionConfiguration() != null ?
+                    createSdkEncryptionConfigurationFromCfnConfiguration(resultConfigurationUpdate.getEncryptionConfiguration()) : null)
+            .outputLocation(resultConfigurationUpdate.getOutputLocation())
+            .removeEncryptionConfiguration(resultConfigurationUpdate.getRemoveEncryptionConfiguration())
+            .removeOutputLocation(resultConfigurationUpdate.getRemoveOutputLocation())
+            .expectedBucketOwner(resultConfigurationUpdate.getExpectedBucketOwner())
+            .removeExpectedBucketOwner(resultConfigurationUpdate.getRemoveExpectedBucketOwner())
+            .aclConfiguration(resultConfigurationUpdate.getAclConfiguration() != null ?
+                    createSdkAclConfigurationFromCfnConfiguration(resultConfigurationUpdate.getAclConfiguration()) : null)
+            .removeAclConfiguration(resultConfigurationUpdate.getRemoveAclConfiguration())
+            .build();
   }
 
   WorkGroupConfigurationUpdates createSdkConfigurationUpdatesFromCfnConfiguration(software.amazon.athena.workgroup.WorkGroupConfiguration requestedConfig) {
     WorkGroupConfigurationUpdates defaults = HandlerUtils.getDefaultWorkGroupConfiguration();
     WorkGroupConfigurationUpdates.Builder configUpdates = WorkGroupConfigurationUpdates.builder()
-        .enforceWorkGroupConfiguration(requestedConfig.getEnforceWorkGroupConfiguration() != null ? requestedConfig.getEnforceWorkGroupConfiguration() : defaults.enforceWorkGroupConfiguration())
-        .engineVersion(requestedConfig.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(requestedConfig.getEngineVersion()) : EngineVersion.builder().selectedEngineVersion(defaults.engineVersion().selectedEngineVersion()).build())
-        .publishCloudWatchMetricsEnabled(requestedConfig.getPublishCloudWatchMetricsEnabled() != null ? requestedConfig.getPublishCloudWatchMetricsEnabled() : defaults.publishCloudWatchMetricsEnabled())
-        .requesterPaysEnabled(requestedConfig.getRequesterPaysEnabled() != null ? requestedConfig.getRequesterPaysEnabled() : defaults.requesterPaysEnabled())
-        .resultConfigurationUpdates(createSdkResultConfigurationUpdatesFromCfnConfiguration(requestedConfig.getResultConfiguration()));
+            .enforceWorkGroupConfiguration(requestedConfig.getEnforceWorkGroupConfiguration() != null ? requestedConfig.getEnforceWorkGroupConfiguration() : defaults.enforceWorkGroupConfiguration())
+            .engineVersion(requestedConfig.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(requestedConfig.getEngineVersion()) : EngineVersion.builder().selectedEngineVersion(defaults.engineVersion().selectedEngineVersion()).build())
+            .publishCloudWatchMetricsEnabled(requestedConfig.getPublishCloudWatchMetricsEnabled() != null ? requestedConfig.getPublishCloudWatchMetricsEnabled() : defaults.publishCloudWatchMetricsEnabled())
+            .requesterPaysEnabled(requestedConfig.getRequesterPaysEnabled() != null ? requestedConfig.getRequesterPaysEnabled() : defaults.requesterPaysEnabled())
+            .resultConfigurationUpdates(createSdkResultConfigurationUpdatesFromCfnConfiguration(requestedConfig.getResultConfiguration()))
+            .additionalConfiguration(requestedConfig.getAdditionalConfiguration())
+            .executionRole(requestedConfig.getExecutionRole());
     if (requestedConfig.getBytesScannedCutoffPerQuery() == null) {
       configUpdates.removeBytesScannedCutoffPerQuery(true);
     } else {
       configUpdates.bytesScannedCutoffPerQuery(requestedConfig.getBytesScannedCutoffPerQuery());
+    }
+    if (requestedConfig.getCustomerContentEncryptionConfiguration() == null) {
+      configUpdates.removeCustomerContentEncryptionConfiguration(true);
+    } else {
+      configUpdates.customerContentEncryptionConfiguration(
+              createSdkCustomerContentEncryptionConfigurationFromCfnConfiguration(requestedConfig.getCustomerContentEncryptionConfiguration()));
     }
     return configUpdates.build();
   }
@@ -110,6 +150,9 @@ class Translator {
       updatesBuilder.removeAclConfiguration(true);
     } else {
       updatesBuilder.outputLocation(resultConfiguration.getOutputLocation());
+      updatesBuilder.expectedBucketOwner(resultConfiguration.getExpectedBucketOwner());
+      updatesBuilder.aclConfiguration(resultConfiguration.getAclConfiguration() != null ?
+              createSdkAclConfigurationFromCfnConfiguration(resultConfiguration.getAclConfiguration()) : null);
     }
     if (resultConfiguration == null || resultConfiguration.getEncryptionConfiguration() == null) {
       updatesBuilder.removeEncryptionConfiguration(true);
@@ -121,15 +164,26 @@ class Translator {
 
   software.amazon.athena.workgroup.WorkGroupConfiguration createCfnWorkgroupConfigurationFromSdkConfiguration(WorkGroupConfiguration sdkConfiguration) {
     return software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
-      .bytesScannedCutoffPerQuery(sdkConfiguration.bytesScannedCutoffPerQuery())
-      .enforceWorkGroupConfiguration(sdkConfiguration.enforceWorkGroupConfiguration())
-      .publishCloudWatchMetricsEnabled(sdkConfiguration.publishCloudWatchMetricsEnabled())
-      .requesterPaysEnabled(sdkConfiguration.requesterPaysEnabled())
-      .resultConfiguration(sdkConfiguration.resultConfiguration() != null ? createCfnResultConfigurationFromSdkConfiguration(sdkConfiguration.resultConfiguration())
-        : null)
-      .engineVersion(sdkConfiguration.engineVersion() != null ? createCfnEngineVersionFromSdkConfiguration(sdkConfiguration.engineVersion())
-              : null)
-      .build();
+            .bytesScannedCutoffPerQuery(sdkConfiguration.bytesScannedCutoffPerQuery())
+            .enforceWorkGroupConfiguration(sdkConfiguration.enforceWorkGroupConfiguration())
+            .publishCloudWatchMetricsEnabled(sdkConfiguration.publishCloudWatchMetricsEnabled())
+            .requesterPaysEnabled(sdkConfiguration.requesterPaysEnabled())
+            .resultConfiguration(sdkConfiguration.resultConfiguration() != null ? createCfnResultConfigurationFromSdkConfiguration(sdkConfiguration.resultConfiguration())
+                    : null)
+            .engineVersion(sdkConfiguration.engineVersion() != null ? createCfnEngineVersionFromSdkConfiguration(sdkConfiguration.engineVersion())
+                    : null)
+            .additionalConfiguration(sdkConfiguration.additionalConfiguration())
+            .executionRole(sdkConfiguration.executionRole())
+            .customerContentEncryptionConfiguration(sdkConfiguration.customerContentEncryptionConfiguration() != null ?
+                    createCfnCustomerContentEncryptionConfigurationFromSdkConfiguration(sdkConfiguration.customerContentEncryptionConfiguration()) : null)
+            .build();
+  }
+
+  private software.amazon.athena.workgroup.CustomerContentEncryptionConfiguration createCfnCustomerContentEncryptionConfigurationFromSdkConfiguration(
+          CustomerContentEncryptionConfiguration customerContentEncryptionConfiguration) {
+    return software.amazon.athena.workgroup.CustomerContentEncryptionConfiguration.builder()
+            .kmsKey(customerContentEncryptionConfiguration.kmsKey())
+            .build();
   }
 
   private software.amazon.athena.workgroup.EngineVersion createCfnEngineVersionFromSdkConfiguration(EngineVersion engineVersion) {
@@ -141,15 +195,22 @@ class Translator {
 
   private software.amazon.athena.workgroup.ResultConfiguration createCfnResultConfigurationFromSdkConfiguration(ResultConfiguration resultConfiguration) {
     return software.amazon.athena.workgroup.ResultConfiguration.builder()
-      .encryptionConfiguration(resultConfiguration.encryptionConfiguration() != null ? createCfnEncryptionConfigurationFromSdkConfiguration(resultConfiguration.encryptionConfiguration()) : null)
-      .outputLocation(resultConfiguration.outputLocation())
-      .build();
+            .encryptionConfiguration(resultConfiguration.encryptionConfiguration() != null ? createCfnEncryptionConfigurationFromSdkConfiguration(resultConfiguration.encryptionConfiguration()) : null)
+            .outputLocation(resultConfiguration.outputLocation())
+            .expectedBucketOwner(resultConfiguration.expectedBucketOwner())
+            .aclConfiguration(resultConfiguration.aclConfiguration() != null ? createCfnAclConfigurationFromSdkConfiguration(resultConfiguration.aclConfiguration()) : null)
+            .build();
+  }
+
+  private software.amazon.athena.workgroup.AclConfiguration createCfnAclConfigurationFromSdkConfiguration(AclConfiguration aclConfiguration) {
+    return software.amazon.athena.workgroup.AclConfiguration.builder()
+            .s3AclOption(aclConfiguration.s3AclOptionAsString()).build();
   }
 
   private software.amazon.athena.workgroup.EncryptionConfiguration createCfnEncryptionConfigurationFromSdkConfiguration(EncryptionConfiguration encryptionConfiguration) {
     return software.amazon.athena.workgroup.EncryptionConfiguration.builder()
-      .encryptionOption(encryptionConfiguration.encryptionOption().toString())
-      .kmsKey(encryptionConfiguration.kmsKey())
-      .build();
+            .encryptionOption(encryptionConfiguration.encryptionOption().toString())
+            .kmsKey(encryptionConfiguration.kmsKey())
+            .build();
   }
 }
