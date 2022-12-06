@@ -5,29 +5,10 @@ phases:
         java: openjdk8
         python: 3.7
     commands:
-      # make sure pip/setuptools/wheel is up to date, awscli for SDK patching
-      - cd "$CODEBUILD_SRC_DIR_JAVA_PLUGIN"
-      - pip install --upgrade setuptools wheel cloudformation-cli cloudformation-cli-java-plugin  -r "$CODEBUILD_SRC_DIR_RPDK/requirements.txt"
-      - mkdir "$CODEBUILD_SRC_DIR_JAVA_PLUGIN/artifacts"
+      pip install pre-commit
   build:
     commands:
-      - cd "$CODEBUILD_SRC_DIR"
+      # pre-build check for commit hooks
       - pre-commit run --all-files
-      - # install aws-cloudformation-resource-schema
-      - cd "$CODEBUILD_SRC_DIR_SCHEMA"
-      - >
-        mvn package org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install
-        --batch-mode
-        --no-transfer-progress
-      # install internal SDK
-      - >
-        mvn org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file
-        --batch-mode
-        --no-transfer-progress
-        -Dfile="$CODEBUILD_SRC_DIR_SDK/cloudformation-2.8.1.jar"
-      # end-to-end test child repo(s)
-      - cd "$CODEBUILD_SRC_DIR"
-      - cd namedquery
-      - mvn clean verify
-    finally:
-      - cat "$CODEBUILD_SRC_DIR/namedquery/rpdk.log"
+      # install aws-cloudformation-rpdk
+      - pip install cloudformation-cli cloudformation-cli-java-plugin
