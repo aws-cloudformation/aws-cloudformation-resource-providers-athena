@@ -7,7 +7,7 @@ phases:
     commands:
       # make sure pip/setuptools/wheel is up to date, awscli for SDK patching
       - cd "$CODEBUILD_SRC_DIR_JAVA_PLUGIN"
-      - pip install --upgrade pre-commit cloudformation-cli cloudformation-cli-java-plugin
+      - pip install  --no-transfer-progress --upgrade pre-commit cloudformation-cli cloudformation-cli-java-plugin  -r "$CODEBUILD_SRC_DIR_RPDK/requirements.txt"
       - mkdir "$CODEBUILD_SRC_DIR_JAVA_PLUGIN/artifacts"
   build:
     commands:
