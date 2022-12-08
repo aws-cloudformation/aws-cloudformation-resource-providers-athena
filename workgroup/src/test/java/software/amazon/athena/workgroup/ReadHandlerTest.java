@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.athena.model.AclConfiguration;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.EngineVersion;
 import software.amazon.awssdk.services.athena.model.GetWorkGroupRequest;
@@ -103,6 +104,10 @@ class ReadHandlerTest {
           .encryptionConfiguration(EncryptionConfiguration.builder()
             .encryptionOption("SSE_S3")
             .build())
+          .expectedBucketOwner("123456789012")
+          .aclConfiguration(AclConfiguration.builder()
+            .s3AclOption("BUCKET_OWNER_FULL_CONTROL")
+            .build())
           .build())
         .engineVersion(engineVersion1)
         .build())
@@ -135,6 +140,10 @@ class ReadHandlerTest {
       .isEqualTo(workGroup.configuration().resultConfiguration().outputLocation());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getEncryptionConfiguration().getEncryptionOption())
       .isEqualTo(workGroup.configuration().resultConfiguration().encryptionConfiguration().encryptionOption().toString());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getExpectedBucketOwner())
+      .isEqualTo(workGroup.configuration().resultConfiguration().expectedBucketOwner());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getAclConfiguration().getS3AclOption())
+      .isEqualTo(workGroup.configuration().resultConfiguration().aclConfiguration().s3AclOptionAsString());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getSelectedEngineVersion())
             .isEqualTo(engineVersion1.selectedEngineVersion());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getEffectiveEngineVersion())
@@ -142,6 +151,80 @@ class ReadHandlerTest {
     assertThat(response.getMessage()).isNull();
     assertThat(response.getErrorCode()).isNull();
   }
+
+  @Test
+  void testSuccessStateForApacheSparkWorkGroup() {
+    // Prepare inputs
+    final ResourceModel resourceModel = ResourceModel.builder().name("Apache Spark workgroup").build();
+
+    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
+
+    software.amazon.awssdk.services.athena.model.EngineVersion engineVersion1 = EngineVersion.builder()
+            .selectedEngineVersion("Auto")
+            .effectiveEngineVersion("PySpark engine version 3").build();
+
+    final WorkGroup workGroup = WorkGroup.builder()
+            .name("Apache Spark workgroup").description("Apache Spark workgroup")
+            .state("enabled")
+            .creationTime(Instant.now())
+            .configuration(WorkGroupConfiguration.builder()
+                    .enforceWorkGroupConfiguration(true)
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .requesterPaysEnabled(true)
+                    .publishCloudWatchMetricsEnabled(true)
+                    .resultConfiguration(ResultConfiguration.builder()
+                            .outputLocation("s3://abc/")
+                            .encryptionConfiguration(EncryptionConfiguration.builder()
+                                    .encryptionOption("SSE_S3")
+                                    .build())
+                            .expectedBucketOwner("123456789012")
+                            .aclConfiguration(AclConfiguration.builder()
+                                    .s3AclOption("BUCKET_OWNER_FULL_CONTROL")
+                                    .build())
+                            .build())
+                    .engineVersion(engineVersion1)
+                    .build())
+            .build();
+
+    // Mock
+    doReturn(ListTagsForResourceResponse.builder().build()).when(proxy).injectCredentialsAndInvokeV2(any(ListTagsForResourceRequest.class), any());
+    doReturn(GetWorkGroupResponse.builder().workGroup(workGroup).build()).when(proxy).injectCredentialsAndInvokeV2(any(GetWorkGroupRequest.class), any());
+
+    // Call
+    final ProgressEvent<ResourceModel, CallbackContext> response = new ReadHandler().handleRequest(proxy, request, null, logger);
+
+    // Assert
+    assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+    assertThat(response.getCallbackContext()).isNull();
+    assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+    assertThat(response.getResourceModel().getName()).isEqualTo(workGroup.name());
+    assertThat(response.getResourceModel().getDescription()).isEqualTo(workGroup.description());
+    assertThat(response.getResourceModel().getState()).isEqualTo(workGroup.stateAsString());
+    assertThat(response.getResourceModel().getCreationTime()).isEqualTo(Long.toString(workGroup.creationTime().getEpochSecond()));
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getBytesScannedCutoffPerQuery())
+            .isEqualTo(workGroup.configuration().bytesScannedCutoffPerQuery());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getEnforceWorkGroupConfiguration())
+            .isEqualTo(workGroup.configuration().enforceWorkGroupConfiguration());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getRequesterPaysEnabled())
+            .isEqualTo(workGroup.configuration().requesterPaysEnabled());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getPublishCloudWatchMetricsEnabled())
+            .isEqualTo(workGroup.configuration().publishCloudWatchMetricsEnabled());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getOutputLocation())
+            .isEqualTo(workGroup.configuration().resultConfiguration().outputLocation());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getEncryptionConfiguration().getEncryptionOption())
+            .isEqualTo(workGroup.configuration().resultConfiguration().encryptionConfiguration().encryptionOption().toString());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getExpectedBucketOwner())
+            .isEqualTo(workGroup.configuration().resultConfiguration().expectedBucketOwner());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getAclConfiguration().getS3AclOption())
+            .isEqualTo(workGroup.configuration().resultConfiguration().aclConfiguration().s3AclOptionAsString());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getSelectedEngineVersion())
+            .isEqualTo(engineVersion1.selectedEngineVersion());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getEffectiveEngineVersion())
+            .isEqualTo(engineVersion1.effectiveEngineVersion());
+    assertThat(response.getMessage()).isNull();
+    assertThat(response.getErrorCode()).isNull();
+  }
+
 
   @Test
   void testSuccessStateWithResultConfigurationNullable() {

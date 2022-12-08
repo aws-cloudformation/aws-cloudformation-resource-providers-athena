@@ -1,5 +1,6 @@
 package software.amazon.athena.workgroup;
 
+import software.amazon.awssdk.services.athena.model.AclConfiguration;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.EngineVersion;
 import software.amazon.awssdk.services.athena.model.ResultConfiguration;
@@ -49,10 +50,18 @@ class Translator {
             .build();
   }
 
+  private AclConfiguration createSdkAclConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.AclConfiguration aclConfiguration) {
+    return AclConfiguration.builder()
+            .s3AclOption(aclConfiguration.getS3AclOption())
+            .build();
+  }
+
   private ResultConfiguration createSdkResultConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.ResultConfiguration resultConfiguration) {
     return ResultConfiguration.builder()
       .encryptionConfiguration(resultConfiguration.getEncryptionConfiguration() != null ? createSdkEncryptionConfigurationFromCfnConfiguration(resultConfiguration.getEncryptionConfiguration()) : null)
       .outputLocation(resultConfiguration.getOutputLocation())
+      .aclConfiguration(resultConfiguration.getAclConfiguration() != null ? createSdkAclConfigurationFromCfnConfiguration(resultConfiguration.getAclConfiguration()) : null)
+      .expectedBucketOwner(resultConfiguration.getExpectedBucketOwner())
       .build();
   }
 
@@ -83,6 +92,11 @@ class Translator {
       .outputLocation(resultConfigurationUpdate.getOutputLocation())
       .removeEncryptionConfiguration(resultConfigurationUpdate.getRemoveEncryptionConfiguration())
       .removeOutputLocation(resultConfigurationUpdate.getRemoveOutputLocation())
+      .expectedBucketOwner(resultConfigurationUpdate.getExpectedBucketOwner())
+      .removeExpectedBucketOwner(resultConfigurationUpdate.getRemoveExpectedBucketOwner())
+      .aclConfiguration(resultConfigurationUpdate.getAclConfiguration() != null ?
+        createSdkAclConfigurationFromCfnConfiguration(resultConfigurationUpdate.getAclConfiguration()) : null)
+      .removeAclConfiguration(resultConfigurationUpdate.getRemoveAclConfiguration())
       .build();
   }
 
@@ -110,6 +124,9 @@ class Translator {
       updatesBuilder.removeAclConfiguration(true);
     } else {
       updatesBuilder.outputLocation(resultConfiguration.getOutputLocation());
+      updatesBuilder.expectedBucketOwner(resultConfiguration.getExpectedBucketOwner());
+      updatesBuilder.aclConfiguration(resultConfiguration.getAclConfiguration() != null ?
+              createSdkAclConfigurationFromCfnConfiguration(resultConfiguration.getAclConfiguration()) : null);
     }
     if (resultConfiguration == null || resultConfiguration.getEncryptionConfiguration() == null) {
       updatesBuilder.removeEncryptionConfiguration(true);
@@ -143,7 +160,14 @@ class Translator {
     return software.amazon.athena.workgroup.ResultConfiguration.builder()
       .encryptionConfiguration(resultConfiguration.encryptionConfiguration() != null ? createCfnEncryptionConfigurationFromSdkConfiguration(resultConfiguration.encryptionConfiguration()) : null)
       .outputLocation(resultConfiguration.outputLocation())
+      .expectedBucketOwner(resultConfiguration.expectedBucketOwner())
+      .aclConfiguration(resultConfiguration.aclConfiguration() != null ? createCfnAclConfigurationFromSdkConfiguration(resultConfiguration.aclConfiguration()) : null)
       .build();
+  }
+
+  private software.amazon.athena.workgroup.AclConfiguration createCfnAclConfigurationFromSdkConfiguration(AclConfiguration aclConfiguration) {
+    return software.amazon.athena.workgroup.AclConfiguration.builder()
+            .s3AclOption(aclConfiguration.s3AclOptionAsString()).build();
   }
 
   private software.amazon.athena.workgroup.EncryptionConfiguration createCfnEncryptionConfigurationFromSdkConfiguration(EncryptionConfiguration encryptionConfiguration) {
