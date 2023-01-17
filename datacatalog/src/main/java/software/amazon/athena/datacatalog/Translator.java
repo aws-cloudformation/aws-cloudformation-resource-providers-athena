@@ -1,22 +1,29 @@
 package software.amazon.athena.datacatalog;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import com.google.common.collect.Maps;
+import org.apache.commons.collections.MapUtils;
 import software.amazon.awssdk.services.athena.model.CreateDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.DataCatalogSummary;
 import software.amazon.awssdk.services.athena.model.DeleteDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.GetDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.UpdateDataCatalogRequest;
 
+import static java.util.stream.Collectors.toMap;
+
+
 class Translator {
 
-  static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel) {
+  static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel,
+                                                           Map<String, String> stackTags) {
+
     return CreateDataCatalogRequest.builder()
         .name(resourceModel.getName())
         .type(resourceModel.getType())
         .description(resourceModel.getDescription())
         .parameters(resourceModel.getParameters())
-        .tags(convertToAthenaSdkTags(resourceModel.getTags()))
+        .tags(convertToAthenaSdkTags(consolidateTags(resourceModel.getTags(), stackTags)))
         .build();
   }
 
@@ -42,15 +49,14 @@ class Translator {
   }
 
   static List<software.amazon.awssdk.services.athena.model.Tag> convertToAthenaSdkTags(
-        List<software.amazon.athena.datacatalog.Tag> cfnResourceModelTags) {
-
-    if (cfnResourceModelTags == null) return null;
+          final Map<String, String> cfnTags) {
+    if (MapUtils.isEmpty(cfnTags)) return null;
     List<software.amazon.awssdk.services.athena.model.Tag> sdkTags = new ArrayList<>();
-    cfnResourceModelTags.forEach(q -> sdkTags.add(
-    software.amazon.awssdk.services.athena.model.Tag.builder()
-        .key(q.getKey())
-        .value(q.getValue())
-        .build()));
+    cfnTags.forEach((key, value) -> sdkTags.add(
+            software.amazon.awssdk.services.athena.model.Tag.builder()
+                    .key(key)
+                    .value(value)
+                    .build()));
     return sdkTags;
   }
 
@@ -72,5 +78,28 @@ class Translator {
         .name(summary.catalogName())
         .type(summary.typeAsString())
         .build();
+  }
+
+  /**
+   * Use this method in the UPDATE workflow, since aws prefixed tags will never change
+   * This will combine the resource level tags and stack level tags
+   * @param resourceTags List of resource tags.
+   * @param stackLevelTags stack level tags specified by the customer to be placed on each resource
+   * @return a consolidated map including all tags
+   */
+  public static Map<String, String> consolidateTags(
+          final Collection<Tag> resourceTags,
+          final Map<String, String> stackLevelTags) {
+
+    Map<String, String> resourceLevelTags = resourceTags == null ?
+            Collections.emptyMap() : resourceTags.stream().collect(toMap(Tag::getKey, Tag::getValue));
+
+    Map<String, String> consolidatedTags = Maps.newHashMap();
+    if (MapUtils.isNotEmpty(stackLevelTags)) consolidatedTags.putAll(stackLevelTags);
+
+    // Resource tags will override stack level tags with same keys.
+    if (MapUtils.isNotEmpty(resourceLevelTags)) consolidatedTags.putAll(resourceLevelTags);
+
+    return consolidatedTags;
   }
 }
