@@ -12,8 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -32,9 +37,15 @@ public class CreateHandlerTest extends BaseHandlerTest {
     @Test
     public void testSuccessState() {
         final ResourceModel model = buildTestResourceModel();
+
+        final Map<String, String> stackTags = new HashMap<>();
+        stackTags.put("StackTag1", "StackTagValue1");
+        stackTags.put("StackTag2", "StackTagValue2");
+
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
+                .desiredResourceState(model)
+                .desiredResourceTags(stackTags)
+                .build();
 
         // Mock
         when(proxyClient.client().createDataCatalog(any(CreateDataCatalogRequest.class)))
@@ -89,5 +100,21 @@ public class CreateHandlerTest extends BaseHandlerTest {
                 .message("Invalid request provided: DataCatalog has already been created").build());
         // Call
         assertThrows(CfnAlreadyExistsException.class, () -> testHandleRequest(request));
+    }
+
+    @Test
+    void testMapsEquality() {
+        Map<String, String> old = new HashMap<>();
+        old.put("Ram", "Komma");
+        old.put("valli", "komma");
+        old.put("pitchika", "Jaya");
+
+        Map<String, String> newMap = new HashMap<>();
+        newMap.put("pitchika", "Jaya");
+        newMap.put("Ram", "Komma");
+        newMap.put("valli", "komma");
+
+        assertTrue(Objects.equals(old, newMap));
+
     }
 }

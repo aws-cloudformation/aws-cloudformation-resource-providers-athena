@@ -3,6 +3,8 @@ package software.amazon.athena.datacatalog;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -149,12 +152,19 @@ public class UpdateHandlerTest extends BaseHandlerTest {
 
     private ResourceHandlerRequest<ResourceModel> getUpdateResourceHandlerRequest(ResourceModel oldModel,
             ResourceModel newModel) {
-        return ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(newModel)
-            .previousResourceState(oldModel)
-            .region("region")
-            .awsAccountId("account")
-            .build();
+        ResourceHandlerRequest.ResourceHandlerRequestBuilder<ResourceModel> builder =
+                ResourceHandlerRequest.<ResourceModel>builder()
+                        .desiredResourceState(newModel)
+                        .previousResourceState(oldModel)
+                        .region("region")
+                        .awsAccountId("account");
+        if(oldModel != null && CollectionUtils.isNotEmpty(oldModel.getTags())) {
+            builder.previousResourceTags(oldModel.getTags().stream().collect(toMap(Tag::getKey, Tag::getValue)));
+        }
+        if(newModel != null && CollectionUtils.isNotEmpty(newModel.getTags())) {
+            builder.desiredResourceTags(newModel.getTags().stream().collect(toMap(Tag::getKey, Tag::getValue)));
+        }
+        return builder.build();
     }
 
     private void mockInvocation(boolean tag, boolean untag) {

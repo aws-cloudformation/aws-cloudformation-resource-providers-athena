@@ -16,14 +16,14 @@ import static java.util.stream.Collectors.toMap;
 class Translator {
 
   static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel,
-                                                           Map<String, String> stackTags) {
+                                                           Map<String, String> resourceTags) {
 
     return CreateDataCatalogRequest.builder()
         .name(resourceModel.getName())
         .type(resourceModel.getType())
         .description(resourceModel.getDescription())
         .parameters(resourceModel.getParameters())
-        .tags(convertToAthenaSdkTags(consolidateTags(resourceModel.getTags(), stackTags)))
+        .tags(convertToAthenaSdkTags(resourceTags))
         .build();
   }
 
@@ -78,28 +78,5 @@ class Translator {
         .name(summary.catalogName())
         .type(summary.typeAsString())
         .build();
-  }
-
-  /**
-   * Use this method in the UPDATE workflow, since aws prefixed tags will never change
-   * This will combine the resource level tags and stack level tags
-   * @param resourceTags List of resource tags.
-   * @param stackLevelTags stack level tags specified by the customer to be placed on each resource
-   * @return a consolidated map including all tags
-   */
-  public static Map<String, String> consolidateTags(
-          final Collection<Tag> resourceTags,
-          final Map<String, String> stackLevelTags) {
-
-    Map<String, String> resourceLevelTags = resourceTags == null ?
-            Collections.emptyMap() : resourceTags.stream().collect(toMap(Tag::getKey, Tag::getValue));
-
-    Map<String, String> consolidatedTags = Maps.newHashMap();
-    if (MapUtils.isNotEmpty(stackLevelTags)) consolidatedTags.putAll(stackLevelTags);
-
-    // Resource tags will override stack level tags with same keys.
-    if (MapUtils.isNotEmpty(resourceLevelTags)) consolidatedTags.putAll(resourceLevelTags);
-
-    return consolidatedTags;
   }
 }

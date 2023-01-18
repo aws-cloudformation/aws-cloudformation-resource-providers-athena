@@ -1,26 +1,19 @@
 package software.amazon.athena.datacatalog;
 
-import static software.amazon.athena.datacatalog.HandlerUtils.getDatacatalogArn;
-import static software.amazon.athena.datacatalog.HandlerUtils.handleExceptions;
-
-import com.google.common.base.Function;
 import com.google.common.collect.Sets;
+import lombok.Setter;
+import org.apache.commons.collections.MapUtils;
+import software.amazon.awssdk.services.athena.AthenaClient;
+import software.amazon.awssdk.services.athena.model.*;
+import software.amazon.cloudformation.proxy.*;
+
+import software.amazon.awssdk.services.athena.model.Tag;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import lombok.Setter;
-import org.apache.commons.collections.CollectionUtils;
-import software.amazon.awssdk.services.athena.AthenaClient;
-import software.amazon.awssdk.services.athena.model.AthenaException;
-import software.amazon.awssdk.services.athena.model.TagResourceRequest;
-import software.amazon.awssdk.services.athena.model.UntagResourceRequest;
-import software.amazon.awssdk.services.athena.model.UpdateDataCatalogRequest;
-import software.amazon.awssdk.services.athena.model.UpdateDataCatalogResponse;
-import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
-import software.amazon.cloudformation.proxy.Logger;
-import software.amazon.cloudformation.proxy.ProgressEvent;
-import software.amazon.cloudformation.proxy.ProxyClient;
-import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+
+import static java.util.stream.Collectors.toList;
+import static software.amazon.athena.datacatalog.HandlerUtils.getDatacatalogArn;
+import static software.amazon.athena.datacatalog.HandlerUtils.handleExceptions;
 
 public class UpdateHandler extends BaseHandlerAthena {
 
@@ -57,40 +50,39 @@ public class UpdateHandler extends BaseHandlerAthena {
                 .translateToServiceRequest(Translator::updateDataCatalogRequest)
                 .makeServiceCall(this::updateDataCatalog)
                 .progress()
-                .then(progress -> updateTags(request, athenaProxyClient, request.getPreviousResourceState(),
-                    request.getDesiredResourceState())));
+                .then(progress -> updateTags(request, athenaProxyClient)));
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> updateTags(
-        ResourceHandlerRequest<ResourceModel> request,
-        final ProxyClient<AthenaClient> proxyClient,
-        ResourceModel oldModel, ResourceModel newModel) {
+            final ResourceHandlerRequest<ResourceModel> request, final ProxyClient<AthenaClient> proxyClient) {
 
-        final Set<Tag> oldTags = getTagsFromResource.apply(oldModel);
-        final Set<Tag> newTags = getTagsFromResource.apply(newModel);
+        final ResourceModel newModel = request.getDesiredResourceState();
+
+        final Set<Tag> oldTags = getTagsFromResourceModel(request.getPreviousResourceTags());
+        final Set<Tag> newTags = getTagsFromResourceModel(request.getDesiredResourceTags());
         final Set<Tag> tagsToAdd = Sets.difference(newTags, oldTags);
         final Set<Tag> tagsToRemove = Sets.difference(oldTags, newTags);
+        boolean areTagsUpdated = !tagsToAdd.isEmpty() || !tagsToRemove.isEmpty();
 
-        if (CollectionUtils.isNotEmpty(tagsToRemove)) {
+        if (areTagsUpdated){
             String arn = getDatacatalogArn(request, newModel.getName());
-            UntagResourceRequest untagResourceRequest = UntagResourceRequest.builder()
-                .resourceARN(arn)
-                .tagKeys(tagsToRemove.stream().map(software.amazon.athena.datacatalog.Tag::getKey)
-                        .collect(Collectors.toList()))
-                .build();
-            proxyClient.injectCredentialsAndInvokeV2(untagResourceRequest,
-                proxyClient.client()::untagResource);
-        }
+            if (!tagsToRemove.isEmpty()) {
+                UntagResourceRequest untagResourceRequest = UntagResourceRequest.builder()
+                        .resourceARN(arn)
+                        .tagKeys(tagsToRemove.stream().map(Tag::key).collect(toList()))
+                        .build();
+                proxyClient.injectCredentialsAndInvokeV2(untagResourceRequest,
+                        proxyClient.client()::untagResource);
+            }
 
-        if (CollectionUtils.isNotEmpty(tagsToAdd)) {
-            String arn = getDatacatalogArn(request, newModel.getName());
-
-            TagResourceRequest tagResourceRequest = TagResourceRequest.builder()
-                .resourceARN(arn)
-                .tags(getTagsFromResourceModel(tagsToAdd, request.getDesiredResourceTags()))
-                .build();
-            proxyClient.injectCredentialsAndInvokeV2(tagResourceRequest,
-                proxyClient.client()::tagResource);
+            if (!tagsToAdd.isEmpty()) {
+                TagResourceRequest tagResourceRequest = TagResourceRequest.builder()
+                        .resourceARN(arn)
+                        .tags(tagsToAdd)
+                        .build();
+                proxyClient.injectCredentialsAndInvokeV2(tagResourceRequest,
+                        proxyClient.client()::tagResource);
+            }
         }
         return ProgressEvent.defaultSuccessHandler(newModel);
     }
@@ -105,10 +97,9 @@ public class UpdateHandler extends BaseHandlerAthena {
         }
     }
 
-    private Function<ResourceModel, Set<Tag>> getTagsFromResource = model -> (model == null || model.getTags() == null) ?
-            Collections.emptySet() : Sets.newHashSet(model.getTags());
-    private List<software.amazon.awssdk.services.athena.model.Tag> getTagsFromResourceModel(
-            Set<Tag> resourceTags, Map<String, String> stackTags) {
-            return Translator.convertToAthenaSdkTags(Translator.consolidateTags(resourceTags, stackTags));
+    private Set<Tag> getTagsFromResourceModel(
+            Map<String, String> resourceTags) {
+        return (MapUtils.isEmpty(resourceTags)) ? new HashSet<>()
+                : new HashSet<>(Translator.convertToAthenaSdkTags(resourceTags));
     }
 }
