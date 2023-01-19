@@ -2,7 +2,6 @@ package software.amazon.athena.datacatalog;
 
 import com.google.common.collect.Sets;
 import lombok.Setter;
-import org.apache.commons.collections.MapUtils;
 import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.*;
 import software.amazon.cloudformation.proxy.*;
@@ -58,8 +57,8 @@ public class UpdateHandler extends BaseHandlerAthena {
 
         final ResourceModel newModel = request.getDesiredResourceState();
 
-        final Set<Tag> oldTags = getTagsFromResourceModel(request.getPreviousResourceTags());
-        final Set<Tag> newTags = getTagsFromResourceModel(request.getDesiredResourceTags());
+        final Set<Tag> oldTags = getAthenaSdkTags(request.getPreviousResourceState(), request.getPreviousResourceTags());
+        final Set<Tag> newTags = getAthenaSdkTags(request.getDesiredResourceState(), request.getDesiredResourceTags());
         final Set<Tag> tagsToAdd = Sets.difference(newTags, oldTags);
         final Set<Tag> tagsToRemove = Sets.difference(oldTags, newTags);
         boolean areTagsUpdated = !tagsToAdd.isEmpty() || !tagsToRemove.isEmpty();
@@ -97,9 +96,9 @@ public class UpdateHandler extends BaseHandlerAthena {
         }
     }
 
-    private Set<Tag> getTagsFromResourceModel(
-            Map<String, String> resourceTags) {
-        return (MapUtils.isEmpty(resourceTags)) ? new HashSet<>()
-                : new HashSet<>(Translator.convertToAthenaSdkTags(resourceTags));
+    private Set<Tag> getAthenaSdkTags(ResourceModel resourceModel, Map<String, String> stackTags) {
+        List<software.amazon.athena.datacatalog.Tag> resourceTags = resourceModel == null ? Collections.emptyList() :
+                resourceModel.getTags();
+        return new HashSet<>(Translator.convertToAthenaSdkTags(resourceTags, stackTags));
     }
 }
