@@ -10,7 +10,9 @@ import software.amazon.awssdk.services.athena.model.WorkGroupConfiguration;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,10 +27,13 @@ public class TranslatorTest {
 
     List<Tag> cfnTags = Arrays.asList(tag1, tag2);
 
-    List<software.amazon.awssdk.services.athena.model.Tag> sdkTags =
-      new Translator().createSdkTagsFromCfnTags(cfnTags);
+    Map<String, String> stackTags = new HashMap<>();
+    stackTags.put("Author", "Bezos");
 
-    assertThat(sdkTags.size()).isEqualTo(cfnTags.size());
+    List<software.amazon.awssdk.services.athena.model.Tag> sdkTags =
+      new Translator().createConsolidatedSdkTagsFromCfnTags(cfnTags, stackTags);
+
+    assertThat(sdkTags.size()).isEqualTo(2);
     assertThat(sdkTags.get(0).value()).isEqualTo(cfnTags.get(0).getValue());
     assertThat(sdkTags.get(1).value()).isEqualTo(cfnTags.get(1).getValue());
   }

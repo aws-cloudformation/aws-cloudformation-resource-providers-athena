@@ -22,14 +22,15 @@ public class CreateHandler extends BaseHandlerAthena {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        ProxyClient<AthenaClient> athenaProxyClient,
+        final ProxyClient<AthenaClient> athenaProxyClient,
         final Logger logger) {
 
         this.logger = logger;
 
         return proxy.initiate("athena::createDataCatalog", athenaProxyClient,
             request.getDesiredResourceState(), callbackContext)
-            .translateToServiceRequest(Translator::createDataCatalogRequest)
+            .translateToServiceRequest(
+                    model -> Translator.createDataCatalogRequest(model, request.getDesiredResourceTags()))
             .makeServiceCall(this::createDataCatalog)
             .success();
     }

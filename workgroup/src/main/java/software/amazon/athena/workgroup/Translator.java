@@ -1,5 +1,8 @@
 package software.amazon.athena.workgroup;
 
+import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import software.amazon.awssdk.services.athena.model.AclConfiguration;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.EngineVersion;
@@ -9,16 +12,24 @@ import software.amazon.awssdk.services.athena.model.WorkGroupConfiguration;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 class Translator {
-  List<software.amazon.awssdk.services.athena.model.Tag> createSdkTagsFromCfnTags(List<software.amazon.athena.workgroup.Tag> cfnTags) {
+
+  List<software.amazon.awssdk.services.athena.model.Tag> createConsolidatedSdkTagsFromCfnTags(
+          final Collection<software.amazon.athena.workgroup.Tag> resourceTags, final Map<String, String> stackLevelTags) {
+    Map<String, String> consolidatedTags = Maps.newHashMap();
+    if (MapUtils.isNotEmpty(stackLevelTags)) consolidatedTags.putAll(stackLevelTags);
+
+    // Resource tags will override stack level tags with same keys.
+    if (CollectionUtils.isNotEmpty(resourceTags)) {
+      resourceTags.forEach(tag -> consolidatedTags.put(tag.getKey(), tag.getValue()));
+    }
     List<software.amazon.awssdk.services.athena.model.Tag> sdkTags = new ArrayList<>();
-    cfnTags.forEach(q -> sdkTags.add(
-      software.amazon.awssdk.services.athena.model.Tag.builder()
-        .key(q.getKey())
-        .value(q.getValue())
-        .build()));
+    consolidatedTags.forEach((key, value) -> sdkTags.add(
+            software.amazon.awssdk.services.athena.model.Tag.builder().key(key).value(value).build()));
     return sdkTags;
   }
 

@@ -2,6 +2,12 @@ package software.amazon.athena.datacatalog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Collection;
+
+import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import software.amazon.awssdk.services.athena.model.CreateDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.DataCatalogSummary;
 import software.amazon.awssdk.services.athena.model.DeleteDataCatalogRequest;
@@ -10,13 +16,13 @@ import software.amazon.awssdk.services.athena.model.UpdateDataCatalogRequest;
 
 class Translator {
 
-  static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel) {
+  static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel, Map<String, String> stackTags) {
     return CreateDataCatalogRequest.builder()
         .name(resourceModel.getName())
         .type(resourceModel.getType())
         .description(resourceModel.getDescription())
         .parameters(resourceModel.getParameters())
-        .tags(convertToAthenaSdkTags(resourceModel.getTags()))
+        .tags(convertToAthenaSdkTags(resourceModel.getTags(), stackTags))
         .build();
   }
 
@@ -42,15 +48,18 @@ class Translator {
   }
 
   static List<software.amazon.awssdk.services.athena.model.Tag> convertToAthenaSdkTags(
-        List<software.amazon.athena.datacatalog.Tag> cfnResourceModelTags) {
+          final Collection<Tag> resourceTags, final Map<String, String> stackLevelTags) {
+    Map<String, String> consolidatedTags = Maps.newHashMap();
+    if (MapUtils.isNotEmpty(stackLevelTags)) consolidatedTags.putAll(stackLevelTags);
 
-    if (cfnResourceModelTags == null) return null;
+    // Resource tags will override stack level tags with same keys.
+    if (CollectionUtils.isNotEmpty(resourceTags)) {
+      resourceTags.forEach(tag -> consolidatedTags.put(tag.getKey(), tag.getValue()));
+    }
+
     List<software.amazon.awssdk.services.athena.model.Tag> sdkTags = new ArrayList<>();
-    cfnResourceModelTags.forEach(q -> sdkTags.add(
-    software.amazon.awssdk.services.athena.model.Tag.builder()
-        .key(q.getKey())
-        .value(q.getValue())
-        .build()));
+    consolidatedTags.forEach((key, value) -> sdkTags.add(
+            software.amazon.awssdk.services.athena.model.Tag.builder().key(key).value(value).build()));
     return sdkTags;
   }
 

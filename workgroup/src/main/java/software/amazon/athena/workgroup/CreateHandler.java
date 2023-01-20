@@ -9,6 +9,8 @@ import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import java.util.Map;
+
 import static software.amazon.athena.workgroup.HandlerUtils.translateAthenaException;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
@@ -16,6 +18,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
   private AthenaClient athenaClient;
   private Translator translator;
   private Logger logger;
+  private ResourceHandlerRequest<ResourceModel> request;
 
   @Override
   public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -24,28 +27,30 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
     final CallbackContext callbackContext,
     final Logger logger) {
 
-    clientProxy = proxy;
-    athenaClient = AthenaClient.create();
+    this.clientProxy = proxy;
+    this.athenaClient = AthenaClient.create();
     this.logger = logger;
     this.translator = new Translator();
+    this.request = request;
 
-    final ResourceModel model = request.getDesiredResourceState();
-
-    return createResource(model);
+    return createResource(request.getDesiredResourceState());
   }
 
   private ProgressEvent<ResourceModel, CallbackContext> createResource(ResourceModel model) {
-    createWorkgroup(model);
+    createWorkgroup();
     logger.log(String.format("%s [%s] created successfully",
       ResourceModel.TYPE_NAME, model.getPrimaryIdentifier().toString()));
     return ProgressEvent.defaultSuccessHandler(model);
   }
 
-  private CreateWorkGroupResponse createWorkgroup(final ResourceModel model) {
+  private CreateWorkGroupResponse createWorkgroup() {
+    final ResourceModel model = request.getDesiredResourceState();
+    final Map<String, String> stackTags = request.getDesiredResourceTags();
+
     final CreateWorkGroupRequest createWorkGroupRequest = CreateWorkGroupRequest.builder()
       .name(model.getName())
       .description(model.getDescription())
-      .tags(model.getTags() != null ? translator.createSdkTagsFromCfnTags(model.getTags()) : null)
+      .tags(translator.createConsolidatedSdkTagsFromCfnTags(model.getTags(), stackTags))
       .configuration(model.getWorkGroupConfiguration() != null ?
         translator.createSdkWorkgroupConfigurationFromCfnConfiguration(model.getWorkGroupConfiguration()) : null)
       .build();
