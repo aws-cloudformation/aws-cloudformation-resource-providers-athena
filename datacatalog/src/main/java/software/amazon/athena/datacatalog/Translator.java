@@ -1,6 +1,9 @@
 package software.amazon.athena.datacatalog;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Collection;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
@@ -13,8 +16,7 @@ import software.amazon.awssdk.services.athena.model.UpdateDataCatalogRequest;
 
 class Translator {
 
-  static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel,
-                                                           Map<String, String> stackTags) {
+  static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel, Map<String, String> stackTags) {
     return CreateDataCatalogRequest.builder()
         .name(resourceModel.getName())
         .type(resourceModel.getType())

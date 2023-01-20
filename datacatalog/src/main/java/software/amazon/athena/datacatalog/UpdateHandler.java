@@ -1,18 +1,29 @@
 package software.amazon.athena.datacatalog;
 
-import com.google.common.collect.Sets;
-import lombok.Setter;
-import software.amazon.awssdk.services.athena.AthenaClient;
-import software.amazon.awssdk.services.athena.model.*;
-import software.amazon.cloudformation.proxy.*;
-
-import software.amazon.awssdk.services.athena.model.Tag;
-
-import java.util.*;
-
 import static java.util.stream.Collectors.toList;
 import static software.amazon.athena.datacatalog.HandlerUtils.getDatacatalogArn;
 import static software.amazon.athena.datacatalog.HandlerUtils.handleExceptions;
+
+import com.google.common.collect.Sets;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.List;
+import java.util.Collections;
+import java.util.Map;
+
+import lombok.Setter;
+import software.amazon.awssdk.services.athena.AthenaClient;
+import software.amazon.awssdk.services.athena.model.AthenaException;
+import software.amazon.awssdk.services.athena.model.Tag;
+import software.amazon.awssdk.services.athena.model.TagResourceRequest;
+import software.amazon.awssdk.services.athena.model.UntagResourceRequest;
+import software.amazon.awssdk.services.athena.model.UpdateDataCatalogRequest;
+import software.amazon.awssdk.services.athena.model.UpdateDataCatalogResponse;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ProxyClient;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class UpdateHandler extends BaseHandlerAthena {
 
