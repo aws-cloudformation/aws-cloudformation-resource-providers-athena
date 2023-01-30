@@ -49,6 +49,10 @@ class Translator {
 
   static List<software.amazon.awssdk.services.athena.model.Tag> convertToAthenaSdkTags(
           final Collection<Tag> resourceTags, final Map<String, String> stackLevelTags) {
+
+    if (CollectionUtils.isEmpty(resourceTags) && MapUtils.isEmpty(stackLevelTags)) {
+      return null;
+    }
     Map<String, String> consolidatedTags = Maps.newHashMap();
     if (MapUtils.isNotEmpty(stackLevelTags)) consolidatedTags.putAll(stackLevelTags);
 

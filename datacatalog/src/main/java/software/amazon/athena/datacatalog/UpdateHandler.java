@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static software.amazon.athena.datacatalog.HandlerUtils.getDatacatalogArn;
 import static software.amazon.athena.datacatalog.HandlerUtils.handleExceptions;
 
+import com.amazonaws.util.CollectionUtils;
 import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.Set;
@@ -110,6 +111,7 @@ public class UpdateHandler extends BaseHandlerAthena {
     private Set<Tag> getAthenaSdkTags(ResourceModel resourceModel, Map<String, String> stackTags) {
         List<software.amazon.athena.datacatalog.Tag> resourceTags = resourceModel == null ? Collections.emptyList() :
                 resourceModel.getTags();
-        return new HashSet<>(Translator.convertToAthenaSdkTags(resourceTags, stackTags));
+        List<Tag> athenaTags = Translator.convertToAthenaSdkTags(resourceTags, stackTags);
+        return CollectionUtils.isNullOrEmpty(athenaTags) ? Collections.emptySet(): new HashSet<>(athenaTags);
     }
 }
