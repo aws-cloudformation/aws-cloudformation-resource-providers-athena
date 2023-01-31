@@ -23,6 +23,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
   private AthenaClient athenaClient;
   private Translator translator;
   private ResourceHandlerRequest<ResourceModel> request;
+  private Logger logger;
 
   @Override
   public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -37,6 +38,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
     this.athenaClient = AthenaClient.create();
     this.translator = new Translator();
     this.request = request;
+    this.logger = logger;
 
     return ProgressEvent.defaultSuccessHandler(getWorkGroup(model));
   }
@@ -67,7 +69,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
         }
       } while (nextToken != null);
 
-      return ResourceModel.builder()
+      ResourceModel responseModel = ResourceModel.builder()
         .name(workGroup.name())
         .state(workGroup.stateAsString())
         .description(workGroup.description())
@@ -77,6 +79,8 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
         .workGroupConfigurationUpdates(null)
         .tags(translator.createCfnTagsFromSdkTags(tags))
         .build();
+      this.logger.log(String.format("ResponseModel = %s", responseModel.toString()));
+      return responseModel;
     } catch (AthenaException e) {
         throw translateAthenaException(e, model.getName());
     }

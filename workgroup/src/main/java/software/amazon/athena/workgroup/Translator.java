@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class Translator {
+  private static final String APACHE_SPARK_ENGINE_VERSION = "PySpark engine version 3";
   List<software.amazon.awssdk.services.athena.model.Tag> createSdkTagsFromCfnTags(List<software.amazon.athena.workgroup.Tag> cfnTags) {
     List<software.amazon.awssdk.services.athena.model.Tag> sdkTags = new ArrayList<>();
     cfnTags.forEach(q -> sdkTags.add(
@@ -33,14 +34,31 @@ class Translator {
   }
 
   WorkGroupConfiguration createSdkWorkgroupConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.WorkGroupConfiguration cfnConfiguration) {
-    return WorkGroupConfiguration.builder()
-      .bytesScannedCutoffPerQuery(cfnConfiguration.getBytesScannedCutoffPerQuery())
-      .enforceWorkGroupConfiguration(cfnConfiguration.getEnforceWorkGroupConfiguration())
-      .publishCloudWatchMetricsEnabled(cfnConfiguration.getPublishCloudWatchMetricsEnabled())
-      .requesterPaysEnabled(cfnConfiguration.getRequesterPaysEnabled())
-      .resultConfiguration(cfnConfiguration.getResultConfiguration() != null ? createSdkResultConfigurationFromCfnConfiguration(cfnConfiguration.getResultConfiguration()) : null)
-      .engineVersion(cfnConfiguration.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(cfnConfiguration.getEngineVersion()) : null)
-      .build();
+    WorkGroupConfiguration.Builder builder = WorkGroupConfiguration.builder()
+            .bytesScannedCutoffPerQuery(cfnConfiguration.getBytesScannedCutoffPerQuery())
+            .enforceWorkGroupConfiguration(cfnConfiguration.getEnforceWorkGroupConfiguration())
+            .publishCloudWatchMetricsEnabled(cfnConfiguration.getPublishCloudWatchMetricsEnabled())
+            .requesterPaysEnabled(cfnConfiguration.getRequesterPaysEnabled())
+            .resultConfiguration(cfnConfiguration.getResultConfiguration() != null ? createSdkResultConfigurationFromCfnConfiguration(cfnConfiguration.getResultConfiguration()) : null)
+            .engineVersion(cfnConfiguration.getEngineVersion() != null ? createSdkEngineVersionFromCfnConfiguration(cfnConfiguration.getEngineVersion()) : null);
+
+    if (isApacheSparkWorkgroupFromCfnConfiguration(cfnConfiguration.getEngineVersion())) {
+      if (cfnConfiguration.getAdditionalConfiguration() != null && !cfnConfiguration.getAdditionalConfiguration().isEmpty()) {
+        builder.additionalConfiguration(cfnConfiguration.getAdditionalConfiguration());
+      }
+      if (cfnConfiguration.getExecutionRole() != null && !cfnConfiguration.getExecutionRole().isEmpty()) {
+        builder.executionRole(cfnConfiguration.getExecutionRole());
+      }
+      if (cfnConfiguration.getCustomerContentEncryptionConfiguration() != null && !cfnConfiguration.getCustomerContentEncryptionConfiguration().getKmsKey().isEmpty()) {
+        builder.customerContentEncryptionConfiguration(
+                createSdkCustomerContentEncryptionConfigurationFromCfnConfiguration(cfnConfiguration.getCustomerContentEncryptionConfiguration()));
+      }
+    }
+    return builder.build();
+  }
+
+  private boolean isApacheSparkWorkgroupFromCfnConfiguration(software.amazon.athena.workgroup.EngineVersion engineVersion) {
+    return engineVersion != null && APACHE_SPARK_ENGINE_VERSION.equals(engineVersion.getEffectiveEngineVersion());
   }
 
   private EngineVersion createSdkEngineVersionFromCfnConfiguration(software.amazon.athena.workgroup.EngineVersion engineVersion) {
@@ -48,6 +66,13 @@ class Translator {
             .selectedEngineVersion(engineVersion.getSelectedEngineVersion())
             .effectiveEngineVersion(engineVersion.getEffectiveEngineVersion())
             .build();
+  }
+
+  private CustomerContentEncryptionConfiguration createSdkCustomerContentEncryptionConfigurationFromCfnConfiguration(
+          software.amazon.athena.workgroup.CustomerContentEncryptionConfiguration customerContentEncryptionConfiguration) {
+    return customerContentEncryptionConfiguration.getKmsKey() != null && !customerContentEncryptionConfiguration.getKmsKey().isEmpty()
+            ? CustomerContentEncryptionConfiguration.builder().kmsKey(customerContentEncryptionConfiguration.getKmsKey()).build()
+            : null;
   }
 
   private AclConfiguration createSdkAclConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.AclConfiguration aclConfiguration) {
@@ -58,11 +83,12 @@ class Translator {
 
   private ResultConfiguration createSdkResultConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.ResultConfiguration resultConfiguration) {
     return ResultConfiguration.builder()
-      .encryptionConfiguration(resultConfiguration.getEncryptionConfiguration() != null ? createSdkEncryptionConfigurationFromCfnConfiguration(resultConfiguration.getEncryptionConfiguration()) : null)
-      .outputLocation(resultConfiguration.getOutputLocation())
-      .aclConfiguration(resultConfiguration.getAclConfiguration() != null ? createSdkAclConfigurationFromCfnConfiguration(resultConfiguration.getAclConfiguration()) : null)
-      .expectedBucketOwner(resultConfiguration.getExpectedBucketOwner())
-      .build();
+            .encryptionConfiguration(resultConfiguration.getEncryptionConfiguration() != null ?
+                    createSdkEncryptionConfigurationFromCfnConfiguration(resultConfiguration.getEncryptionConfiguration()) : null)
+            .outputLocation(resultConfiguration.getOutputLocation())
+            .aclConfiguration(resultConfiguration.getAclConfiguration() != null ? createSdkAclConfigurationFromCfnConfiguration(resultConfiguration.getAclConfiguration()) : null)
+            .expectedBucketOwner(resultConfiguration.getExpectedBucketOwner() != null && !resultConfiguration.getExpectedBucketOwner().isEmpty() ? resultConfiguration.getExpectedBucketOwner() : null)
+            .build();
   }
 
   private EncryptionConfiguration createSdkEncryptionConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.EncryptionConfiguration encryptionConfiguration) {
@@ -137,16 +163,40 @@ class Translator {
   }
 
   software.amazon.athena.workgroup.WorkGroupConfiguration createCfnWorkgroupConfigurationFromSdkConfiguration(WorkGroupConfiguration sdkConfiguration) {
-    return software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
-      .bytesScannedCutoffPerQuery(sdkConfiguration.bytesScannedCutoffPerQuery())
-      .enforceWorkGroupConfiguration(sdkConfiguration.enforceWorkGroupConfiguration())
-      .publishCloudWatchMetricsEnabled(sdkConfiguration.publishCloudWatchMetricsEnabled())
-      .requesterPaysEnabled(sdkConfiguration.requesterPaysEnabled())
-      .resultConfiguration(sdkConfiguration.resultConfiguration() != null ? createCfnResultConfigurationFromSdkConfiguration(sdkConfiguration.resultConfiguration())
-        : null)
-      .engineVersion(sdkConfiguration.engineVersion() != null ? createCfnEngineVersionFromSdkConfiguration(sdkConfiguration.engineVersion())
-              : null)
-      .build();
+    software.amazon.athena.workgroup.WorkGroupConfiguration.WorkGroupConfigurationBuilder builder =
+            software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
+                    .bytesScannedCutoffPerQuery(sdkConfiguration.bytesScannedCutoffPerQuery())
+                    .enforceWorkGroupConfiguration(sdkConfiguration.enforceWorkGroupConfiguration())
+                    .publishCloudWatchMetricsEnabled(sdkConfiguration.publishCloudWatchMetricsEnabled())
+                    .requesterPaysEnabled(sdkConfiguration.requesterPaysEnabled())
+                    .resultConfiguration(sdkConfiguration.resultConfiguration() != null
+                            ? createCfnResultConfigurationFromSdkConfiguration(sdkConfiguration.resultConfiguration()) : null)
+                    .engineVersion(sdkConfiguration.engineVersion() != null ? createCfnEngineVersionFromSdkConfiguration(sdkConfiguration.engineVersion()) : null);
+
+    if (isApacheSparkWorkGroupFromSdkConfiguration(sdkConfiguration.engineVersion())) {
+      if (sdkConfiguration.additionalConfiguration() != null && !sdkConfiguration.additionalConfiguration().isEmpty()) {
+        builder.additionalConfiguration(sdkConfiguration.additionalConfiguration());
+      }
+      if (sdkConfiguration.executionRole() != null && !sdkConfiguration.executionRole().isEmpty()) {
+        builder.executionRole(sdkConfiguration.executionRole());
+      }
+
+      if (sdkConfiguration.customerContentEncryptionConfiguration() != null) {
+        builder.customerContentEncryptionConfiguration(createCfnCustomerContentEncryptionConfigurationFromSdkConfiguration(sdkConfiguration.customerContentEncryptionConfiguration()));
+      }
+    }
+
+    return builder.build();
+  }
+
+  private boolean isApacheSparkWorkGroupFromSdkConfiguration(EngineVersion engineVersion) {
+    return engineVersion != null && APACHE_SPARK_ENGINE_VERSION.equals(engineVersion.effectiveEngineVersion());
+  }
+  private software.amazon.athena.workgroup.CustomerContentEncryptionConfiguration createCfnCustomerContentEncryptionConfigurationFromSdkConfiguration(
+          CustomerContentEncryptionConfiguration customerContentEncryptionConfiguration) {
+    return software.amazon.athena.workgroup.CustomerContentEncryptionConfiguration.builder()
+            .kmsKey(customerContentEncryptionConfiguration.kmsKey())
+            .build();
   }
 
   private software.amazon.athena.workgroup.EngineVersion createCfnEngineVersionFromSdkConfiguration(EngineVersion engineVersion) {

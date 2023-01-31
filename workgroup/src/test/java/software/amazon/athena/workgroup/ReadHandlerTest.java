@@ -1,10 +1,13 @@
 package software.amazon.athena.workgroup;
 
+import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.athena.model.AclConfiguration;
+import software.amazon.awssdk.services.athena.model.CreateWorkGroupResponse;
+import software.amazon.awssdk.services.athena.model.CustomerContentEncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.EngineVersion;
 import software.amazon.awssdk.services.athena.model.GetWorkGroupRequest;
@@ -153,18 +156,20 @@ class ReadHandlerTest {
   }
 
   @Test
-  void testSuccessStateForApacheSparkWorkGroup() {
+  void testWorkGroupWithAdditionalParametersSuccessState() {
     // Prepare inputs
-    final ResourceModel resourceModel = ResourceModel.builder().name("Apache Spark workgroup").build();
+    final ResourceModel resourceModel = ResourceModel.builder().name("primary workgroup").build();
 
-    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
+   final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(resourceModel)
+            .build();
 
     software.amazon.awssdk.services.athena.model.EngineVersion engineVersion1 = EngineVersion.builder()
             .selectedEngineVersion("Auto")
             .effectiveEngineVersion("PySpark engine version 3").build();
 
     final WorkGroup workGroup = WorkGroup.builder()
-            .name("Apache Spark workgroup").description("Apache Spark workgroup")
+            .name("primary workgroup").description("the primary workgroup")
             .state("enabled")
             .creationTime(Instant.now())
             .configuration(WorkGroupConfiguration.builder()
@@ -178,11 +183,13 @@ class ReadHandlerTest {
                                     .encryptionOption("SSE_S3")
                                     .build())
                             .expectedBucketOwner("123456789012")
-                            .aclConfiguration(AclConfiguration.builder()
-                                    .s3AclOption("BUCKET_OWNER_FULL_CONTROL")
-                                    .build())
+                            .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
                             .build())
                     .engineVersion(engineVersion1)
+                    .additionalConfiguration("{\"additionalConfig\": \"some_config\"}")
+                    .executionRole("arn:aws:iam::123456789012:role/service-role/fake-execution-role")
+                    .customerContentEncryptionConfiguration(CustomerContentEncryptionConfiguration.builder()
+                            .kmsKey("arn:aws:kms:us-east-1:123456789012:key/fake-kms-key-id").build())
                     .build())
             .build();
 
@@ -215,8 +222,12 @@ class ReadHandlerTest {
             .isEqualTo(workGroup.configuration().resultConfiguration().encryptionConfiguration().encryptionOption().toString());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getExpectedBucketOwner())
             .isEqualTo(workGroup.configuration().resultConfiguration().expectedBucketOwner());
-    assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getAclConfiguration().getS3AclOption())
-            .isEqualTo(workGroup.configuration().resultConfiguration().aclConfiguration().s3AclOptionAsString());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getAdditionalConfiguration())
+            .isEqualTo(workGroup.configuration().additionalConfiguration());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getExecutionRole())
+            .isEqualTo(workGroup.configuration().executionRole());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getCustomerContentEncryptionConfiguration().getKmsKey())
+            .isEqualTo(workGroup.configuration().customerContentEncryptionConfiguration().kmsKey());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getSelectedEngineVersion())
             .isEqualTo(engineVersion1.selectedEngineVersion());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getEffectiveEngineVersion())

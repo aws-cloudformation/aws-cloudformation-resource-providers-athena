@@ -110,6 +110,14 @@
         "RemoveEncryptionConfiguration": {
             "type": "boolean"
         },
+        "AdditionalConfiguration": {
+            "description": "Additional Configuration that are passed to Apache Spark Calculations running in this workgroup",
+            "type": "string"
+        },
+        "ExecutionRole": {
+            "description": "Execution Role ARN required to run Apache Spark Calculations",
+            "type": "string"
+        },
         "RemoveOutputLocation": {
             "type": "boolean"
         },
