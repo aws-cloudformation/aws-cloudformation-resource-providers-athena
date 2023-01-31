@@ -12,7 +12,9 @@ import software.amazon.awssdk.services.athena.model.WorkGroupConfiguration;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,10 +29,13 @@ public class TranslatorTest {
 
     List<Tag> cfnTags = Arrays.asList(tag1, tag2);
 
-    List<software.amazon.awssdk.services.athena.model.Tag> sdkTags =
-            new Translator().createSdkTagsFromCfnTags(cfnTags);
+    Map<String, String> stackTags = new HashMap<>();
+    stackTags.put("Author", "Bezos");
 
-    assertThat(sdkTags.size()).isEqualTo(cfnTags.size());
+    List<software.amazon.awssdk.services.athena.model.Tag> sdkTags =
+      new Translator().createConsolidatedSdkTagsFromCfnTags(cfnTags, stackTags);
+
+    assertThat(sdkTags.size()).isEqualTo(2);
     assertThat(sdkTags.get(0).value()).isEqualTo(cfnTags.get(0).getValue());
     assertThat(sdkTags.get(1).value()).isEqualTo(cfnTags.get(1).getValue());
   }
@@ -62,6 +67,46 @@ public class TranslatorTest {
             .build();
 
     WorkGroupConfiguration sdkWorkGroupConfiguration =
+      new Translator().createSdkWorkgroupConfigurationFromCfnConfiguration(cfnWorkGroupConfiguration);
+
+    assertThat(cfnWorkGroupConfiguration.getEnforceWorkGroupConfiguration()).isEqualTo(sdkWorkGroupConfiguration.enforceWorkGroupConfiguration());
+    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery());
+    assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfiguration.publishCloudWatchMetricsEnabled());
+    assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
+    assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getOutputLocation()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().outputLocation());
+    assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getEncryptionConfiguration().getEncryptionOption())
+      .isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().encryptionConfiguration().encryptionOption().toString());
+    assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getExpectedBucketOwner()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().expectedBucketOwner());
+    assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getAclConfiguration().getS3AclOption()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().aclConfiguration().s3AclOptionAsString());
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion().getSelectedEngineVersion())
+            .isEqualTo(sdkWorkGroupConfiguration.engineVersion().selectedEngineVersion());
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion().getEffectiveEngineVersion())
+            .isEqualTo(sdkWorkGroupConfiguration.engineVersion().effectiveEngineVersion());
+  }
+
+  @Test
+  void testCreateSdkWorkgroupConfigurationFromCfnConfigurationForApacheSparkWorkgroup() {
+    software.amazon.athena.workgroup.EngineVersion engineVersion = software.amazon.athena.workgroup.EngineVersion.builder()
+            .selectedEngineVersion("AUTO")
+            .effectiveEngineVersion("PySpark engine version 3")
+            .build();
+    software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
+            .enforceWorkGroupConfiguration(true)
+            .bytesScannedCutoffPerQuery(10_000_000_000L)
+            .publishCloudWatchMetricsEnabled(true)
+            .requesterPaysEnabled(false)
+            .resultConfiguration(software.amazon.athena.workgroup.ResultConfiguration.builder()
+                    .outputLocation("s3://abc/")
+                    .encryptionConfiguration(software.amazon.athena.workgroup.EncryptionConfiguration.builder()
+                            .encryptionOption("SSE_S3")
+                            .build())
+                    .expectedBucketOwner("123456789012")
+                    .aclConfiguration(software.amazon.athena.workgroup.AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
+                    .build())
+            .engineVersion(engineVersion)
+            .build();
+
+    WorkGroupConfiguration sdkWorkGroupConfiguration =
             new Translator().createSdkWorkgroupConfigurationFromCfnConfiguration(cfnWorkGroupConfiguration);
 
     assertThat(cfnWorkGroupConfiguration.getEnforceWorkGroupConfiguration()).isEqualTo(sdkWorkGroupConfiguration.enforceWorkGroupConfiguration());
@@ -71,6 +116,8 @@ public class TranslatorTest {
     assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getOutputLocation()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().outputLocation());
     assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getEncryptionConfiguration().getEncryptionOption())
             .isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().encryptionConfiguration().encryptionOption().toString());
+    assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getExpectedBucketOwner()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().expectedBucketOwner());
+    assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getAclConfiguration().getS3AclOption()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().aclConfiguration().s3AclOptionAsString());
     assertThat(cfnWorkGroupConfiguration.getEngineVersion().getSelectedEngineVersion())
             .isEqualTo(sdkWorkGroupConfiguration.engineVersion().selectedEngineVersion());
     assertThat(cfnWorkGroupConfiguration.getEngineVersion().getEffectiveEngineVersion())

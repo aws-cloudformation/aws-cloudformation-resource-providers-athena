@@ -209,14 +209,22 @@ public class UpdateHandlerTest {
                     .build())
             .build();
     final ResourceModel newModel = ResourceModel.builder()
-            .name(workgroupName)
-            .workGroupConfiguration(WorkGroupConfiguration.builder()
-                    .bytesScannedCutoffPerQuery(configBytes)
-                    .build())
-            .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
-                    .bytesScannedCutoffPerQuery(configUpdatesBytes)
-                    .build())
-            .build();
+          .name(workgroupName)
+          .workGroupConfiguration(WorkGroupConfiguration.builder()
+              .bytesScannedCutoffPerQuery(configBytes)
+              .resultConfiguration(ResultConfiguration.builder()
+                      .outputLocation("s3://abc/")
+                      .encryptionConfiguration(software.amazon.athena.workgroup.EncryptionConfiguration.builder()
+                              .encryptionOption("SSE_S3")
+                              .build())
+                      .expectedBucketOwner("123456789012")
+                      .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
+                      .build())
+              .build())
+          .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
+              .bytesScannedCutoffPerQuery(configUpdatesBytes)
+              .build())
+          .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
             .previousResourceState(oldModel)
@@ -240,6 +248,7 @@ public class UpdateHandlerTest {
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
     assertEquals(configBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
+    assertEquals("123456789012", receivedRequest.configurationUpdates().resultConfigurationUpdates().expectedBucketOwner());
 
     assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
     assertThat(response.getCallbackContext()).isNull();

@@ -37,25 +37,27 @@ public class CreateHandlerTest {
     Tag tag = Tag.builder().key("owner").value("jedi").build();
 
     final ResourceModel resourceModel = ResourceModel.builder()
-            .name("Primary")
-            .description("Primary workgroup")
-            .tags(Lists.newArrayList(tag))
-            .workGroupConfiguration(WorkGroupConfiguration.builder()
-                    .bytesScannedCutoffPerQuery(10_000_000_000L)
-                    .enforceWorkGroupConfiguration(false)
-                    .publishCloudWatchMetricsEnabled(true)
-                    .requesterPaysEnabled(true)
-                    .resultConfiguration(ResultConfiguration.builder()
-                            .outputLocation("s3://abc/")
-                            .encryptionConfiguration(EncryptionConfiguration.builder()
-                                    .encryptionOption("SSE_S3")
-                                    .build())
-                            .build())
-                    .engineVersion(EngineVersion.builder()
-                            .selectedEngineVersion("Athena engine version 1")
-                            .build())
-                    .build())
-            .build();
+      .name("Primary")
+      .description("Primary workgroup")
+      .tags(Lists.newArrayList(tag))
+      .workGroupConfiguration(WorkGroupConfiguration.builder()
+                                                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                                                    .enforceWorkGroupConfiguration(false)
+                                                    .publishCloudWatchMetricsEnabled(true)
+                                                    .requesterPaysEnabled(true)
+                                                    .resultConfiguration(ResultConfiguration.builder()
+                                                                                            .outputLocation("s3://abc/")
+                                                                                            .encryptionConfiguration(EncryptionConfiguration.builder()
+                                                                                                                     .encryptionOption("SSE_S3")
+                                                                                                                     .build())
+                                                                                            .expectedBucketOwner("123456789012")
+                                                                                            .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
+                                                                                                              .build())
+                                                    .engineVersion(EngineVersion.builder()
+                                                                                .selectedEngineVersion("Athena engine version 1")
+                                                                                .build())
+                                                   .build())
+      .build();
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
             .desiredResourceState(resourceModel)
             .build();
@@ -128,6 +130,55 @@ public class CreateHandlerTest {
     assertThat(response.getMessage()).isNull();
     assertThat(response.getErrorCode()).isNull();
 
+  }
+
+
+  @Test
+  void testSuccessStateForApacheSparkWorkGroup() {
+    // Prepare inputs
+    Tag tag = Tag.builder().key("owner").value("jedi").build();
+
+    final ResourceModel resourceModel = ResourceModel.builder()
+            .name("Apache Spark WorkGroup")
+            .description("Apache Spark workgroup")
+            .tags(Lists.newArrayList(tag))
+            .workGroupConfiguration(WorkGroupConfiguration.builder()
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .enforceWorkGroupConfiguration(false)
+                    .publishCloudWatchMetricsEnabled(true)
+                    .requesterPaysEnabled(true)
+                    .resultConfiguration(ResultConfiguration.builder()
+                            .outputLocation("s3://abc/")
+                            .encryptionConfiguration(EncryptionConfiguration.builder()
+                                    .encryptionOption("SSE_S3")
+                                    .build())
+                            .expectedBucketOwner("123456789012")
+                            .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
+                            .build())
+                    .engineVersion(EngineVersion.builder()
+                            .selectedEngineVersion("PySpark engine version 3")
+                            .build())
+                    .build())
+            .build();
+    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(resourceModel)
+            .build();
+
+    // Mock
+    doReturn(CreateWorkGroupResponse.builder().build())
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
+
+    // Call
+    final ProgressEvent<ResourceModel, CallbackContext> response
+            = new CreateHandler().handleRequest(proxy, request, null, logger);
+
+    // Assert
+    assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+    assertThat(response.getCallbackContext()).isNull();
+    assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+    assertThat(response.getMessage()).isNull();
+    assertThat(response.getErrorCode()).isNull();
   }
 
   @Test

@@ -14,9 +14,11 @@
         ],
         "/WorkGroupConfiguration/ResultConfiguration/OutputLocation": "s3://bucket",
         "/WorkGroupConfiguration/ResultConfiguration/EncryptionConfiguration/KmsKey": "abcdef54hi",
+        "/WorkGroupConfiguration/ResultConfiguration/ExpectedBucketOwner": "123456789012",
         "/WorkGroupConfiguration/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
         "/WorkGroupConfiguration/EngineVersion/SelectedEngineVersion": "AUTO",
         "/WorkGroupConfigurationUpdates/ResultConfigurationUpdates/OutputLocation": "s3://bucket",
+        "/WorkGroupConfigurationUpdates/ResultConfiguration/ExpectedBucketOwner": "123456789012",
         "/WorkGroupConfigurationUpdates/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
         "/WorkGroupConfigurationUpdates/EngineVersion/SelectedEngineVersion": "AUTO"
     },
@@ -33,9 +35,11 @@
         ],
         "/WorkGroupConfiguration/ResultConfiguration/OutputLocation": "s3://bucket",
         "/WorkGroupConfiguration/ResultConfiguration/EncryptionConfiguration/KmsKey": "abcdef54hi",
+        "/WorkGroupConfiguration/ResultConfiguration/ExpectedBucketOwner": "123456789012",
         "/WorkGroupConfiguration/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
         "/WorkGroupConfiguration/EngineVersion/SelectedEngineVersion": "AUTO",
         "/WorkGroupConfigurationUpdates/ResultConfigurationUpdates/OutputLocation": "s3://bucket",
+        "/WorkGroupConfigurationUpdates/ResultConfiguration/ExpectedBucketOwner": "123456789012",
         "/WorkGroupConfigurationUpdates/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
         "/WorkGroupConfigurationUpdates/EngineVersion/SelectedEngineVersion": "AUTO"
     }

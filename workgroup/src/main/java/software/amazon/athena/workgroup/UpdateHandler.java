@@ -3,14 +3,11 @@ package software.amazon.athena.workgroup;
 import com.google.common.collect.Sets;
 import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.AthenaException;
-import software.amazon.awssdk.services.athena.model.EngineVersion;
-import software.amazon.awssdk.services.athena.model.ResultConfigurationUpdates;
 import software.amazon.awssdk.services.athena.model.Tag;
 import software.amazon.awssdk.services.athena.model.TagResourceRequest;
 import software.amazon.awssdk.services.athena.model.UntagResourceRequest;
 import software.amazon.awssdk.services.athena.model.UpdateWorkGroupRequest;
 import software.amazon.awssdk.services.athena.model.UpdateWorkGroupResponse;
-import software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -49,18 +46,18 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
   }
 
   private ProgressEvent<ResourceModel, CallbackContext> updateResource(ResourceModel model) {
-    updateWorkgroup(model);
+    updateWorkgroup();
     logger.log(String.format("%s [%s] updated successfully",
       ResourceModel.TYPE_NAME, model.getPrimaryIdentifier().toString()));
     return ProgressEvent.defaultSuccessHandler(model);
   }
 
-  private UpdateWorkGroupResponse updateWorkgroup(final ResourceModel newModel) {
+  private UpdateWorkGroupResponse updateWorkgroup() {
+    final ResourceModel newModel = request.getDesiredResourceState();
     final ResourceModel oldModel = request.getPreviousResourceState();
-    final Set<Tag> oldTags = (oldModel == null || oldModel.getTags() == null) ?
-      new HashSet<>() : new HashSet<>(translator.createSdkTagsFromCfnTags(oldModel.getTags()));
-    final Set<Tag> newTags = newModel.getTags() == null ?
-        new HashSet<>() : new HashSet<>(translator.createSdkTagsFromCfnTags(newModel.getTags()));
+
+    final Set<Tag> oldTags = new HashSet<>(translator.createConsolidatedSdkTagsFromCfnTags(oldModel.getTags(), request.getPreviousResourceTags()));
+    final Set<Tag> newTags = new HashSet<>(translator.createConsolidatedSdkTagsFromCfnTags(newModel.getTags(), request.getDesiredResourceTags()));
     try {
       // Handle modifications to WorkGroup tags
       if (!oldTags.equals(newTags)) {
