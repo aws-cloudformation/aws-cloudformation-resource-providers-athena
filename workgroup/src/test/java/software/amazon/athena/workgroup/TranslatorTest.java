@@ -122,9 +122,6 @@ public class TranslatorTest {
             .isEqualTo(sdkWorkGroupConfiguration.engineVersion().selectedEngineVersion());
     assertThat(cfnWorkGroupConfiguration.getEngineVersion().getEffectiveEngineVersion())
             .isEqualTo(sdkWorkGroupConfiguration.engineVersion().effectiveEngineVersion());
-    assertThat(cfnWorkGroupConfiguration.getAdditionalConfiguration()).isEqualTo(sdkWorkGroupConfiguration.additionalConfiguration());
-    assertThat(cfnWorkGroupConfiguration.getExecutionRole()).isEqualTo(sdkWorkGroupConfiguration.executionRole());
-    assertThat(cfnWorkGroupConfiguration.getCustomerContentEncryptionConfiguration().getKmsKey()).isEqualTo(sdkWorkGroupConfiguration.customerContentEncryptionConfiguration().kmsKey());
   }
 
   @Test

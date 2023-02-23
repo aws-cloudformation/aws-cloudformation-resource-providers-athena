@@ -379,7 +379,8 @@
         "/properties/WorkGroupConfigurationUpdates"
     ],
     "writeOnlyProperties": [
-        "/properties/WorkGroupConfigurationUpdates"
+        "/properties/WorkGroupConfigurationUpdates",
+        "/properties/WorkGroupConfiguration/AdditionalConfiguration"
     ],
     "primaryIdentifier": [
         "/properties/Name"

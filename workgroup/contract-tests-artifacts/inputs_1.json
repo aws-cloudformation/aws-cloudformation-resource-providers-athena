@@ -1,0 +1,53 @@
+{
+  "CreateInputs": {
+    "Name": "WorkgroupContractTests",
+    "State": "ENABLED",
+    "Tags": [
+      {
+      "Key": "tagKey1",
+      "Value": "tagValue1"
+      },
+      {
+        "Key": "tagKey2",
+        "Value": "tagValue2"
+      }
+    ],
+    "RecursiveDeleteOption": true,
+    "WorkGroupConfiguration": {
+      "ResultConfiguration": {
+        "AclConfiguration": {
+          "S3AclOption": "BUCKET_OWNER_FULL_CONTROL"
+        },
+        "ExpectedBucketOwner": "{{awsathenaworkgroupcto2}}",
+        "OutputLocation": "s3://{{awsathenaworkgroupcto1}}",
+        "EncryptionConfiguration": {
+          "EncryptionOption": "SSE_S3",
+          "KmsKey": "{{awsathenaworkgroupcto3}}"
+        }
+      },
+      "EngineVersion": {
+        "SelectedEngineVersion": "AUTO"
+      },
+      "BytesScannedCutoffPerQuery":  100000000
+    },
+    "WorkGroupConfigurationUpdates": {
+      "ResultConfigurationUpdates": {
+        "OutputLocation": "s3://{{awsathenaworkgroupcto1}}",
+        "ExpectedBucketOwner": "{{awsathenaworkgroupcto2}}"
+      },
+      "EngineVersion": {
+        "SelectedEngineVersion": "AUTO"
+      }
+    }
+  },
+  "PatchInputs": [
+    {
+      "op": "add",
+      "path": "/Tags/2",
+      "value": {
+        "Key": "tagKey3",
+        "Value": "tagValue3"
+      }
+    }
+  ]
+}

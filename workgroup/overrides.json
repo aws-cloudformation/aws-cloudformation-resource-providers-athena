@@ -1,6 +1,7 @@
 {
     "CREATE": {
         "/Name": "WorkgroupContractTests",
+        "/Description": "WorkgroupContractTests Description",
         "/State": "ENABLED",
         "/Tags": [
             {
@@ -12,15 +13,21 @@
                 "Value": "tagValue2"
             }
         ],
-        "/WorkGroupConfiguration/ResultConfiguration/OutputLocation": "s3://bucket",
-        "/WorkGroupConfiguration/ResultConfiguration/EncryptionConfiguration/KmsKey": "abcdef54hi",
-        "/WorkGroupConfiguration/ResultConfiguration/ExpectedBucketOwner": "123456789012",
+        "/WorkGroupConfiguration/ResultConfiguration/OutputLocation": "s3://ramkomma-bucket",
+        "/WorkGroupConfiguration/ResultConfiguration/EncryptionConfiguration/KmsKey": "5a6a0325-d839-4d26-a272-94b96baf98ec",
+        "/WorkGroupConfiguration/ResultConfiguration/ExpectedBucketOwner": "713768384657",
         "/WorkGroupConfiguration/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
         "/WorkGroupConfiguration/EngineVersion/SelectedEngineVersion": "AUTO",
-        "/WorkGroupConfigurationUpdates/ResultConfigurationUpdates/OutputLocation": "s3://bucket",
-        "/WorkGroupConfigurationUpdates/ResultConfiguration/ExpectedBucketOwner": "123456789012",
+        "/WorkGroupConfiguration/ExecutionRole": "arn:aws:iam::713768384657:role/service-role/AWSAthenaSparkExecutionRole-b2w0ndaahj",
+        "/WorkGroupConfiguration/AdditionalConfiguration": "DUMMY",
+        "/WorkGroupConfiguration/CustomerContentEncryptionConfiguration/KmsKey": "arn:aws:kms:us-east-1:713768384657:key/5a6a0325-d839-4d26-a272-94b96baf98ec",
+        "/WorkGroupConfigurationUpdates/ResultConfigurationUpdates/OutputLocation": "s3://ramkomma-bucket",
+        "/WorkGroupConfigurationUpdates/ResultConfiguration/ExpectedBucketOwner": "713768384657",
         "/WorkGroupConfigurationUpdates/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
-        "/WorkGroupConfigurationUpdates/EngineVersion/SelectedEngineVersion": "AUTO"
+        "/WorkGroupConfigurationUpdates/EngineVersion/SelectedEngineVersion": "AUTO",
+        "/WorkGroupConfigurationUpdates/ExecutionRole": "arn:aws:iam::713768384657:role/service-role/AWSAthenaSparkExecutionRole-b2w0ndaahj",
+        "/WorkGroupConfigurationUpdates/AdditionalConfiguration": "DUMMY",
+        "/WorkGroupConfigurationUpdates/CustomerContentEncryptionConfiguration/KmsKey": "arn:aws:kms:us-east-1:713768384657:key/5a6a0325-d839-4d26-a272-94b96baf98ec"
     },
     "UPDATE": {
         "/Tags": [
@@ -33,14 +40,20 @@
                 "Value": "tagValue2"
             }
         ],
-        "/WorkGroupConfiguration/ResultConfiguration/OutputLocation": "s3://bucket",
-        "/WorkGroupConfiguration/ResultConfiguration/EncryptionConfiguration/KmsKey": "abcdef54hi",
-        "/WorkGroupConfiguration/ResultConfiguration/ExpectedBucketOwner": "123456789012",
+        "/WorkGroupConfiguration/ResultConfiguration/OutputLocation": "s3://ramkomma-bucket",
+        "/WorkGroupConfiguration/ResultConfiguration/EncryptionConfiguration/KmsKey": "5a6a0325-d839-4d26-a272-94b96baf98ec",
+        "/WorkGroupConfiguration/ResultConfiguration/ExpectedBucketOwner": "713768384657",
         "/WorkGroupConfiguration/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
         "/WorkGroupConfiguration/EngineVersion/SelectedEngineVersion": "AUTO",
-        "/WorkGroupConfigurationUpdates/ResultConfigurationUpdates/OutputLocation": "s3://bucket",
-        "/WorkGroupConfigurationUpdates/ResultConfiguration/ExpectedBucketOwner": "123456789012",
+        "/WorkGroupConfiguration/ExecutionRole": "arn:aws:iam::713768384657:role/service-role/AWSAthenaSparkExecutionRole-b2w0ndaahj",
+        "/WorkGroupConfiguration/AdditionalConfiguration": "DUMMY",
+        "/WorkGroupConfiguration/CustomerContentEncryptionConfiguration/KmsKey": "arn:aws:kms:us-east-1:713768384657:key/5a6a0325-d839-4d26-a272-94b96baf98ec",
+        "/WorkGroupConfigurationUpdates/ResultConfigurationUpdates/OutputLocation": "s3://ramkomma-bucket",
+        "/WorkGroupConfigurationUpdates/ResultConfiguration/ExpectedBucketOwner": "713768384657",
         "/WorkGroupConfigurationUpdates/EngineVersion/EffectiveEngineVersion": "Athena engine version 2",
-        "/WorkGroupConfigurationUpdates/EngineVersion/SelectedEngineVersion": "AUTO"
+        "/WorkGroupConfigurationUpdates/EngineVersion/SelectedEngineVersion": "AUTO",
+        "/WorkGroupConfigurationUpdates/ExecutionRole": "arn:aws:iam::713768384657:role/service-role/AWSAthenaSparkExecutionRole-b2w0ndaahj",
+        "/WorkGroupConfigurationUpdates/AdditionalConfiguration": "DUMMY",
+        "/WorkGroupConfigurationUpdates/CustomerContentEncryptionConfiguration/KmsKey": "arn:aws:kms:us-east-1:713768384657:key/5a6a0325-d839-4d26-a272-94b96baf98ec"
     }
 }

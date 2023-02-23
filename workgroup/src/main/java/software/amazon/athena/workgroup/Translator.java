@@ -5,7 +5,6 @@ import software.amazon.awssdk.services.athena.model.CustomerContentEncryptionCon
 import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import software.amazon.awssdk.services.athena.model.AclConfiguration;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.EngineVersion;
 import software.amazon.awssdk.services.athena.model.ResultConfiguration;
