@@ -110,6 +110,14 @@
         "RemoveEncryptionConfiguration": {
             "type": "boolean"
         },
+        "AdditionalConfiguration": {
+            "description": "Additional Configuration that are passed to Athena Spark Calculations running in this workgroup",
+            "type": "string"
+        },
+        "ExecutionRole": {
+            "description": "Execution Role ARN required to run Athena Spark Calculations",
+            "type": "string"
+        },
         "RemoveOutputLocation": {
             "type": "boolean"
         },
@@ -141,6 +149,22 @@
             "additionalProperties": false
         },
         "RemoveAclConfiguration": {
+            "type": "boolean"
+        },
+        "CustomerContentEncryptionConfiguration": {
+            "description": "Indicates the KMS key for encrypting notebook content.",
+            "type": "object",
+            "properties": {
+                "KmsKey": {
+                    "$ref": "#/definitions/KmsKey"
+                }
+            },
+            "required": [
+                "KmsKey"
+            ],
+            "additionalProperties": false
+        },
+        "RemoveCustomerContentEncryptionConfiguration": {
             "type": "boolean"
         },
         "ResultConfiguration": {
@@ -213,6 +237,15 @@
                 },
                 "EngineVersion": {
                     "$ref": "#/definitions/EngineVersion"
+                },
+                "AdditionalConfiguration": {
+                    "$ref": "#/definitions/AdditionalConfiguration"
+                },
+                "ExecutionRole": {
+                    "$ref": "#/definitions/ExecutionRole"
+                },
+                "CustomerContentEncryptionConfiguration": {
+                    "$ref": "#/definitions/CustomerContentEncryptionConfiguration"
                 }
             },
             "additionalProperties": false
@@ -241,6 +274,18 @@
                 },
                 "EngineVersion": {
                     "$ref": "#/definitions/EngineVersion"
+                },
+                "AdditionalConfiguration": {
+                    "$ref": "#/definitions/AdditionalConfiguration"
+                },
+                "ExecutionRole": {
+                    "$ref": "#/definitions/ExecutionRole"
+                },
+                "CustomerContentEncryptionConfiguration": {
+                    "$ref": "#/definitions/CustomerContentEncryptionConfiguration"
+                },
+                "RemoveCustomerContentEncryptionConfiguration": {
+                    "$ref": "#/definitions/RemoveCustomerContentEncryptionConfiguration"
                 }
             },
             "additionalProperties": false
@@ -334,7 +379,9 @@
         "/properties/WorkGroupConfigurationUpdates"
     ],
     "writeOnlyProperties": [
-        "/properties/WorkGroupConfigurationUpdates"
+        "/properties/WorkGroupConfigurationUpdates",
+        "/properties/RecursiveDeleteOption",
+        "/properties/WorkGroupConfiguration/AdditionalConfiguration"
     ],
     "primaryIdentifier": [
         "/properties/Name"

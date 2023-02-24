@@ -1,0 +1,8 @@
+{
+    "CreateInputs": {
+        "Database": "sampledb",
+        "Description": "contract test named query",
+        "QueryString": "SELECT * FROM elb_logs"
+    },
+    "PatchInputs": []
+}

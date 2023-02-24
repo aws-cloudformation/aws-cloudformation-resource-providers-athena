@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  ContractTestS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: cfn-athena-bucket-name
+  ContractTestKey:
+    Type: 'AWS::KMS::Key'
+    Properties:
+      KeyPolicy:
+        Id: 'CfAthenaWGKMSKeyPolicy'
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: Allow Athena to use the key
+            Effect: Allow
+            Principal:
+              Service: 'athena.amazonaws.com'
+            Action:
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+            Resource: '*'
+
+Outputs:
+  ContractBucketName:
+    Description: The name of the S3 bucket
+    Value: !Ref ContractTestS3Bucket
+    Export:
+      Name: awsathenaworkgroupcto1
+  ContractBucketOwnerId:
+    Value: !Ref AWS::AccountId
+    Export:
+      Name: awsathenaworkgroupcto2
+  ContractTestKeyArn:
+    Value: !GetAtt ContractTestKey.Arn
+    Export:
+      Name: awsathenaworkgroupcto3

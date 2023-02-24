@@ -50,27 +50,27 @@ public class UpdateHandlerTest {
   void testSuccessState() {
     // Prepare inputs
     final ResourceModel resourceModel = ResourceModel.builder()
-      .name("Primary")
-      .description("Primary workgroup update description")
-      .state("disabled")
-      .build();
+            .name("Primary")
+            .description("Primary workgroup update description")
+            .state("disabled")
+            .build();
     final ResourceModel oldModel = ResourceModel.builder()
-      .name("Primary")
-      .build();
+            .name("Primary")
+            .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-      .previousResourceState(oldModel)
-      .desiredResourceState(resourceModel)
-      .build();
+            .previousResourceState(oldModel)
+            .desiredResourceState(resourceModel)
+            .build();
 
     // Mock
     doReturn(UpdateWorkGroupResponse.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
 
     // Call
     final ProgressEvent<ResourceModel, CallbackContext> response
-      = new UpdateHandler().handleRequest(proxy, request, null, logger);
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
 
     // Assert
     assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
@@ -88,33 +88,33 @@ public class UpdateHandlerTest {
             .build();
 
     final ResourceModel resourceModel = ResourceModel.builder()
-      .name("Primary")
-      .description("Primary workgroup update description")
-      .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
-                                                                  .enforceWorkGroupConfiguration(true)
-                                                                  .bytesScannedCutoffPerQuery(10_000_000_000L)
-                                                                  .requesterPaysEnabled(true)
-                                                                  .engineVersion(engineVersion)
-                                                                  .build())
-      .state("disabled")
-      .build();
+            .name("Primary")
+            .description("Primary workgroup update description")
+            .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
+                    .enforceWorkGroupConfiguration(true)
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .requesterPaysEnabled(true)
+                    .engineVersion(engineVersion)
+                    .build())
+            .state("disabled")
+            .build();
     final ResourceModel oldModel = ResourceModel.builder()
-      .name("Primary")
-      .build();
+            .name("Primary")
+            .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-      .previousResourceState(oldModel)
-      .desiredResourceState(resourceModel)
-      .build();
+            .previousResourceState(oldModel)
+            .desiredResourceState(resourceModel)
+            .build();
 
     // Mock
     doReturn(UpdateWorkGroupResponse.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
 
     // Call
     final ProgressEvent<ResourceModel, CallbackContext> response
-      = new UpdateHandler().handleRequest(proxy, request, null, logger);
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
 
     // Assert
     assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
@@ -131,33 +131,47 @@ public class UpdateHandlerTest {
     final String workgroupName = "primary";
     final String description = "Primary workgroup description";
     final ResourceModel oldModel = ResourceModel.builder()
-        .name(workgroupName)
-        .description(description)
-        .workGroupConfiguration(WorkGroupConfiguration.builder()
-            .bytesScannedCutoffPerQuery(10_000_000_000L)
-            .enforceWorkGroupConfiguration(false)
-            .publishCloudWatchMetricsEnabled(false)
-            .requesterPaysEnabled(true)
-            .build())
-        .state("DISABLED")
-        .build();
+            .name(workgroupName)
+            .description(description)
+            .workGroupConfiguration(WorkGroupConfiguration.builder()
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .enforceWorkGroupConfiguration(false)
+                    .publishCloudWatchMetricsEnabled(false)
+                    .requesterPaysEnabled(true)
+                    .build())
+            .state("DISABLED")
+            .build();
     final ResourceModel newModel = ResourceModel.builder()
-        .name(workgroupName)
-        .build();
+            .name(workgroupName)
+            .workGroupConfiguration(WorkGroupConfiguration.builder()
+                    .resultConfiguration(ResultConfiguration.builder()
+                            .outputLocation("s3://abc/")
+                            .encryptionConfiguration(software.amazon.athena.workgroup.EncryptionConfiguration.builder()
+                                    .encryptionOption("SSE_S3")
+                                    .build())
+                            .expectedBucketOwner("123456789012")
+                            .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
+                            .build())
+                    .additionalConfiguration("{\"additionalConfig\": \"some_config\"}")
+                    .executionRole("arn:aws:iam::123456789012:role/service-role/fake-execution-role")
+                    .customerContentEncryptionConfiguration(CustomerContentEncryptionConfiguration.builder()
+                            .kmsKey("arn:aws:kms:us-east-1:123456789012:key/fake-kms-key-id").build())
+                    .build())
+            .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-        .previousResourceState(oldModel)
-        .desiredResourceState(newModel)
-        .build();
+            .previousResourceState(oldModel)
+            .desiredResourceState(newModel)
+            .build();
 
     // Mock
     doReturn(UpdateWorkGroupResponse.builder().build())
-        .when(proxy)
-        .injectCredentialsAndInvokeV2(any(), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
 
     // Call
     final ProgressEvent<ResourceModel, CallbackContext> response
-        = new UpdateHandler().handleRequest(proxy, request, null, logger);
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
 
     // Assert
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
@@ -189,42 +203,42 @@ public class UpdateHandlerTest {
     final long configBytes = 22_222_222_222L;
     final long configUpdatesBytes = 33_333_333_333L;
     final ResourceModel oldModel = ResourceModel.builder()
-        .name(workgroupName)
-        .workGroupConfiguration(WorkGroupConfiguration.builder()
-            .bytesScannedCutoffPerQuery(oldBytes)
-            .build())
-        .build();
+            .name(workgroupName)
+            .workGroupConfiguration(WorkGroupConfiguration.builder()
+                    .bytesScannedCutoffPerQuery(oldBytes)
+                    .build())
+            .build();
     final ResourceModel newModel = ResourceModel.builder()
-        .name(workgroupName)
-        .workGroupConfiguration(WorkGroupConfiguration.builder()
-            .bytesScannedCutoffPerQuery(configBytes)
-            .resultConfiguration(ResultConfiguration.builder()
-              .outputLocation("s3://abc/")
-              .encryptionConfiguration(software.amazon.athena.workgroup.EncryptionConfiguration.builder()
-                .encryptionOption("SSE_S3")
-                .build())
-              .expectedBucketOwner("123456789012")
-                .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
-                .build())
-            .build())
-        .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
-            .bytesScannedCutoffPerQuery(configUpdatesBytes)
-            .build())
-        .build();
+          .name(workgroupName)
+          .workGroupConfiguration(WorkGroupConfiguration.builder()
+              .bytesScannedCutoffPerQuery(configBytes)
+              .resultConfiguration(ResultConfiguration.builder()
+                      .outputLocation("s3://abc/")
+                      .encryptionConfiguration(software.amazon.athena.workgroup.EncryptionConfiguration.builder()
+                              .encryptionOption("SSE_S3")
+                              .build())
+                      .expectedBucketOwner("123456789012")
+                      .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
+                      .build())
+              .build())
+          .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
+              .bytesScannedCutoffPerQuery(configUpdatesBytes)
+              .build())
+          .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-        .previousResourceState(oldModel)
-        .desiredResourceState(newModel)
-        .build();
+            .previousResourceState(oldModel)
+            .desiredResourceState(newModel)
+            .build();
 
     // Mock
     doReturn(UpdateWorkGroupResponse.builder().build())
-        .when(proxy)
-        .injectCredentialsAndInvokeV2(any(), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
 
     // Call
     final ProgressEvent<ResourceModel, CallbackContext> response
-        = new UpdateHandler().handleRequest(proxy, request, null, logger);
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
 
     // Assert
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
@@ -351,38 +365,38 @@ public class UpdateHandlerTest {
     // Prepare inputs
     List<Tag> newTags = Lists.list(new Tag("key1", "value1"), new Tag("key2", "value2"));
     final ResourceModel resourceModel = ResourceModel.builder()
-      .name("Primary")
-      .description("Primary workgroup update description")
-      .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
-        .enforceWorkGroupConfiguration(true)
-        .bytesScannedCutoffPerQuery(10_000_000_000L)
-        .requesterPaysEnabled(true)
-        .build())
-      .state("disabled")
-      .tags(newTags)
-      .build();
+            .name("Primary")
+            .description("Primary workgroup update description")
+            .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
+                    .enforceWorkGroupConfiguration(true)
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .requesterPaysEnabled(true)
+                    .build())
+            .state("disabled")
+            .tags(newTags)
+            .build();
     final ResourceModel oldModel = ResourceModel.builder()
-      .name("Primary")
-      .build();
+            .name("Primary")
+            .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-      .previousResourceState(oldModel)
-      .desiredResourceState(resourceModel)
-      .region("unit-test")
-      .awsAccountId("123456789012")
-      .build();
+            .previousResourceState(oldModel)
+            .desiredResourceState(resourceModel)
+            .region("unit-test")
+            .awsAccountId("123456789012")
+            .build();
 
     // Mock
     doReturn(UpdateWorkGroupResponse.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(UpdateWorkGroupRequest.class), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(UpdateWorkGroupRequest.class), any());
     doReturn(TagResourceResponse.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(TagResourceRequest.class), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(TagResourceRequest.class), any());
 
     // Call
     final ProgressEvent<ResourceModel, CallbackContext> response
-      = new UpdateHandler().handleRequest(proxy, request, null, logger);
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
 
     // Assert
     assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
@@ -404,38 +418,38 @@ public class UpdateHandlerTest {
     // Prepare inputs
     List<Tag> oldTags = Lists.list(new Tag("key1", "value1"), new Tag("key2", "value2"));
     final ResourceModel resourceModel = ResourceModel.builder()
-      .name("Primary")
-      .description("Primary workgroup update description")
-      .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
-        .enforceWorkGroupConfiguration(true)
-        .bytesScannedCutoffPerQuery(10_000_000_000L)
-        .requesterPaysEnabled(true)
-        .build())
-      .state("disabled")
-      .build();
+            .name("Primary")
+            .description("Primary workgroup update description")
+            .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
+                    .enforceWorkGroupConfiguration(true)
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .requesterPaysEnabled(true)
+                    .build())
+            .state("disabled")
+            .build();
     final ResourceModel oldModel = ResourceModel.builder()
-      .name("Primary")
-      .tags(oldTags)
-      .build();
+            .name("Primary")
+            .tags(oldTags)
+            .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-      .previousResourceState(oldModel)
-      .desiredResourceState(resourceModel)
-      .region("unit-test")
-      .awsAccountId("123456789012")
-      .build();
+            .previousResourceState(oldModel)
+            .desiredResourceState(resourceModel)
+            .region("unit-test")
+            .awsAccountId("123456789012")
+            .build();
 
     // Mock
     doReturn(UpdateWorkGroupResponse.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(UpdateWorkGroupRequest.class), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(UpdateWorkGroupRequest.class), any());
     doReturn(UntagResourceResponse.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(UntagResourceRequest.class), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(UntagResourceRequest.class), any());
 
     // Call
     final ProgressEvent<ResourceModel, CallbackContext> response
-      = new UpdateHandler().handleRequest(proxy, request, null, logger);
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
 
     // Assert
     assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
@@ -456,42 +470,42 @@ public class UpdateHandlerTest {
   void testSuccessStateWithNewTagsAndUntagsAndChangedTagValues() {
     // Prepare inputs
     final ResourceModel resourceModel = ResourceModel.builder()
-      .name("Primary")
-      .description("Primary workgroup update description")
-      .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
-        .enforceWorkGroupConfiguration(true)
-        .bytesScannedCutoffPerQuery(10_000_000_000L)
-        .requesterPaysEnabled(true)
-        .build())
-      .state("disabled")
-      .tags(Lists.list(new Tag("key1", "value1new"), new Tag("key3", "value3")))
-      .build();
+            .name("Primary")
+            .description("Primary workgroup update description")
+            .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
+                    .enforceWorkGroupConfiguration(true)
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .requesterPaysEnabled(true)
+                    .build())
+            .state("disabled")
+            .tags(Lists.list(new Tag("key1", "value1new"), new Tag("key3", "value3")))
+            .build();
     final ResourceModel oldModel = ResourceModel.builder()
-      .name("Primary")
-      .tags(Lists.list(new Tag("key1", "value1"), new Tag("key2", "value2")))
-      .build();
+            .name("Primary")
+            .tags(Lists.list(new Tag("key1", "value1"), new Tag("key2", "value2")))
+            .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-      .previousResourceState(oldModel)
-      .desiredResourceState(resourceModel)
-      .region("unit-test")
-      .awsAccountId("123456789012")
-      .build();
+            .previousResourceState(oldModel)
+            .desiredResourceState(resourceModel)
+            .region("unit-test")
+            .awsAccountId("123456789012")
+            .build();
 
     // Mock
     doReturn(UpdateWorkGroupResponse.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(UpdateWorkGroupRequest.class), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(UpdateWorkGroupRequest.class), any());
     doReturn(TagResourceResponse.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(TagResourceRequest.class), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(TagResourceRequest.class), any());
     doReturn(UntagResourceResponse.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(UntagResourceRequest.class), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(UntagResourceRequest.class), any());
 
     // Call
     final ProgressEvent<ResourceModel, CallbackContext> response
-      = new UpdateHandler().handleRequest(proxy, request, null, logger);
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
 
     // Assert
     assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
@@ -514,40 +528,40 @@ public class UpdateHandlerTest {
   void testSuccessStateWithResultConfigurationUpdates() {
     // Prepare inputs
     final ResourceModel resourceModel = ResourceModel.builder()
-      .name("Primary")
-      .description("Primary workgroup update description")
-      .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
-                                                                  .enforceWorkGroupConfiguration(true)
-                                                                  .bytesScannedCutoffPerQuery(10_000_000_000L)
-                                                                  .requesterPaysEnabled(true)
-                                                                  .removeBytesScannedCutoffPerQuery(true)
-                                                                  .resultConfigurationUpdates(ResultConfigurationUpdates.builder()
-                                                                                                                         .removeOutputLocation(true)
-                                                                                                                         .encryptionConfiguration(EncryptionConfiguration.builder()
-                                                                                                                                                                         .encryptionOption("CSE_KMS")
-                                                                                                                                                                         .kmsKey("eiifcckijivunlgvvggjeiheertfetujenrnndugggnh")
-                                                                                                                                                                         .build())
-                                                                                                                         .build())
-                                                                  .build())
-      .state("disabled")
-      .build();
+            .name("Primary")
+            .description("Primary workgroup update description")
+            .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
+                    .enforceWorkGroupConfiguration(true)
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .requesterPaysEnabled(true)
+                    .removeBytesScannedCutoffPerQuery(true)
+                    .resultConfigurationUpdates(ResultConfigurationUpdates.builder()
+                            .removeOutputLocation(true)
+                            .encryptionConfiguration(EncryptionConfiguration.builder()
+                                    .encryptionOption("CSE_KMS")
+                                    .kmsKey("eiifcckijivunlgvvggjeiheertfetujenrnndugggnh")
+                                    .build())
+                            .build())
+                    .build())
+            .state("disabled")
+            .build();
     final ResourceModel oldModel = ResourceModel.builder()
-      .name("Primary")
-      .build();
+            .name("Primary")
+            .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-      .previousResourceState(oldModel)
-      .desiredResourceState(resourceModel)
-      .build();
+            .previousResourceState(oldModel)
+            .desiredResourceState(resourceModel)
+            .build();
 
     // Mock
     doReturn(UpdateWorkGroupResponse.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
 
     // Call
     final ProgressEvent<ResourceModel, CallbackContext> response
-      = new UpdateHandler().handleRequest(proxy, request, null, logger);
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
 
     // Assert
     assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
@@ -562,52 +576,52 @@ public class UpdateHandlerTest {
   void testInternalServerException() {
     // Prepare inputs
     final ResourceModel resourceModel = ResourceModel.builder()
-      .name("Primary")
-      .description("Primary workgroup")
-      .build();
+            .name("Primary")
+            .description("Primary workgroup")
+            .build();
     final ResourceModel oldModel = ResourceModel.builder()
-      .name("Primary")
-      .build();
+            .name("Primary")
+            .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-      .previousResourceState(oldModel)
-      .desiredResourceState(resourceModel)
-      .build();
+            .previousResourceState(oldModel)
+            .desiredResourceState(resourceModel)
+            .build();
 
     // Mock
     doThrow(InternalServerException.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
 
     // Call
     assertThrows(CfnGeneralServiceException.class, () ->
-      new UpdateHandler().handleRequest(proxy, request, null, logger));
+            new UpdateHandler().handleRequest(proxy, request, null, logger));
   }
 
   @Test
   void testInvalidRequestException() {
     // Prepare inputs
     final ResourceModel resourceModel = ResourceModel.builder()
-      .name("Primary")
-      .description("Primary workgroup")
-      .build();
+            .name("Primary")
+            .description("Primary workgroup")
+            .build();
     final ResourceModel oldModel = ResourceModel.builder()
-      .name("Primary")
-      .build();
+            .name("Primary")
+            .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-      .previousResourceState(oldModel)
-      .desiredResourceState(resourceModel)
-      .build();
+            .previousResourceState(oldModel)
+            .desiredResourceState(resourceModel)
+            .build();
 
     // Mock
     doThrow(InvalidRequestException.builder().build())
-      .when(proxy)
-      .injectCredentialsAndInvokeV2(any(), any());
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
 
     // Call
     assertThrows(CfnInvalidRequestException.class, () ->
-      new UpdateHandler().handleRequest(proxy, request, null, logger));
+            new UpdateHandler().handleRequest(proxy, request, null, logger));
   }
 
   @Test
@@ -616,7 +630,7 @@ public class UpdateHandlerTest {
     String workGroup = "someWorkGroup";
     final ResourceModel resourceModel = ResourceModel.builder().name(workGroup).build();
     final ResourceHandlerRequest<ResourceModel> request =
-        ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
+            ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
 
     // Mock
     String message = String.format("WorkGroup %s is not found.", workGroup);
