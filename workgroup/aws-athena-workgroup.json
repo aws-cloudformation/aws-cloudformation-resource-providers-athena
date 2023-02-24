@@ -380,6 +380,7 @@
     ],
     "writeOnlyProperties": [
         "/properties/WorkGroupConfigurationUpdates",
+        "/properties/RecursiveDeleteOption",
         "/properties/WorkGroupConfiguration/AdditionalConfiguration"
     ],
     "primaryIdentifier": [
