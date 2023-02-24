@@ -1,0 +1,9 @@
+{
+    "CreateInputs": {
+        "StatementName": "cfn_sample_prepared_statement",
+        "Description": "contract test prepared statement",
+        "QueryStatement": "SELECT 1+?",
+        "WorkGroup": "primary"
+    },
+    "PatchInputs": []
+}
