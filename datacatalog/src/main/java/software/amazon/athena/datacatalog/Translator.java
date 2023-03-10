@@ -54,7 +54,9 @@ class Translator {
       return null;
     }
     Map<String, String> consolidatedTags = Maps.newHashMap();
-    if (MapUtils.isNotEmpty(stackLevelTags)) consolidatedTags.putAll(stackLevelTags);
+    if (MapUtils.isNotEmpty(stackLevelTags)) {
+      consolidatedTags.putAll(stackLevelTags);
+    }
 
     // Resource tags will override stack level tags with same keys.
     if (CollectionUtils.isNotEmpty(resourceTags)) {

@@ -22,7 +22,9 @@ class Translator {
   List<software.amazon.awssdk.services.athena.model.Tag> createConsolidatedSdkTagsFromCfnTags(
           final Collection<software.amazon.athena.workgroup.Tag> resourceTags, final Map<String, String> stackLevelTags) {
     Map<String, String> consolidatedTags = Maps.newHashMap();
-    if (MapUtils.isNotEmpty(stackLevelTags)) consolidatedTags.putAll(stackLevelTags);
+    if (MapUtils.isNotEmpty(stackLevelTags)) {
+      consolidatedTags.putAll(stackLevelTags);
+    }
 
     // Resource tags will override stack level tags with same keys.
     if (CollectionUtils.isNotEmpty(resourceTags)) {

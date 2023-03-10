@@ -46,12 +46,21 @@ class ReadHandlerTest {
 
   @Mock
   private Logger logger;
+  private ResultConfiguration resultConfiguration = ResultConfiguration.builder()
+          .outputLocation("s3://abc/")
+          .encryptionConfiguration(EncryptionConfiguration.builder()
+                  .encryptionOption("SSE_S3")
+                  .build())
+          .expectedBucketOwner("123456789012")
+          .aclConfiguration(AclConfiguration.builder()
+                  .s3AclOption("BUCKET_OWNER_FULL_CONTROL")
+                  .build())
+          .build();
 
   @Test
   void testSuccessStateWithWorkGroupConfigurationNullable() {
     // Prepare inputs
     final ResourceModel resourceModel = ResourceModel.builder().name("primary workgroup").build();
-
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
 
     final WorkGroup workGroup = WorkGroup.builder()
@@ -87,13 +96,10 @@ class ReadHandlerTest {
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
 
-    software.amazon.awssdk.services.athena.model.EngineVersion engineVersion1 = EngineVersion.builder()
+    software.amazon.awssdk.services.athena.model.EngineVersion sqlEngine = EngineVersion.builder()
             .selectedEngineVersion("Auto")
             .effectiveEngineVersion("Athena engine version 1").build();
-    final CustomerContentEncryptionConfiguration ccec = CustomerContentEncryptionConfiguration.builder()
-            .kmsKey("arn:aws:kms:us-east-1:123456789012:key/fake-kms-key-id").build();
-    final String executionRole = "arn:aws:iam::123456789012:role/service-role/fake-execution-role";
-    final String additionalConf = "{\"additionalConfig\": \"some_config\"}";
+
 
     final WorkGroup workGroup = WorkGroup.builder()
             .name("primary workgroup")
@@ -105,20 +111,8 @@ class ReadHandlerTest {
                     .bytesScannedCutoffPerQuery(10_000_000_000L)
                     .requesterPaysEnabled(true)
                     .publishCloudWatchMetricsEnabled(true)
-                    .resultConfiguration(ResultConfiguration.builder()
-                            .outputLocation("s3://abc/")
-                            .encryptionConfiguration(EncryptionConfiguration.builder()
-                                    .encryptionOption("SSE_S3")
-                                    .build())
-                            .expectedBucketOwner("123456789012")
-                            .aclConfiguration(AclConfiguration.builder()
-                                    .s3AclOption("BUCKET_OWNER_FULL_CONTROL")
-                                    .build())
-                            .build())
-                    .engineVersion(engineVersion1)
-                    .additionalConfiguration(additionalConf)
-                    .executionRole(executionRole)
-                    .customerContentEncryptionConfiguration(ccec)
+                    .resultConfiguration(resultConfiguration)
+                    .engineVersion(sqlEngine)
                     .build())
             .build();
 
@@ -154,14 +148,11 @@ class ReadHandlerTest {
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getAclConfiguration().getS3AclOption())
       .isEqualTo(workGroup.configuration().resultConfiguration().aclConfiguration().s3AclOptionAsString());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getSelectedEngineVersion())
-            .isEqualTo(engineVersion1.selectedEngineVersion());
+            .isEqualTo(sqlEngine.selectedEngineVersion());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getEffectiveEngineVersion())
-            .isEqualTo(engineVersion1.effectiveEngineVersion());
-    assertThat(response.getResourceModel().getWorkGroupConfiguration().getAdditionalConfiguration())
-            .isEqualTo(additionalConf);
-    assertThat(response.getResourceModel().getWorkGroupConfiguration().getExecutionRole()).isEqualTo(executionRole);
-    assertThat(response.getResourceModel().getWorkGroupConfiguration().getCustomerContentEncryptionConfiguration().getKmsKey())
-            .isEqualTo(ccec.kmsKey());
+            .isEqualTo(sqlEngine.effectiveEngineVersion());
+
+
     assertThat(response.getMessage()).isNull();
     assertThat(response.getErrorCode()).isNull();
   }
@@ -173,9 +164,13 @@ class ReadHandlerTest {
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
 
-    software.amazon.awssdk.services.athena.model.EngineVersion engineVersion1 = EngineVersion.builder()
+    software.amazon.awssdk.services.athena.model.EngineVersion sparkEngine = EngineVersion.builder()
             .selectedEngineVersion("Auto")
             .effectiveEngineVersion("PySpark engine version 3").build();
+    final CustomerContentEncryptionConfiguration ccec = CustomerContentEncryptionConfiguration.builder()
+            .kmsKey("arn:aws:kms:us-east-1:123456789012:key/fake-kms-key-id").build();
+    final String executionRole = "arn:aws:iam::123456789012:role/service-role/fake-execution-role";
+    final String additionalConf = "{\"additionalConfig\": \"some_config\"}";
 
     final WorkGroup workGroup = WorkGroup.builder()
             .name("Apache Spark workgroup").description("Apache Spark workgroup")
@@ -183,20 +178,13 @@ class ReadHandlerTest {
             .creationTime(Instant.now())
             .configuration(WorkGroupConfiguration.builder()
                     .enforceWorkGroupConfiguration(true)
-                    .bytesScannedCutoffPerQuery(10_000_000_000L)
                     .requesterPaysEnabled(true)
                     .publishCloudWatchMetricsEnabled(true)
-                    .resultConfiguration(ResultConfiguration.builder()
-                            .outputLocation("s3://abc/")
-                            .encryptionConfiguration(EncryptionConfiguration.builder()
-                                    .encryptionOption("SSE_S3")
-                                    .build())
-                            .expectedBucketOwner("123456789012")
-                            .aclConfiguration(AclConfiguration.builder()
-                                    .s3AclOption("BUCKET_OWNER_FULL_CONTROL")
-                                    .build())
-                            .build())
-                    .engineVersion(engineVersion1)
+                    .resultConfiguration(resultConfiguration)
+                    .executionRole(executionRole)
+                    .customerContentEncryptionConfiguration(ccec)
+                    .engineVersion(sparkEngine)
+                    .additionalConfiguration(additionalConf)
                     .build())
             .build();
 
@@ -232,13 +220,17 @@ class ReadHandlerTest {
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getResultConfiguration().getAclConfiguration().getS3AclOption())
             .isEqualTo(workGroup.configuration().resultConfiguration().aclConfiguration().s3AclOptionAsString());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getSelectedEngineVersion())
-            .isEqualTo(engineVersion1.selectedEngineVersion());
+            .isEqualTo(sparkEngine.selectedEngineVersion());
     assertThat(response.getResourceModel().getWorkGroupConfiguration().getEngineVersion().getEffectiveEngineVersion())
-            .isEqualTo(engineVersion1.effectiveEngineVersion());
+            .isEqualTo(sparkEngine.effectiveEngineVersion());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getAdditionalConfiguration())
+            .isEqualTo(additionalConf);
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getCustomerContentEncryptionConfiguration().getKmsKey())
+            .isEqualTo(ccec.kmsKey());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getExecutionRole()).isEqualTo(executionRole);
     assertThat(response.getMessage()).isNull();
     assertThat(response.getErrorCode()).isNull();
   }
-
 
   @Test
   void testSuccessStateWithResultConfigurationNullable() {
