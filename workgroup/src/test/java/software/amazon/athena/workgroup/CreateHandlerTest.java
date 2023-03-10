@@ -31,6 +31,21 @@ public class CreateHandlerTest {
   @Mock
   private Logger logger;
 
+  public static final ResultConfiguration RESULT_CONFIGURATION = ResultConfiguration.builder()
+          .outputLocation("s3://abc/")
+          .encryptionConfiguration(EncryptionConfiguration.builder()
+                  .encryptionOption("SSE_S3")
+                  .build())
+          .expectedBucketOwner("123456789012")
+          .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
+          .build();
+  public static final EngineVersion SQL_ENGINE = EngineVersion.builder()
+          .selectedEngineVersion("Athena engine version 1")
+          .build();
+  public static final EngineVersion SPARK_ENGINE = EngineVersion.builder()
+          .selectedEngineVersion("PySpark engine version 3")
+          .build();
+
   @Test
   void testSuccessState() {
     // Prepare inputs
@@ -45,17 +60,8 @@ public class CreateHandlerTest {
                                                     .enforceWorkGroupConfiguration(false)
                                                     .publishCloudWatchMetricsEnabled(true)
                                                     .requesterPaysEnabled(true)
-                                                    .resultConfiguration(ResultConfiguration.builder()
-                                                                                            .outputLocation("s3://abc/")
-                                                                                            .encryptionConfiguration(EncryptionConfiguration.builder()
-                                                                                                                     .encryptionOption("SSE_S3")
-                                                                                                                     .build())
-                                                                                            .expectedBucketOwner("123456789012")
-                                                                                            .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
-                                                                                                              .build())
-                                                    .engineVersion(EngineVersion.builder()
-                                                                                .selectedEngineVersion("Athena engine version 1")
-                                                                                .build())
+                                                    .resultConfiguration(RESULT_CONFIGURATION)
+                                                    .engineVersion(SQL_ENGINE)
                                                    .build())
       .build();
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -93,21 +99,9 @@ public class CreateHandlerTest {
                     .enforceWorkGroupConfiguration(false)
                     .publishCloudWatchMetricsEnabled(true)
                     .requesterPaysEnabled(true)
-                    .resultConfiguration(ResultConfiguration.builder()
-                            .outputLocation("s3://abc/")
-                            .encryptionConfiguration(EncryptionConfiguration.builder()
-                                    .encryptionOption("SSE_S3")
-                                    .build())
-                            .expectedBucketOwner("123456789012")
-                            .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
-                            .build())
-                    .engineVersion(EngineVersion.builder()
-                            .selectedEngineVersion("Athena engine version 1")
-                            .build())
+                    .resultConfiguration(RESULT_CONFIGURATION)
+                    .engineVersion(SQL_ENGINE)
                     .additionalConfiguration("{\"additionalConfig\": \"some_config\"}")
-                    .executionRole("arn:aws:iam::123456789012:role/service-role/fake-execution-role")
-                    .customerContentEncryptionConfiguration(CustomerContentEncryptionConfiguration.builder()
-                            .kmsKey("arn:aws:kms:us-east-1:123456789012:key/fake-kms-key-id").build())
                     .build())
             .build();
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -132,7 +126,6 @@ public class CreateHandlerTest {
 
   }
 
-
   @Test
   void testSuccessStateForApacheSparkWorkGroup() {
     // Prepare inputs
@@ -143,21 +136,11 @@ public class CreateHandlerTest {
             .description("Apache Spark workgroup")
             .tags(Lists.newArrayList(tag))
             .workGroupConfiguration(WorkGroupConfiguration.builder()
-                    .bytesScannedCutoffPerQuery(10_000_000_000L)
                     .enforceWorkGroupConfiguration(false)
                     .publishCloudWatchMetricsEnabled(true)
                     .requesterPaysEnabled(true)
-                    .resultConfiguration(ResultConfiguration.builder()
-                            .outputLocation("s3://abc/")
-                            .encryptionConfiguration(EncryptionConfiguration.builder()
-                                    .encryptionOption("SSE_S3")
-                                    .build())
-                            .expectedBucketOwner("123456789012")
-                            .aclConfiguration(AclConfiguration.builder().s3AclOption("BUCKET_OWNER_FULL_CONTROL").build())
-                            .build())
-                    .engineVersion(EngineVersion.builder()
-                            .selectedEngineVersion("PySpark engine version 3")
-                            .build())
+                    .resultConfiguration(RESULT_CONFIGURATION)
+                    .engineVersion(SPARK_ENGINE)
                     .build())
             .build();
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -327,5 +310,4 @@ public class CreateHandlerTest {
     assertThrows(CfnInvalidRequestException.class, () ->
             new CreateHandler().handleRequest(proxy, request, null, logger));
   }
-
 }

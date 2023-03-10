@@ -17,7 +17,12 @@ out/
 target/
 docs/
 .hypothesis/
+.gradle
+gradle/*
+gradlew*
 
+build
+*/build
 # our logs
 rpdk.log
 *.zip
