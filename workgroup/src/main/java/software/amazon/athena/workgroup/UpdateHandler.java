@@ -56,8 +56,14 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
     final ResourceModel newModel = request.getDesiredResourceState();
     final ResourceModel oldModel = request.getPreviousResourceState();
 
-    final Set<Tag> oldTags = new HashSet<>(translator.createConsolidatedSdkTagsFromCfnTags(oldModel.getTags(), request.getPreviousResourceTags()));
-    final Set<Tag> newTags = new HashSet<>(translator.createConsolidatedSdkTagsFromCfnTags(newModel.getTags(), request.getDesiredResourceTags()));
+    final Set<Tag> oldTags = new HashSet<>(
+            translator.createConsolidatedSdkTagsFromCfnTags(oldModel.getTags(),
+                                                            request.getPreviousResourceTags(),
+                                                            request.getPreviousSystemTags()));
+    final Set<Tag> newTags = new HashSet<>(
+            translator.createConsolidatedSdkTagsFromCfnTags(newModel.getTags(),
+                                                            request.getDesiredResourceTags(),
+                                                            request.getSystemTags()));
     try {
       // Handle modifications to WorkGroup tags
       if (!oldTags.equals(newTags)) {

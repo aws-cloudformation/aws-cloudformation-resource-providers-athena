@@ -48,8 +48,9 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
   private CreateWorkGroupResponse createWorkgroup() {
     final ResourceModel model = request.getDesiredResourceState();
     final Map<String, String> stackTags = request.getDesiredResourceTags();
+    final Map<String, String> systemTags = request.getSystemTags();
     List<software.amazon.awssdk.services.athena.model.Tag> tags =
-            translator.createConsolidatedSdkTagsFromCfnTags(model.getTags(), stackTags);
+            translator.createConsolidatedSdkTagsFromCfnTags(model.getTags(), stackTags, systemTags);
 
     final CreateWorkGroupRequest createWorkGroupRequest = CreateWorkGroupRequest.builder()
       .name(model.getName())

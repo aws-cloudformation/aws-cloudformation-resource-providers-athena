@@ -32,12 +32,18 @@ public class TranslatorTest {
     Map<String, String> stackTags = new HashMap<>();
     stackTags.put("Author", "Bezos");
 
-    List<software.amazon.awssdk.services.athena.model.Tag> sdkTags =
-      new Translator().createConsolidatedSdkTagsFromCfnTags(cfnTags, stackTags);
+    Map<String, String> systemTags = new HashMap<>();
+    systemTags.put("aws:tag:systemTagKey", "systemTagValue");
 
-    assertThat(sdkTags.size()).isEqualTo(2);
+    List<software.amazon.awssdk.services.athena.model.Tag> sdkTags =
+      new Translator().createConsolidatedSdkTagsFromCfnTags(cfnTags, stackTags, systemTags);
+
+    assertThat(sdkTags.size()).isEqualTo(3);
     assertThat(sdkTags.get(0).value()).isEqualTo(cfnTags.get(0).getValue());
     assertThat(sdkTags.get(1).value()).isEqualTo(cfnTags.get(1).getValue());
+    assertThat(sdkTags.get(2).key()).isEqualTo("aws:tag:systemTagKey");
+    assertThat(sdkTags.get(2).value()).isEqualTo(systemTags.get("aws:tag:systemTagKey"));
+
   }
 
   @Test
