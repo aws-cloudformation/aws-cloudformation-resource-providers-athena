@@ -32,7 +32,13 @@ class Translator {
       resourceTags.forEach(tag -> consolidatedTags.put(tag.getKey(), tag.getValue()));
     }
 
+<<<<<<< HEAD
     if (MapUtils.isNotEmpty(systemTags)) consolidatedTags.putAll(systemTags);
+=======
+    if (MapUtils.isNotEmpty(systemTags)){
+      consolidatedTags.putAll(systemTags);
+    }
+>>>>>>> 1144a98 (Adding System tag support for workgroups)
 
     List<software.amazon.awssdk.services.athena.model.Tag> sdkTags = new ArrayList<>();
     consolidatedTags.forEach((key, value) -> sdkTags.add(

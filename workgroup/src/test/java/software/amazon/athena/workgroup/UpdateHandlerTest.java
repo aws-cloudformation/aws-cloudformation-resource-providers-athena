@@ -467,9 +467,9 @@ public class UpdateHandlerTest {
     verify(proxy, times(2)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
     TagResourceRequest tagRequest = (TagResourceRequest) requests.get(0);
-    assertEquals(tagRequest.tags().size() ,1);
-    assertThat(systemTags.containsKey(tagRequest.tags().get(0).key()));
-    assertThat(tagRequest.tags().get(0).value().equals(systemTags.get(tagRequest.tags().get(0).key())));
+    assertThat(tagRequest.tags().size()).isEqualTo(1);
+    assertThat(systemTags.keySet()).contains(tagRequest.tags().get(0).key());
+    assertThat(tagRequest.tags().get(0).value()).isEqualTo(systemTags.get(tagRequest.tags().get(0).key()));
   }
 
   @Test
@@ -522,10 +522,10 @@ public class UpdateHandlerTest {
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
     verify(proxy, times(2)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
-    assertThat(requests.get(0) instanceof UntagResourceRequest);
+    assertThat(requests.get(0) instanceof UntagResourceRequest).isTrue();
     UntagResourceRequest untagRequest = (UntagResourceRequest) requests.get(0);
     assertEquals(untagRequest.tagKeys().size() ,1);
-    assertThat(systemTags.containsKey(untagRequest.tagKeys().get(0)));
+    assertThat(systemTags.keySet()).contains(untagRequest.tagKeys().get(0));
   }
   @Test
   void testSuccessStateWithRemovingAllTags() {
