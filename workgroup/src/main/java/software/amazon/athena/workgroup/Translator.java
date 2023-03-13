@@ -20,7 +20,8 @@ import java.util.Map;
 class Translator {
 
   List<software.amazon.awssdk.services.athena.model.Tag> createConsolidatedSdkTagsFromCfnTags(
-          final Collection<software.amazon.athena.workgroup.Tag> resourceTags, final Map<String, String> stackLevelTags) {
+          final Collection<software.amazon.athena.workgroup.Tag> resourceTags,
+          final Map<String, String> stackLevelTags, final Map<String, String> systemTags) {
     Map<String, String> consolidatedTags = Maps.newHashMap();
     if (MapUtils.isNotEmpty(stackLevelTags)) {
       consolidatedTags.putAll(stackLevelTags);
@@ -30,6 +31,11 @@ class Translator {
     if (CollectionUtils.isNotEmpty(resourceTags)) {
       resourceTags.forEach(tag -> consolidatedTags.put(tag.getKey(), tag.getValue()));
     }
+
+    if (MapUtils.isNotEmpty(systemTags)){
+      consolidatedTags.putAll(systemTags);
+    }
+
     List<software.amazon.awssdk.services.athena.model.Tag> sdkTags = new ArrayList<>();
     consolidatedTags.forEach((key, value) -> sdkTags.add(
             software.amazon.awssdk.services.athena.model.Tag.builder().key(key).value(value).build()));
