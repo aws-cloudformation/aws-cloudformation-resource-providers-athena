@@ -16,13 +16,15 @@ import software.amazon.awssdk.services.athena.model.UpdateDataCatalogRequest;
 
 class Translator {
 
-  static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel, Map<String, String> stackTags) {
+  static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel,
+                                                           Map<String, String> stackTags,
+                                                           Map<String, String> systemTags) {
     return CreateDataCatalogRequest.builder()
         .name(resourceModel.getName())
         .type(resourceModel.getType())
         .description(resourceModel.getDescription())
         .parameters(resourceModel.getParameters())
-        .tags(convertToAthenaSdkTags(resourceModel.getTags(), stackTags))
+        .tags(convertToAthenaSdkTags(resourceModel.getTags(), stackTags, systemTags))
         .build();
   }
 
@@ -48,9 +50,11 @@ class Translator {
   }
 
   static List<software.amazon.awssdk.services.athena.model.Tag> convertToAthenaSdkTags(
-          final Collection<Tag> resourceTags, final Map<String, String> stackLevelTags) {
+          final Collection<Tag> resourceTags,
+          final Map<String, String> stackLevelTags,
+          final Map<String, String> systemTags) {
 
-    if (CollectionUtils.isEmpty(resourceTags) && MapUtils.isEmpty(stackLevelTags)) {
+    if (CollectionUtils.isEmpty(resourceTags) && MapUtils.isEmpty(stackLevelTags) && MapUtils.isEmpty(systemTags)) {
       return null;
     }
     Map<String, String> consolidatedTags = Maps.newHashMap();
@@ -61,6 +65,10 @@ class Translator {
     // Resource tags will override stack level tags with same keys.
     if (CollectionUtils.isNotEmpty(resourceTags)) {
       resourceTags.forEach(tag -> consolidatedTags.put(tag.getKey(), tag.getValue()));
+    }
+
+    if (MapUtils.isNotEmpty(systemTags)){
+      consolidatedTags.putAll(systemTags);
     }
 
     List<software.amazon.awssdk.services.athena.model.Tag> sdkTags = new ArrayList<>();

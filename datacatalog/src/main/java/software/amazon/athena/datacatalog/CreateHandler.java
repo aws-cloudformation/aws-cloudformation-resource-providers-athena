@@ -30,7 +30,9 @@ public class CreateHandler extends BaseHandlerAthena {
         return proxy.initiate("athena::createDataCatalog", athenaProxyClient,
             request.getDesiredResourceState(), callbackContext)
             .translateToServiceRequest(
-                    model -> Translator.createDataCatalogRequest(model, request.getDesiredResourceTags()))
+                    model -> Translator.createDataCatalogRequest(model,
+                                                                 request.getDesiredResourceTags(),
+                                                                 request.getSystemTags()))
             .makeServiceCall(this::createDataCatalog)
             .success();
     }
