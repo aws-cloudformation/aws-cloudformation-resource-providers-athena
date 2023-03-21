@@ -69,8 +69,12 @@ public class UpdateHandler extends BaseHandlerAthena {
 
         final ResourceModel newModel = request.getDesiredResourceState();
 
-        final Set<Tag> oldTags = getAthenaSdkTags(request.getPreviousResourceState(), request.getPreviousResourceTags());
-        final Set<Tag> newTags = getAthenaSdkTags(request.getDesiredResourceState(), request.getDesiredResourceTags());
+        final Set<Tag> oldTags = getAthenaSdkTags(request.getPreviousResourceState(),
+                                                  request.getPreviousResourceTags(),
+                                                  request.getPreviousSystemTags());
+        final Set<Tag> newTags = getAthenaSdkTags(request.getDesiredResourceState(),
+                                                  request.getDesiredResourceTags(),
+                                                  request.getSystemTags());
         final Set<Tag> tagsToAdd = Sets.difference(newTags, oldTags);
         final Set<Tag> tagsToRemove = Sets.difference(oldTags, newTags);
         boolean areTagsUpdated = !tagsToAdd.isEmpty() || !tagsToRemove.isEmpty();
@@ -108,10 +112,12 @@ public class UpdateHandler extends BaseHandlerAthena {
         }
     }
 
-    private Set<Tag> getAthenaSdkTags(ResourceModel resourceModel, Map<String, String> stackTags) {
+    private Set<Tag> getAthenaSdkTags(ResourceModel resourceModel,
+                                      Map<String, String> stackTags,
+                                      Map<String, String> systemTags) {
         List<software.amazon.athena.datacatalog.Tag> resourceTags = resourceModel == null ? Collections.emptyList() :
                 resourceModel.getTags();
-        List<Tag> athenaTags = Translator.convertToAthenaSdkTags(resourceTags, stackTags);
+        List<Tag> athenaTags = Translator.convertToAthenaSdkTags(resourceTags, stackTags, systemTags);
         return CollectionUtils.isNullOrEmpty(athenaTags) ? Collections.emptySet(): new HashSet<>(athenaTags);
     }
 }

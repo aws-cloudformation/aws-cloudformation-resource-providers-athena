@@ -1,6 +1,8 @@
 package software.amazon.athena.datacatalog;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +11,8 @@ import org.mockito.Mock;
 import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.AthenaRequest;
 import software.amazon.awssdk.services.athena.model.AthenaResponse;
+import software.amazon.awssdk.services.athena.model.CreateDataCatalogRequest;
+import software.amazon.awssdk.services.athena.model.CreateDataCatalogResponse;
 import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.TagResourceRequest;
 import software.amazon.awssdk.services.athena.model.TagResourceResponse;
@@ -16,6 +20,8 @@ import software.amazon.awssdk.services.athena.model.UntagResourceRequest;
 import software.amazon.awssdk.services.athena.model.UntagResourceResponse;
 import software.amazon.awssdk.services.athena.model.UpdateDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.UpdateDataCatalogResponse;
+import software.amazon.awssdk.services.athena.model.UpdateWorkGroupRequest;
+import software.amazon.awssdk.services.athena.model.UpdateWorkGroupResponse;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
@@ -25,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,6 +82,29 @@ public class UpdateHandlerTest extends BaseHandlerTest {
         TagResourceRequest tagRequest =
             captureRequests(verifiedClient()::tagResource, TagResourceRequest.class).get(0);
         assertThat(tagRequest.tags().containsAll(newModel.getTags()));
+    }
+
+    @Test
+    public void testSuccessState_WithAddingSystemTags() {
+        final ResourceModel resourceModel = buildTestResourceModelWithNullTags();
+        Map<String, String> systemTags = new HashMap<>();
+        systemTags.put("aws:tag:somekey", "somevalue");
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                                                                      .desiredResourceState(resourceModel)
+                                                                      .systemTags(systemTags)
+                                                                      .region("region")
+                                                                      .awsAccountId("account")
+                                                                      .build();
+
+        mockInvocation(true, false);
+        mockSuccessfulReadhandler(resourceModel);
+        final ProgressEvent<ResourceModel, CallbackContext> response = testHandleRequest(request);
+        assertDesiredState(response, request);
+
+        // Verify that tags are added
+        TagResourceRequest tagRequest =
+                captureRequests(verifiedClient()::tagResource, TagResourceRequest.class).get(0);
+        assertThat(tagRequest.tags().containsAll(systemTags.entrySet()));
     }
 
     @Test

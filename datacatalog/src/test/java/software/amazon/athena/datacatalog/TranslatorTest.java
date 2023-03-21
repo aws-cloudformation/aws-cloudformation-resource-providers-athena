@@ -19,26 +19,35 @@ public class TranslatorTest {
 
         ResourceModel resourceModel = BaseHandlerTest.buildTestResourceModel();
         Map<String, String> stackTags = new HashMap<>();
+        Map<String, String> systemTags = new HashMap<>();
 
         //Case 0: Empty test.
-        List<Tag> tags = Translator.convertToAthenaSdkTags(Collections.emptyList(), stackTags);
+        List<Tag> tags = Translator.convertToAthenaSdkTags(Collections.emptyList(), stackTags, systemTags);
         assertThat(tags).isNull();
 
         //Case 1: No stack tags
-        tags = Translator.convertToAthenaSdkTags(resourceModel.getTags(), stackTags);
+        tags = Translator.convertToAthenaSdkTags(resourceModel.getTags(), stackTags, systemTags);
         assertThat(tags.size()).isEqualTo(1);
 
         //Case 2: Valid stack tags
         stackTags.put("StackKey", "StackValue");
-        tags = Translator.convertToAthenaSdkTags(resourceModel.getTags(), stackTags);
+        tags = Translator.convertToAthenaSdkTags(resourceModel.getTags(), stackTags, systemTags);
         assertThat(tags.size()).isEqualTo(2);
 
         //Case 3: Stack tag overridden by resource tag.
         stackTags.put("testKey1", "StackTagValue");
-        tags = Translator.convertToAthenaSdkTags(resourceModel.getTags(), stackTags);
+        tags = Translator.convertToAthenaSdkTags(resourceModel.getTags(), stackTags, systemTags);
         assertThat(tags.size()).isEqualTo(2);
         Optional<String> value = tags.stream().filter(tag -> "testKey1".equals(tag.key())).map(Tag::value).findFirst();
         assertThat(value.isPresent()).isTrue();
         assertThat("someValue1".equals(value.get())).isTrue();
+
+        //Case 4: Valid system tags
+        systemTags.put("aws:tag:systemTagKey", "systemTagValue");
+        tags = Translator.convertToAthenaSdkTags(resourceModel.getTags(), stackTags, systemTags);
+        assertThat(tags.size()).isEqualTo(3);
+        value = tags.stream().filter(tag -> "aws:tag:systemTagKey".equals(tag.key())).map(Tag::value).findFirst();
+        assertThat(value.isPresent()).isTrue();
+        assertThat("systemTagValue".equals(value.get())).isTrue();
     }
 }
