@@ -1,33 +1,36 @@
 {
-  "CreateInputs": {
-    "Name": "ContractTestsReservation",
-    "TargetDpus": 24,
-    "CapacityAssignmentConfiguration" : {
-      "CapacityAssignments": [
+    "CreateInputs": {
+        "Name": "ContractTestsReservation",
+        "TargetDpus": 24,
+        "CapacityAssignmentConfiguration": {
+            "CapacityAssignments": [
+                {
+                    "WorkgroupNames": [
+                        "{{awsathenacapacityreservationcto1}}",
+                        "{{awsathenacapacityreservationcto2}}"
+                    ]
+                }
+            ]
+        },
+        "Tags": [
+            {
+                "Key": "someKey",
+                "Value": "someValue"
+            }
+        ]
+    },
+    "PatchInputs": [
         {
-          "WorkgroupNames":["{{awsathenacapacityreservationcto1}}", "{{awsathenacapacityreservationcto2}}"]
+            "op": "replace",
+            "path": "/Tags/0",
+            "value": {
+                "Key": "someNewKey",
+                "Value": "someNewValue"
+            }
+        },
+        {
+            "op": "remove",
+            "path": "/CapacityAssignmentConfiguration/CapacityAssignments/0/1"
         }
-      ]
-    },
-    "Tags" : [
-      {
-        "Key":"someKey",
-        "Value":"someValue"
-      }
     ]
-  },
-  "PatchInputs": [
-    {
-      "op": "replace",
-      "path": "/Tags/0",
-      "value": {
-        "Key":"someNewKey",
-        "Value":"someNewValue"
-      }
-    },
-    {
-      "op": "remove",
-      "path": "/CapacityAssignmentConfiguration/CapacityAssignments/0/1"
-    }
-  ]
 }

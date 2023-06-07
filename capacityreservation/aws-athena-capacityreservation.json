@@ -38,7 +38,7 @@
                 "$ref": "#/definitions/WorkgroupName"
             }
         },
-        "CapacityAssignment" : {
+        "CapacityAssignment": {
             "type": "object",
             "properties": {
                 "WorkgroupNames": {
@@ -148,7 +148,9 @@
         "/properties/Arn"
     ],
     "additionalIdentifiers": [
-        ["/properties/Name"]
+        [
+            "/properties/Name"
+        ]
     ],
     "handlers": {
         "create": {
