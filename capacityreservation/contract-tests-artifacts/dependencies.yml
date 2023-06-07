@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  ContractTestS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub cfn-athena-cr-bucket-name-${AWS::Region}-${AWS::AccountId}
+  CapacityReservationContractTestWorkGroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: CapacityReservationContractTestWorkGroup
+      Description: contract test workgroup for capacity reservation
+      State: ENABLED
+      WorkGroupConfiguration:
+        EngineVersion:
+          SelectedEngineVersion: Athena engine version 3
+          EffectiveEngineVersion: Athena engine version 3
+  CapacityReservationContractTestWorkGroup2:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: CapacityReservationContractTestWorkGroup2
+      Description: contract test workgroup for capacity reservation
+      State: ENABLED
+      WorkGroupConfiguration:
+        EngineVersion:
+          SelectedEngineVersion: Athena engine version 3
+          EffectiveEngineVersion: Athena engine version 3
+
+Outputs:
+  ContractTestWorkgroup:
+    Value: !Ref CapacityReservationContractTestWorkGroup
+    Export:
+      Name: awsathenacapacityreservationcto1
+  ContractTestWorkgroup2:
+    Value: !Ref CapacityReservationContractTestWorkGroup2
+    Export:
+      Name: awsathenacapacityreservationcto2
