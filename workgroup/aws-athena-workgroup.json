@@ -349,21 +349,18 @@
                 "s3:PutObject",
                 "s3:ListMultipartUploadParts",
                 "kms:Decrypt",
-                "kms:GenerateDataKey"            ]
+                "kms:GenerateDataKey"
+            ]
         },
         "read": {
             "permissions": [
                 "athena:GetWorkGroup",
-                "athena:ListTagsForResource",
-                "s3:*",
-                "kms:*"
+                "athena:ListTagsForResource"
             ]
         },
         "list": {
             "permissions": [
-                "athena:ListWorkGroups",
-                "s3:*",
-                "kms:*"
+                "athena:ListWorkGroups"
             ]
         },
         "delete": {
