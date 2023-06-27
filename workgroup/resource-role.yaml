@@ -38,6 +38,9 @@ Resources:
                 - "athena:TagResource"
                 - "athena:UntagResource"
                 - "athena:UpdateWorkGroup"
+                - "iam:PassRole"
+                - "kms:*"
+                - "s3:*"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:

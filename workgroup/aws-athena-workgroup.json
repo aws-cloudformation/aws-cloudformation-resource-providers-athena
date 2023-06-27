@@ -339,31 +339,44 @@
         "create": {
             "permissions": [
                 "athena:CreateWorkGroup",
-                "athena:TagResource"
+                "athena:TagResource",
+                "iam:PassRole",
+                "s3:*",
+                "kms:*"
             ]
         },
         "read": {
             "permissions": [
                 "athena:GetWorkGroup",
-                "athena:ListTagsForResource"
+                "athena:ListTagsForResource",
+                "s3:*",
+                "kms:*"
             ]
         },
         "list": {
             "permissions": [
-                "athena:ListWorkGroups"
+                "athena:ListWorkGroups",
+                "s3:*",
+                "kms:*"
             ]
         },
         "delete": {
             "permissions": [
                 "athena:DeleteWorkGroup",
-                "athena:UntagResource"
+                "athena:GetWorkGroup",
+                "athena:UntagResource",
+                "s3:*",
+                "kms:*"
             ]
         },
         "update": {
             "permissions": [
                 "athena:UpdateWorkGroup",
                 "athena:TagResource",
-                "athena:UntagResource"
+                "athena:UntagResource",
+                "iam:PassRole",
+                "s3:*",
+                "kms:*"
             ]
         }
     },
