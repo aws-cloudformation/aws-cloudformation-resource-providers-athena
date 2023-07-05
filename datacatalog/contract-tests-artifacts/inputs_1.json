@@ -1,6 +1,6 @@
 {
     "CreateInputs": {
-        "Name": "DataCatalog",
+        "Name": "DataCatalog04072023",
         "Description": "contract test hive catalog",
         "Type": "GLUE",
         "Tags": [
