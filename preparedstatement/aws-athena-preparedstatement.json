@@ -63,7 +63,9 @@
                         "$ref": "resource-schema.json#/properties/WorkGroup"
                     }
                 },
-                "required": ["WorkGroup"]
+                "required": [
+                    "WorkGroup"
+                ]
             },
             "permissions": [
                 "athena:ListPreparedStatements"
