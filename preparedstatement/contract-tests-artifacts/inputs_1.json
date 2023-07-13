@@ -5,5 +5,9 @@
         "QueryStatement": "SELECT 1+?",
         "WorkGroup": "primary"
     },
-    "PatchInputs": []
+    "PatchInputs": [],
+    "ListInputs": {
+        "WorkGroup": "primary"
+    }
+
 }
