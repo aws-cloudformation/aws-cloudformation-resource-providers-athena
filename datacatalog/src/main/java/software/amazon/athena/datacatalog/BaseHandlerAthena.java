@@ -8,6 +8,8 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import java.net.URI;
+
 public abstract class BaseHandlerAthena extends BaseHandler<CallbackContext> {
 
   @Override
@@ -33,7 +35,8 @@ public abstract class BaseHandlerAthena extends BaseHandler<CallbackContext> {
 
   public AthenaClient getClient() {
     return AthenaClient.builder()
-        .httpClient(LambdaWrapper.HTTP_CLIENT)
-        .build();
+            .endpointOverride(URI.create("https://athena-webservice-preprod.eu-west-1.amazonaws.com"))
+            .httpClient(LambdaWrapper.HTTP_CLIENT)
+            .build();
   }
 }

@@ -1,9 +1,13 @@
 package software.amazon.athena.datacatalog;
 
+import static software.amazon.athena.datacatalog.HandlerUtils.getDataCatalog;
 import static software.amazon.athena.datacatalog.HandlerUtils.handleExceptions;
 
 import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.AthenaException;
+import software.amazon.awssdk.services.athena.model.DataCatalog;
+import software.amazon.awssdk.services.athena.model.DataCatalogStatus;
+import software.amazon.awssdk.services.athena.model.DataCatalogType;
 import software.amazon.awssdk.services.athena.model.DeleteDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.DeleteDataCatalogResponse;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -31,9 +35,26 @@ public class DeleteHandler extends BaseHandlerAthena {
             request.getDesiredResourceState(), callbackContext)
             .translateToServiceRequest(Translator::deleteDataCatalogRequest)
             .makeServiceCall(this::deleteDataCatalog)
-            .done(deleteDataCatalogResponse -> ProgressEvent.<ResourceModel, CallbackContext>builder()
-                .status(OperationStatus.SUCCESS)
-                .build());
+            .stabilize((deleteRequest, deleteResponse, client, model, context) -> {
+                if (model.getType().equals(DataCatalogType.FEDERATED.name())) {
+                    return !getDataCatalog(client, model).status().equals(DataCatalogStatus.DELETE_IN_PROGRESS);
+                }
+                return true;
+            })
+            .done((deleteRequest, deleteResponse, client, model, context) -> {
+                OperationStatus operationStatus = OperationStatus.SUCCESS;
+                ProgressEvent.ProgressEventBuilder<ResourceModel, CallbackContext> progressEventBuilder = ProgressEvent.<ResourceModel, CallbackContext>builder();
+                if (model.getType().equals(DataCatalogType.FEDERATED.name())) {
+                    DataCatalog dataCatalog = getDataCatalog(client, model);
+                    if (!dataCatalog.status().equals(DataCatalogStatus.DELETE_COMPLETE)) {
+                        operationStatus = OperationStatus.FAILED;
+                        progressEventBuilder.message(dataCatalog.error());
+                    }
+                }
+                return progressEventBuilder
+                        .status(operationStatus)
+                        .build();
+            });
     }
 
     private DeleteDataCatalogResponse deleteDataCatalog(
