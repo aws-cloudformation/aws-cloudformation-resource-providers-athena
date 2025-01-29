@@ -112,6 +112,17 @@ public abstract class BaseHandlerTest {
         .build();
   }
 
+  protected static ResourceModel buildTestResourceModelFederated() {
+    return ResourceModel.builder()
+            .name("TestCatalog")
+            .description("full description")
+            .type("FEDERATED")
+            .tags(Lists.list(
+                    Tag.builder().key("testKey1").value("someValue1").build()))
+            .parameters(ImmutableMap.of("connection-type", "DYNAMODB", "connection-properties", "{\"spill_bucket\":\"test_spill\"}"))
+            .build();
+  }
+
   protected static ResourceModel buildTestResourceModelWithNullTags() {
     return ResourceModel.builder()
         .name("TestCatalog")
