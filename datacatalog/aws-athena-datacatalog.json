@@ -186,6 +186,10 @@
         "tagUpdatable": true,
         "cloudFormationSystemTags": true,
         "tagProperty": "/properties/Tags",
-        "permissions": ["athena:UntagResource", "athena:TagResource", "athena:ListTagsForResource"]
+        "permissions": [
+            "athena:UntagResource",
+            "athena:TagResource",
+            "athena:ListTagsForResource"
+        ]
     }
 }

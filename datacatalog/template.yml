@@ -13,11 +13,11 @@ Resources:
     Properties:
       Handler: software.amazon.athena.datacatalog.HandlerWrapper::handleRequest
       Runtime: java11
-      CodeUri: ./target/example-jeff-jeffcatalog-handler-1.0-SNAPSHOT.jar
+      CodeUri: ./target/aws-athena-datacatalog-handler-1.0-SNAPSHOT.jar
 
   TestEntrypoint:
     Type: AWS::Serverless::Function
     Properties:
       Handler: software.amazon.athena.datacatalog.HandlerWrapper::testEntrypoint
       Runtime: java11
-      CodeUri: ./target/example-jeff-jeffcatalog-handler-1.0-SNAPSHOT.jar
+      CodeUri: ./target/aws-athena-datacatalog-handler-1.0-SNAPSHOT.jar
