@@ -3,6 +3,7 @@ package software.amazon.athena.datacatalog;
 import java.util.stream.Collectors;
 
 import software.amazon.awssdk.services.athena.AthenaClient;
+import software.amazon.awssdk.services.athena.model.DataCatalogStatus;
 import software.amazon.awssdk.services.athena.model.ListDataCatalogsRequest;
 import software.amazon.awssdk.services.athena.model.ListDataCatalogsResponse;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -31,8 +32,9 @@ public class ListHandler extends BaseHandlerAthena {
 
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
             .resourceModels(listDataCatalogsResponse.dataCatalogsSummary()
-                .stream().map(Translator::getModelFromDataCatalogSummary)
-                .collect(Collectors.toList()))
+                    .stream().filter(summary -> !summary.status().equals(DataCatalogStatus.DELETE_COMPLETE))
+                    .map(Translator::getModelFromDataCatalogSummary)
+                    .collect(Collectors.toList()))
             .nextToken(listDataCatalogsResponse.nextToken())
             .status(OperationStatus.SUCCESS)
             .callbackContext(callbackContext)

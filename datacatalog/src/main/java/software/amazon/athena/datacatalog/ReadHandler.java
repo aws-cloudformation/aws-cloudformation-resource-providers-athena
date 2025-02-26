@@ -9,10 +9,13 @@ import java.util.List;
 import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.AthenaException;
 import software.amazon.awssdk.services.athena.model.DataCatalog;
+import software.amazon.awssdk.services.athena.model.DataCatalogStatus;
+import software.amazon.awssdk.services.athena.model.DataCatalogType;
 import software.amazon.awssdk.services.athena.model.GetDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.GetDataCatalogResponse;
 import software.amazon.awssdk.services.athena.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.athena.model.ListTagsForResourceResponse;
+import software.amazon.cloudformation.exceptions.ResourceNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -33,6 +36,13 @@ public class ReadHandler extends BaseHandlerAthena {
             .translateToServiceRequest(Translator::getDataCatalogRequest)
             .makeServiceCall(this::getDataCatalog)
             .done((getDataCatalogRequest, getDataCatalogResponse, proxyInvocation, resourceModel, context) -> {
+                DataCatalog d = getDataCatalogResponse.dataCatalog();
+                if (d.type().equals(DataCatalogType.FEDERATED)) {
+                    if (d.status().equals(DataCatalogStatus.DELETE_COMPLETE)) {
+                        throw new ResourceNotFoundException("Federated catalog %s is deleted", d.name());
+                    }
+                }
+
                 // get tags
                 String arn = getDatacatalogArn(request, resourceModel.getName());
                 ListTagsForResourceRequest listTagsRequest = ListTagsForResourceRequest.builder()
@@ -53,15 +63,20 @@ public class ReadHandler extends BaseHandlerAthena {
                     }
                 } while (nextToken != null);
 
-                DataCatalog d = getDataCatalogResponse.dataCatalog();
+                ResourceModel.ResourceModelBuilder resourceModelBuilder = ResourceModel.builder()
+                        .name(d.name())
+                        .description(d.description())
+                        .type(d.type().toString())
+                        .parameters(d.parameters())
+                        .tags(convertToResourceModelTags(tags))
+                        .status(d.statusAsString());
 
-                return ProgressEvent.defaultSuccessHandler(ResourceModel.builder()
-                    .name(d.name())
-                    .description(d.description())
-                    .type(d.type().toString())
-                    .parameters(d.parameters())
-                    .tags(convertToResourceModelTags(tags))
-                    .build());
+                if (d.type().equals(DataCatalogType.FEDERATED)) {
+                    resourceModelBuilder.connectionType(d.connectionTypeAsString());
+                    resourceModelBuilder.error(d.error() == null ? "" : d.error());
+                }
+
+                return ProgressEvent.defaultSuccessHandler(resourceModelBuilder.build());
             });
     }
 

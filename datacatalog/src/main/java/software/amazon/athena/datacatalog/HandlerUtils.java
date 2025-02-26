@@ -1,9 +1,5 @@
 package software.amazon.athena.datacatalog;
 
-import com.amazonaws.auth.policy.Resource;
-import com.google.common.collect.ImmutableMap;
-import java.util.Map;
-
 import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.AthenaException;
 import software.amazon.awssdk.services.athena.model.DataCatalog;
@@ -23,7 +19,7 @@ class HandlerUtils {
    */
   private static final String DATACATALOG_ARN_FORMAT = "arn:%s:athena:%s:%s:datacatalog/%s";
 
-  public static final String RESOURCE_TYPE = "Example::Jeff::JeffCatalog";
+  public static final String RESOURCE_TYPE = "AWS::Athena::DataCatalog";
 
   static String getDatacatalogArn(ResourceHandlerRequest<ResourceModel> request, String catalogName) {
     return String.format(DATACATALOG_ARN_FORMAT,

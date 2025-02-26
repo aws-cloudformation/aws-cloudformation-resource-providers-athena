@@ -1,6 +1,6 @@
 {
     "artifact_type": "RESOURCE",
-    "typeName": "Example::Jeff::JeffCatalog",
+    "typeName": "AWS::Athena::DataCatalog",
     "language": "java",
     "runtime": "java11",
     "entrypoint": "software.amazon.athena.datacatalog.HandlerWrapper::handleRequest",

@@ -6,6 +6,7 @@ import static software.amazon.athena.datacatalog.HandlerUtils.handleExceptions;
 
 import com.amazonaws.util.CollectionUtils;
 import com.google.common.collect.Sets;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.List;

@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.athena.model.DataCatalogStatus;
 import software.amazon.awssdk.services.athena.model.DataCatalogType;
 import software.amazon.awssdk.services.athena.model.DeleteDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.DeleteDataCatalogResponse;
+import software.amazon.awssdk.services.athena.model.InvalidRequestException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -32,25 +33,32 @@ public class DeleteHandler extends BaseHandlerAthena {
         this.logger = logger;
 
         return proxy.initiate("athena::deleteDataCatalog", athenaProxyClient,
-            request.getDesiredResourceState(), callbackContext)
+                        request.getDesiredResourceState(), callbackContext)
             .translateToServiceRequest(Translator::deleteDataCatalogRequest)
             .makeServiceCall(this::deleteDataCatalog)
             .stabilize((deleteRequest, deleteResponse, client, model, context) -> {
-                if (model.getType().equals(DataCatalogType.FEDERATED.name())) {
-                    return !getDataCatalog(client, model).status().equals(DataCatalogStatus.DELETE_IN_PROGRESS);
+                try {
+                    DataCatalog dataCatalog = getDataCatalog(client, model);
+                    if (dataCatalog.type().equals(DataCatalogType.FEDERATED)) {
+                        return !dataCatalog.status().equals(DataCatalogStatus.DELETE_IN_PROGRESS);
+                    }
                 }
+                catch (InvalidRequestException ignored) {} // GetDataCatalog should fail for non-FEDERATED after DeleteDataCatalog
                 return true;
             })
             .done((deleteRequest, deleteResponse, client, model, context) -> {
                 OperationStatus operationStatus = OperationStatus.SUCCESS;
                 ProgressEvent.ProgressEventBuilder<ResourceModel, CallbackContext> progressEventBuilder = ProgressEvent.<ResourceModel, CallbackContext>builder();
-                if (model.getType().equals(DataCatalogType.FEDERATED.name())) {
+                try {
                     DataCatalog dataCatalog = getDataCatalog(client, model);
-                    if (!dataCatalog.status().equals(DataCatalogStatus.DELETE_COMPLETE)) {
-                        operationStatus = OperationStatus.FAILED;
-                        progressEventBuilder.message(dataCatalog.error());
+                    if (dataCatalog.type().equals(DataCatalogType.FEDERATED)) {
+                        if (!dataCatalog.status().equals(DataCatalogStatus.DELETE_COMPLETE)) {
+                            operationStatus = OperationStatus.FAILED;
+                            progressEventBuilder.message(dataCatalog.error());
+                        }
                     }
                 }
+                catch (InvalidRequestException ignored) {} // GetDataCatalog should fail for non-FEDERATED after DeleteDataCatalog
                 return progressEventBuilder
                         .status(operationStatus)
                         .build();

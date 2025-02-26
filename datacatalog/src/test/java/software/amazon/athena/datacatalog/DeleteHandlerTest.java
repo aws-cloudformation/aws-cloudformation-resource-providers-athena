@@ -2,6 +2,7 @@ package software.amazon.athena.datacatalog;
 
 import software.amazon.awssdk.services.athena.model.DataCatalog;
 import software.amazon.awssdk.services.athena.model.DataCatalogStatus;
+import software.amazon.awssdk.services.athena.model.DataCatalogType;
 import software.amazon.awssdk.services.athena.model.DeleteDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.DeleteDataCatalogResponse;
 import software.amazon.awssdk.services.athena.model.GetDataCatalogRequest;
@@ -41,6 +42,15 @@ public class DeleteHandlerTest extends BaseHandlerTest {
         // Mock
         when(proxyClient.client().deleteDataCatalog(any(DeleteDataCatalogRequest.class)))
             .thenReturn(DeleteDataCatalogResponse.builder().build());
+        when(proxyClient.client().getDataCatalog(any(GetDataCatalogRequest.class)))
+                .thenReturn(
+                        GetDataCatalogResponse.builder()
+                                .dataCatalog(DataCatalog.builder()
+                                        .type(DataCatalogType.HIVE)
+                                        .status(DataCatalogStatus.DELETE_COMPLETE)
+                                        .build())
+                                .build()
+                );
 
         final ProgressEvent<ResourceModel, CallbackContext> response = testHandleRequest(request);
 
@@ -62,6 +72,7 @@ public class DeleteHandlerTest extends BaseHandlerTest {
                 .thenReturn(
                         GetDataCatalogResponse.builder()
                                 .dataCatalog(DataCatalog.builder()
+                                        .type(DataCatalogType.FEDERATED)
                                         .status(DataCatalogStatus.DELETE_COMPLETE)
                                         .build())
                                 .build()
