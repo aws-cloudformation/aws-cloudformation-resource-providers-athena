@@ -1,12 +1,15 @@
 package software.amazon.athena.datacatalog;
 
-import com.google.common.collect.ImmutableMap;
-import java.util.Map;
+import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.AthenaException;
+import software.amazon.awssdk.services.athena.model.DataCatalog;
+import software.amazon.awssdk.services.athena.model.GetDataCatalogRequest;
+import software.amazon.awssdk.services.athena.model.GetDataCatalogResponse;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
 import software.amazon.awssdk.services.athena.model.ResourceNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 class HandlerUtils {
@@ -37,5 +40,12 @@ class HandlerUtils {
     } else {
       return e;
     }
+  }
+
+  static DataCatalog getDataCatalog(ProxyClient<AthenaClient> client, ResourceModel model) {
+    GetDataCatalogRequest getDataCatalogRequest = Translator.getDataCatalogRequest(model);
+    GetDataCatalogResponse getDataCatalogResponse = client.injectCredentialsAndInvokeV2(
+            getDataCatalogRequest, client.client()::getDataCatalog);
+    return getDataCatalogResponse.dataCatalog();
   }
 }

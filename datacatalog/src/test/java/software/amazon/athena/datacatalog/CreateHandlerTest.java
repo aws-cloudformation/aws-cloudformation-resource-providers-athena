@@ -2,14 +2,15 @@ package software.amazon.athena.datacatalog;
 
 import org.mockito.ArgumentCaptor;
 import software.amazon.awssdk.http.SdkHttpResponse;
-import software.amazon.awssdk.services.athena.AthenaClient;
 import software.amazon.awssdk.services.athena.model.AthenaRequest;
 import software.amazon.awssdk.services.athena.model.AthenaResponse;
 import software.amazon.awssdk.services.athena.model.CreateDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.CreateDataCatalogResponse;
-import software.amazon.awssdk.services.athena.model.CreateWorkGroupRequest;
+import software.amazon.awssdk.services.athena.model.DataCatalog;
+import software.amazon.awssdk.services.athena.model.DataCatalogStatus;
+import software.amazon.awssdk.services.athena.model.GetDataCatalogRequest;
+import software.amazon.awssdk.services.athena.model.GetDataCatalogResponse;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
-import software.amazon.awssdk.services.athena.model.TagResourceRequest;
 import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
@@ -26,7 +27,6 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +56,37 @@ public class CreateHandlerTest extends BaseHandlerTest {
                 .sdkHttpResponse(SdkHttpResponse.builder().statusCode(200).build())
                 .build()
         );
+
+        // Call
+        final ProgressEvent<ResourceModel, CallbackContext> response = testHandleRequest(request);
+        // Assert
+        assertSuccessState(response);
+        assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
+        assertThat(response.getResourceModels()).isNull();
+    }
+
+    @Test
+    public void testFederatedSuccessState() {
+        final ResourceModel model = buildTestResourceModelFederated();
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        // Mock
+        when(proxyClient.client().createDataCatalog(any(CreateDataCatalogRequest.class)))
+                .thenReturn((CreateDataCatalogResponse)
+                        CreateDataCatalogResponse.builder()
+                                .sdkHttpResponse(SdkHttpResponse.builder().statusCode(200).build())
+                                .build()
+                );
+        when(proxyClient.client().getDataCatalog(any(GetDataCatalogRequest.class)))
+                .thenReturn(
+                        GetDataCatalogResponse.builder()
+                                .dataCatalog(DataCatalog.builder()
+                                        .status(DataCatalogStatus.CREATE_COMPLETE)
+                                        .build())
+                                .build()
+                );
 
         // Call
         final ProgressEvent<ResourceModel, CallbackContext> response = testHandleRequest(request);

@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "AWS::Athena::DataCatalog",
     "language": "java",
-    "runtime": "java8",
+    "runtime": "java11",
     "entrypoint": "software.amazon.athena.datacatalog.HandlerWrapper::handleRequest",
     "testEntrypoint": "software.amazon.athena.datacatalog.HandlerWrapper::testEntrypoint",
     "settings": {

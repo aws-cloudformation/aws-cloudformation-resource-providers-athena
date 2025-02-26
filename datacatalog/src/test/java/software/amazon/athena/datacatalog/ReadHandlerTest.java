@@ -43,6 +43,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
             .type("HIVE")
             .description("hello world !!!")
             .parameters(ImmutableMap.of("metadata-function", "testing"))
+            .status("CREATE_COMPLETE")
             .build();
         // Mock
         when(proxyClient.client().getDataCatalog(any(GetDataCatalogRequest.class)))
@@ -71,17 +72,58 @@ public class ReadHandlerTest extends BaseHandlerTest {
     }
 
     @Test
+    public void testFederatedSuccessState() {
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .region("")
+                .awsAccountId("")
+                .desiredResourceState(buildTestResourceModelFederated())
+                .build();
+
+        final DataCatalog expected = DataCatalog.builder()
+                .name("TestCatalog")
+                .type("FEDERATED")
+                .description("hello world !!!")
+                .parameters(ImmutableMap.of("metadata-function", "testing"))
+                .status("CREATE_COMPLETE")
+                .error("No error")
+                .connectionType("DYNAMODB")
+                .build();
+        // Mock
+        when(proxyClient.client().getDataCatalog(any(GetDataCatalogRequest.class)))
+                .thenReturn(GetDataCatalogResponse.builder()
+                        .dataCatalog(expected)
+                        .build());
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder()
+                        .tags(Arrays.asList(
+                                software.amazon.awssdk.services.athena.model.Tag.builder()
+                                        .key("testK").value("testV")
+                                        .build()))
+                        .nextToken("1stinvocation")
+                        .build())
+                .thenReturn(ListTagsForResourceResponse.builder().build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = testHandleRequest(request);
+
+        assertThat(response.getResourceModel().getName()).isEqualTo(expected.name());
+        assertThat(response.getResourceModel().getType()).isEqualTo(expected.type().toString());
+        assertThat(response.getResourceModel().getDescription()).isEqualTo(expected.description());
+        assertThat(response.getResourceModel().getError()).isEqualTo(expected.error());
+        assertThat(response.getResourceModel().getStatus()).isEqualTo(expected.statusAsString());
+        assertThat(response.getResourceModel().getConnectionType()).isEqualTo(expected.connectionTypeAsString());
+        assertThat(response.getResourceModel().getTags().get(0).getKey()).isEqualTo("testK");
+        assertThat(response.getResourceModel().getTags().get(0).getValue()).isEqualTo("testV");
+        assertThat(response.getResourceModels()).isNull();
+    }
+
+    @Test
     public void testSuccessState_ResourceNotFound() {
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
             .region("")
             .awsAccountId("")
             .desiredResourceState(buildSimpleTestResourceModel())
-            .build();
-
-        final DataCatalog result = DataCatalog.builder()
-            .name("getName")
-            .type("HIVE")
-            .description("hello world")
             .build();
 
         // Mock
