@@ -754,4 +754,51 @@ public class UpdateHandlerTest {
     // Call
     assertThrows(CfnNotFoundException.class, () -> new ReadHandler().handleRequest(proxy, request, null, logger));
   }
+
+  @Test
+  void testSuccessStateWithManagedStorageUpdates() {
+    // Prepare inputs
+    final ResourceModel resourceModel = ResourceModel.builder()
+            .name("Primary")
+            .description("Primary workgroup update description")
+            .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
+                    .enforceWorkGroupConfiguration(true)
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .requesterPaysEnabled(true)
+                    .removeBytesScannedCutoffPerQuery(true)
+                    .managedQueryResultsConfiguration(ManagedQueryResultsConfiguration.builder()
+                            .enabled(true)
+                            .encryptionConfiguration(ManagedStorageEncryptionConfiguration.builder()
+                                    .kmsKey("eiifcckijivunlgvvggjeiheertfetujenrnndugggnh")
+                                    .build())
+                            .timeToLive("1 Day")
+                            .build())
+                    .build())
+            .state("disabled")
+            .build();
+    final ResourceModel oldModel = ResourceModel.builder()
+            .name("Primary")
+            .build();
+
+    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .previousResourceState(oldModel)
+            .desiredResourceState(resourceModel)
+            .build();
+
+    // Mock
+    doReturn(UpdateWorkGroupResponse.builder().build())
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
+
+    // Call
+    final ProgressEvent<ResourceModel, CallbackContext> response
+            = new UpdateHandler().handleRequest(proxy, request, null, logger);
+
+    // Assert
+    assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+    assertThat(response.getCallbackContext()).isNull();
+    assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+    assertThat(response.getMessage()).isNull();
+    assertThat(response.getErrorCode()).isNull();
+  }
 }
