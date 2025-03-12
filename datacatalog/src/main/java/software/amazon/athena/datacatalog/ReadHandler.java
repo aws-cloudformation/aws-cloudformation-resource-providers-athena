@@ -22,6 +22,7 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+
 public class ReadHandler extends BaseHandlerAthena {
 
     @Override
@@ -37,10 +38,8 @@ public class ReadHandler extends BaseHandlerAthena {
             .makeServiceCall(this::getDataCatalog)
             .done((getDataCatalogRequest, getDataCatalogResponse, proxyInvocation, resourceModel, context) -> {
                 DataCatalog d = getDataCatalogResponse.dataCatalog();
-                if (d.type().equals(DataCatalogType.FEDERATED)) {
-                    if (d.status().equals(DataCatalogStatus.DELETE_COMPLETE)) {
-                        throw new ResourceNotFoundException("Federated catalog %s is deleted", d.name());
-                    }
+                if (d.type().equals(DataCatalogType.FEDERATED) && d.status().equals(DataCatalogStatus.DELETE_COMPLETE)) {
+                    throw new ResourceNotFoundException("Federated catalog %s is deleted", d.name());
                 }
 
                 // get tags

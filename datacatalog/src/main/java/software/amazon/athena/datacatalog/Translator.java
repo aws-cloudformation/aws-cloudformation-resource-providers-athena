@@ -4,28 +4,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import software.amazon.awssdk.services.athena.model.CreateDataCatalogRequest;
+import software.amazon.awssdk.services.athena.model.DataCatalogType;
 import software.amazon.awssdk.services.athena.model.DataCatalogSummary;
 import software.amazon.awssdk.services.athena.model.DataCatalogType;
 import software.amazon.awssdk.services.athena.model.DeleteDataCatalogRequest;
 import software.amazon.awssdk.services.athena.model.GetDataCatalogRequest;
+import software.amazon.awssdk.services.athena.model.TagResourceRequest;
+import software.amazon.awssdk.services.athena.model.UntagResourceRequest;
 import software.amazon.awssdk.services.athena.model.UpdateDataCatalogRequest;
 
 class Translator {
 
-  static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel,
-                                                           Map<String, String> stackTags,
-                                                           Map<String, String> systemTags) {
+  static CreateDataCatalogRequest createDataCatalogRequest(ResourceModel resourceModel, Map<String, String> stackTags) {
     return CreateDataCatalogRequest.builder()
         .name(resourceModel.getName())
         .type(resourceModel.getType())
         .description(resourceModel.getDescription())
         .parameters(resourceModel.getParameters())
-        .tags(convertToAthenaSdkTags(resourceModel.getTags(), stackTags, systemTags))
+        .tags(convertToAthenaSdkTags(resourceModel.getTags(), stackTags))
         .build();
   }
 
@@ -58,11 +62,9 @@ class Translator {
   }
 
   static List<software.amazon.awssdk.services.athena.model.Tag> convertToAthenaSdkTags(
-          final Collection<Tag> resourceTags,
-          final Map<String, String> stackLevelTags,
-          final Map<String, String> systemTags) {
+          final Collection<Tag> resourceTags, final Map<String, String> stackLevelTags) {
 
-    if (CollectionUtils.isEmpty(resourceTags) && MapUtils.isEmpty(stackLevelTags) && MapUtils.isEmpty(systemTags)) {
+    if (CollectionUtils.isEmpty(resourceTags) && MapUtils.isEmpty(stackLevelTags)) {
       return null;
     }
     Map<String, String> consolidatedTags = Maps.newHashMap();
@@ -73,10 +75,6 @@ class Translator {
     // Resource tags will override stack level tags with same keys.
     if (CollectionUtils.isNotEmpty(resourceTags)) {
       resourceTags.forEach(tag -> consolidatedTags.put(tag.getKey(), tag.getValue()));
-    }
-
-    if (MapUtils.isNotEmpty(systemTags)){
-      consolidatedTags.putAll(systemTags);
     }
 
     List<software.amazon.awssdk.services.athena.model.Tag> sdkTags = new ArrayList<>();
@@ -109,5 +107,36 @@ class Translator {
     }
 
     return resourceModelBuilder.build();
+  }
+
+  /**
+   * Request to add/update tags to/of a resource
+   * @param arn the ARN of the resource
+   * @return the AWS service request to tag a resource
+   */
+  static TagResourceRequest tagResourceRequest(final String arn, final Map<String, String> addedTags) {
+    Objects.requireNonNull(arn);
+    return TagResourceRequest.builder()
+            .resourceARN(arn)
+            .tags(addedTags.keySet().stream()
+                    .map(tagKey -> software.amazon.awssdk.services.athena.model.Tag.builder()
+                            .key(tagKey)
+                            .value(addedTags.get(tagKey))
+                            .build())
+                    .collect(Collectors.toList()))
+            .build();
+  }
+
+  /**
+   * Request to remove tags from a resource
+   * @param arn the ARN of the resource
+   * @return the AWS service request to untag a resource
+   */
+  static UntagResourceRequest untagResourceRequest(final String arn, final Set<String> removedTags) {
+    Objects.requireNonNull(arn);
+    return UntagResourceRequest.builder()
+            .resourceARN(arn)
+            .tagKeys(removedTags)
+            .build();
   }
 }

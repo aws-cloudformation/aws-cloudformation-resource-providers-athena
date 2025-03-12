@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "AWS::Athena::WorkGroup",
     "language": "java",
-    "runtime": "java8",
+    "runtime": "java11",
     "entrypoint": "software.amazon.athena.workgroup.HandlerWrapper::handleRequest",
     "testEntrypoint": "software.amazon.athena.workgroup.HandlerWrapper::testEntrypoint",
     "settings": {
@@ -14,5 +14,6 @@
         ],
         "protocolVersion": "2.0.0"
     },
+    "logProcessorEnabled": "true",
     "executableEntrypoint": "software.amazon.athena.workgroup.HandlerWrapperExecutable"
 }

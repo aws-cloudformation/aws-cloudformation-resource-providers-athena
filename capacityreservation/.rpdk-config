@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "AWS::Athena::CapacityReservation",
     "language": "java",
-    "runtime": "java8",
+    "runtime": "java11",
     "entrypoint": "software.amazon.athena.capacityreservation.HandlerWrapper::handleRequest",
     "testEntrypoint": "software.amazon.athena.capacityreservation.HandlerWrapper::testEntrypoint",
     "settings": {
