@@ -87,6 +87,13 @@
                 "CSE_KMS"
             ]
         },
+        "ManagedQueryResultsTTL": {
+            "description": "The number of days Athena managed storage can keep the query results. Only supporting 1 day for now",
+            "type": "string",
+            "enum": [
+                "1 Day"
+            ]
+        },
         "RemoveBytesScannedCutoffPerQuery": {
             "description": "Indicates that the data usage control limit per query is removed.",
             "type": "boolean"
@@ -105,6 +112,16 @@
             "required": [
                 "EncryptionOption"
             ],
+            "additionalProperties": false
+        },
+        "ManagedStorageEncryptionConfiguration": {
+            "description": "Indicates the encryption configuration for Athena Managed Storage. If not setting this field, Managed Storage will encrypt the query results with Athena's encryption key",
+            "type": "object",
+            "properties": {
+                "KmsKey": {
+                    "$ref": "#/definitions/KmsKey"
+                }
+            },
             "additionalProperties": false
         },
         "RemoveEncryptionConfiguration": {
@@ -217,6 +234,22 @@
             },
             "additionalProperties": false
         },
+        "ManagedQueryResultsConfiguration": {
+            "description": "The configuration for the managed query results and encryption option. ResultConfiguration and ManagedQueryResultsConfiguration cannot be set at the same time",
+            "type": "object",
+            "properties": {
+                "EncryptionConfiguration": {
+                    "$ref": "#/definitions/ManagedStorageEncryptionConfiguration"
+                },
+                "Enabled": {
+                    "type": "boolean"
+                },
+                "TimeToLive": {
+                    "$ref": "#/definitions/ManagedQueryResultsTTL"
+                }
+            },
+            "additionalProperties": false
+        },
         "WorkGroupConfiguration": {
             "type": "object",
             "properties": {
@@ -246,6 +279,9 @@
                 },
                 "CustomerContentEncryptionConfiguration": {
                     "$ref": "#/definitions/CustomerContentEncryptionConfiguration"
+                },
+                "ManagedQueryResultsConfiguration": {
+                    "$ref": "#/definitions/ManagedQueryResultsConfiguration"
                 }
             },
             "additionalProperties": false
@@ -286,6 +322,9 @@
                 },
                 "RemoveCustomerContentEncryptionConfiguration": {
                     "$ref": "#/definitions/RemoveCustomerContentEncryptionConfiguration"
+                },
+                "ManagedQueryResultsConfiguration": {
+                    "$ref": "#/definitions/ManagedQueryResultsConfiguration"
                 }
             },
             "additionalProperties": false
