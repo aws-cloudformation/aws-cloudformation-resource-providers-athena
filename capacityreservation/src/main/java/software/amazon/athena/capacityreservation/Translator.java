@@ -133,7 +133,7 @@ public class Translator {
     return CreateCapacityReservationRequest.builder()
             .name(model.getName())
             .targetDpus(model.getTargetDpus().intValue())
-            .tags(tags.stream()
+            .tags(tags.isEmpty() ? null : tags.stream()
                     .map(tag -> translateToTag(tag))
                     .collect(Collectors.toList()))
             .build();
