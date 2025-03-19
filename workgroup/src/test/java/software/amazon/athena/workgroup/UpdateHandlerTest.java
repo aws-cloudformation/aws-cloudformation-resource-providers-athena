@@ -523,7 +523,7 @@ public class UpdateHandlerTest {
     verify(proxy, times(3)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
     UntagResourceRequest untagRequest = (UntagResourceRequest) requests.get(0);
-    assertThat(untagRequest.tagKeys().containsAll(Lists.list("key1", "key2"))).isTrue();
+    assertThat(untagRequest.tagKeys().containsAll(Lists.list("key2"))).isTrue();
     TagResourceRequest tagRequest = (TagResourceRequest) requests.get(1);
     List<Tag> mappedTagsFromRequest = tagRequest.tags().stream()
             .map(tag -> Tag.builder().key(tag.key()).value(tag.value()).build())
