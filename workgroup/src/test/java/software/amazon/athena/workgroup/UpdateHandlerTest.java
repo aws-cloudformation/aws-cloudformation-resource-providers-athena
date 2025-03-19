@@ -24,6 +24,7 @@ import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -177,7 +178,7 @@ public class UpdateHandlerTest {
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
     verify(proxy, times(1)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
-    assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
+    assertThat(requests.get(0)).isInstanceOf(UpdateWorkGroupRequest.class);
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
     assertEquals(HandlerUtils.DEFAULT_STATE, receivedRequest.state().toString());
@@ -244,7 +245,7 @@ public class UpdateHandlerTest {
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
     verify(proxy, times(1)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
-    assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
+    assertThat(requests.get(0)).isInstanceOf(UpdateWorkGroupRequest.class);
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
     assertEquals(configBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
@@ -296,7 +297,7 @@ public class UpdateHandlerTest {
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
     verify(proxy, times(1)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
-    assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
+    assertThat(requests.get(0)).isInstanceOf(UpdateWorkGroupRequest.class);
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
     assertEquals(configBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
@@ -347,7 +348,7 @@ public class UpdateHandlerTest {
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
     verify(proxy, times(1)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
-    assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
+    assertThat(requests.get(0)).isInstanceOf(UpdateWorkGroupRequest.class);
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
     assertEquals(configUpdatesBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
@@ -410,7 +411,10 @@ public class UpdateHandlerTest {
     verify(proxy, times(2)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
     TagResourceRequest tagRequest = (TagResourceRequest) requests.get(0);
-    assertThat(tagRequest.tags().containsAll(newTags));
+    List<Tag> mappedTagsFromRequest = tagRequest.tags().stream()
+            .map(tag -> Tag.builder().key(tag.key()).value(tag.value()).build())
+            .collect(Collectors.toList());
+    assertThat(new HashSet<>(mappedTagsFromRequest)).isEqualTo(new HashSet<>(newTags));
   }
 
   @Test
@@ -463,7 +467,7 @@ public class UpdateHandlerTest {
     verify(proxy, times(2)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
     UntagResourceRequest tagRequest = (UntagResourceRequest) requests.get(0);
-    assertThat(tagRequest.tagKeys().containsAll(oldTags.stream().map(Tag::getKey).collect(Collectors.toList())));
+    assertThat(tagRequest.tagKeys().containsAll(oldTags.stream().map(Tag::getKey).collect(Collectors.toList()))).isTrue();
   }
 
   @Test
@@ -519,9 +523,12 @@ public class UpdateHandlerTest {
     verify(proxy, times(3)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
     UntagResourceRequest untagRequest = (UntagResourceRequest) requests.get(0);
-    assertThat(untagRequest.tagKeys().containsAll(Lists.list("key1", "key2")));
+    assertThat(untagRequest.tagKeys().containsAll(Lists.list("key1", "key2"))).isTrue();
     TagResourceRequest tagRequest = (TagResourceRequest) requests.get(1);
-    assertThat(tagRequest.tags().containsAll(Lists.list(new Tag("key1", "value1new"), new Tag("key3", "value3"))));
+    List<Tag> mappedTagsFromRequest = tagRequest.tags().stream()
+            .map(tag -> Tag.builder().key(tag.key()).value(tag.value()).build())
+            .collect(Collectors.toList());
+    assertThat(new HashSet<>(mappedTagsFromRequest)).isEqualTo(new HashSet<>(Lists.list(new Tag("key1", "value1new"), new Tag("key3", "value3"))));
   }
 
   @Test
