@@ -14,6 +14,7 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,32 +55,32 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
 
   private UpdateWorkGroupResponse updateWorkgroup() {
     final ResourceModel newModel = request.getDesiredResourceState();
-    final ResourceModel oldModel = request.getPreviousResourceState();
-
-    final Set<Tag> oldTags = new HashSet<>(translator.createConsolidatedSdkTagsFromCfnTags(oldModel.getTags(), request.getPreviousResourceTags()));
-    final Set<Tag> newTags = new HashSet<>(translator.createConsolidatedSdkTagsFromCfnTags(newModel.getTags(), request.getDesiredResourceTags()));
     try {
       // Handle modifications to WorkGroup tags
-      if (!oldTags.equals(newTags)) {
+      if (TagHelper.shouldUpdateTags(request)) {
         String workGroupARN = getWorkGroupArn(request, newModel.getName());
 
-        // {old tags} - {new tags} = {tags to remove}
-        Set<Tag> tagsToRemove = Sets.difference(oldTags, newTags);
-        if (!tagsToRemove.isEmpty()) {
+        Map<String, String> previousTags = TagHelper.getPreviouslyAttachedTags(request);
+        Map<String, String> desiredTags = TagHelper.getNewDesiredTags(request);
+
+        Map<String, String> addedAndUpdatedTags = TagHelper.generateTagsToAddAndUpdate(previousTags, desiredTags);
+        Set<String> removedTags = TagHelper.generateTagsToRemove(previousTags, desiredTags);
+
+        if (!removedTags.isEmpty()) {
           UntagResourceRequest untagResourceRequest = UntagResourceRequest.builder()
-            .resourceARN(workGroupARN)
-            .tagKeys(tagsToRemove.stream().map(Tag::key).collect(Collectors.toList()))
-            .build();
+                  .resourceARN(workGroupARN)
+                  .tagKeys(removedTags)
+                  .build();
           clientProxy.injectCredentialsAndInvokeV2(untagResourceRequest, athenaClient::untagResource);
         }
 
-        // {new tags} - {old tags} = {tags to add}
-        Set<Tag> tagsToAdd = Sets.difference(newTags, oldTags);
-        if (!tagsToAdd.isEmpty()) {
+        if (!addedAndUpdatedTags.isEmpty()) {
           TagResourceRequest tagResourceRequest = TagResourceRequest.builder()
-            .resourceARN(workGroupARN)
-            .tags(tagsToAdd)
-            .build();
+                  .resourceARN(workGroupARN)
+                  .tags(addedAndUpdatedTags.entrySet().stream()
+                          .map(entry -> Tag.builder().key(entry.getKey()).value(entry.getValue()).build())
+                          .collect(Collectors.toList()))
+                  .build();
           clientProxy.injectCredentialsAndInvokeV2(tagResourceRequest, athenaClient::tagResource);
         }
       }
