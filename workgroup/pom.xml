@@ -116,9 +116,9 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>cfn-cli</executable>
+                            <executable>cfn</executable>
                             <commandlineArgs>generate</commandlineArgs>
-                            <workingDirectory></workingDirectory>
+                            <workingDirectory>${project.basedir}</workingDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -207,7 +207,7 @@
         </plugins>
         <resources>
             <resource>
-                <directory></directory>
+                <directory>${project.basedir}</directory>
                 <includes>
                     <include>aws-athena-workgroup.json</include>
                 </includes>

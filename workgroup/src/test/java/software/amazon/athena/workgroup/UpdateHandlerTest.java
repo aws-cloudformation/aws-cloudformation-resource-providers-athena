@@ -24,10 +24,8 @@ import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -180,7 +178,7 @@ public class UpdateHandlerTest {
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
     verify(proxy, times(1)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
-    assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
+    assertThat(requests.get(0)).isInstanceOf(UpdateWorkGroupRequest.class);
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
     assertEquals(HandlerUtils.DEFAULT_STATE, receivedRequest.state().toString());
@@ -247,7 +245,7 @@ public class UpdateHandlerTest {
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
     verify(proxy, times(1)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
-    assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
+    assertThat(requests.get(0)).isInstanceOf(UpdateWorkGroupRequest.class);
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
     assertEquals(configBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
@@ -299,7 +297,7 @@ public class UpdateHandlerTest {
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
     verify(proxy, times(1)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
-    assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
+    assertThat(requests.get(0)).isInstanceOf(UpdateWorkGroupRequest.class);
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
     assertEquals(configBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
@@ -350,7 +348,7 @@ public class UpdateHandlerTest {
     ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
     verify(proxy, times(1)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
-    assertThat(requests.get(0) instanceof UpdateWorkGroupRequest);
+    assertThat(requests.get(0)).isInstanceOf(UpdateWorkGroupRequest.class);
     UpdateWorkGroupRequest receivedRequest = (UpdateWorkGroupRequest) requests.get(0);
 
     assertEquals(configUpdatesBytes, receivedRequest.configurationUpdates().bytesScannedCutoffPerQuery());
@@ -413,120 +411,12 @@ public class UpdateHandlerTest {
     verify(proxy, times(2)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
     TagResourceRequest tagRequest = (TagResourceRequest) requests.get(0);
-    assertThat(tagRequest.tags().containsAll(newTags));
+    List<Tag> mappedTagsFromRequest = tagRequest.tags().stream()
+            .map(tag -> Tag.builder().key(tag.key()).value(tag.value()).build())
+            .collect(Collectors.toList());
+    assertThat(new HashSet<>(mappedTagsFromRequest)).isEqualTo(new HashSet<>(newTags));
   }
 
-  @Test
-  void testSuccessStateWithAddingSystemTags(){
-    // Prepare inputs
-    Map<String, String> systemTags = new HashMap<>();
-    systemTags.put("aws:tag:systemTagKey", "systemTagValue");
-    final ResourceModel resourceModel = ResourceModel.builder()
-                                                .name("Primary")
-                                                .description("Primary workgroup update description")
-                                                .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
-                                                                                       .enforceWorkGroupConfiguration(true)
-                                                                                       .bytesScannedCutoffPerQuery(10_000_000_000L)
-                                                                                       .requesterPaysEnabled(true)
-                                                                                       .build())
-                                                .state("disabled")
-                                                .build();
-    final ResourceModel oldModel = ResourceModel.builder()
-                                           .name("Primary")
-                                           .build();
-
-    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                                                                  .previousResourceState(oldModel)
-                                                                  .desiredResourceState(resourceModel)
-                                                                  .systemTags(systemTags)
-                                                                  .region("unit-test")
-                                                                  .awsAccountId("123456789012")
-                                                                  .build();
-
-    // Mock
-    doReturn(UpdateWorkGroupResponse.builder().build())
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(any(UpdateWorkGroupRequest.class), any());
-    doReturn(TagResourceResponse.builder().build())
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(any(TagResourceRequest.class), any());
-
-    // Call
-    final ProgressEvent<ResourceModel, CallbackContext> response
-            = new UpdateHandler().handleRequest(proxy, request, null, logger);
-
-    // Assert
-    assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-    assertThat(response.getCallbackContext()).isNull();
-    assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-    assertThat(response.getMessage()).isNull();
-    assertThat(response.getErrorCode()).isNull();
-
-    // Verify that tags were registered/unregistered as expected
-    ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
-    verify(proxy, times(2)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
-    List<AthenaRequest> requests = requestCaptor.getAllValues();
-    TagResourceRequest tagRequest = (TagResourceRequest) requests.get(0);
-    assertThat(tagRequest.tags().size()).isEqualTo(1);
-    assertThat(systemTags.keySet()).contains(tagRequest.tags().get(0).key());
-    assertThat(tagRequest.tags().get(0).value()).isEqualTo(systemTags.get(tagRequest.tags().get(0).key()));
-  }
-
-  @Test
-  void testSuccessStateWithRemovingSystemTags(){
-    // Prepare inputs
-    Map<String, String> systemTags = new HashMap<>();
-    systemTags.put("aws:tag:systemTagKey", "systemTagValue");
-    final ResourceModel resourceModel = ResourceModel.builder()
-                                                .name("Primary")
-                                                .description("Primary workgroup update description")
-                                                .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
-                                                                                       .enforceWorkGroupConfiguration(true)
-                                                                                       .bytesScannedCutoffPerQuery(10_000_000_000L)
-                                                                                       .requesterPaysEnabled(true)
-                                                                                       .build())
-                                                .state("disabled")
-                                                .build();
-    final ResourceModel oldModel = ResourceModel.builder()
-                                           .name("Primary")
-                                           .build();
-
-    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                                                                  .previousResourceState(oldModel)
-                                                                  .desiredResourceState(resourceModel)
-                                                                  .previousSystemTags(systemTags)
-                                                                  .region("unit-test")
-                                                                  .awsAccountId("123456789012")
-                                                                  .build();
-
-    // Mock
-    doReturn(UpdateWorkGroupResponse.builder().build())
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(any(UpdateWorkGroupRequest.class), any());
-    doReturn(TagResourceResponse.builder().build())
-            .when(proxy)
-            .injectCredentialsAndInvokeV2(any(UntagResourceRequest.class), any());
-
-    // Call
-    final ProgressEvent<ResourceModel, CallbackContext> response
-            = new UpdateHandler().handleRequest(proxy, request, null, logger);
-
-    // Assert
-    assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-    assertThat(response.getCallbackContext()).isNull();
-    assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-    assertThat(response.getMessage()).isNull();
-    assertThat(response.getErrorCode()).isNull();
-
-    // Verify that tags were registered/unregistered as expected
-    ArgumentCaptor<AthenaRequest> requestCaptor = ArgumentCaptor.forClass(AthenaRequest.class);
-    verify(proxy, times(2)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
-    List<AthenaRequest> requests = requestCaptor.getAllValues();
-    assertThat(requests.get(0) instanceof UntagResourceRequest).isTrue();
-    UntagResourceRequest untagRequest = (UntagResourceRequest) requests.get(0);
-    assertEquals(untagRequest.tagKeys().size() ,1);
-    assertThat(systemTags.keySet()).contains(untagRequest.tagKeys().get(0));
-  }
   @Test
   void testSuccessStateWithRemovingAllTags() {
     // Prepare inputs
@@ -577,7 +467,7 @@ public class UpdateHandlerTest {
     verify(proxy, times(2)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
     UntagResourceRequest tagRequest = (UntagResourceRequest) requests.get(0);
-    assertThat(tagRequest.tagKeys().containsAll(oldTags.stream().map(Tag::getKey).collect(Collectors.toList())));
+    assertThat(tagRequest.tagKeys().containsAll(oldTags.stream().map(Tag::getKey).collect(Collectors.toList()))).isTrue();
   }
 
   @Test
@@ -633,9 +523,12 @@ public class UpdateHandlerTest {
     verify(proxy, times(3)).injectCredentialsAndInvokeV2(requestCaptor.capture(), any());
     List<AthenaRequest> requests = requestCaptor.getAllValues();
     UntagResourceRequest untagRequest = (UntagResourceRequest) requests.get(0);
-    assertThat(untagRequest.tagKeys().containsAll(Lists.list("key1", "key2")));
+    assertThat(untagRequest.tagKeys().containsAll(Lists.list("key2"))).isTrue();
     TagResourceRequest tagRequest = (TagResourceRequest) requests.get(1);
-    assertThat(tagRequest.tags().containsAll(Lists.list(new Tag("key1", "value1new"), new Tag("key3", "value3"))));
+    List<Tag> mappedTagsFromRequest = tagRequest.tags().stream()
+            .map(tag -> Tag.builder().key(tag.key()).value(tag.value()).build())
+            .collect(Collectors.toList());
+    assertThat(new HashSet<>(mappedTagsFromRequest)).isEqualTo(new HashSet<>(Lists.list(new Tag("key1", "value1new"), new Tag("key3", "value3"))));
   }
 
   @Test

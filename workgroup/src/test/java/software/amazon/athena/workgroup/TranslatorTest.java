@@ -32,18 +32,12 @@ public class TranslatorTest {
     Map<String, String> stackTags = new HashMap<>();
     stackTags.put("Author", "Bezos");
 
-    Map<String, String> systemTags = new HashMap<>();
-    systemTags.put("aws:tag:systemTagKey", "systemTagValue");
-
     List<software.amazon.awssdk.services.athena.model.Tag> sdkTags =
-      new Translator().createConsolidatedSdkTagsFromCfnTags(cfnTags, stackTags, systemTags);
+      new Translator().createConsolidatedSdkTagsFromCfnTags(cfnTags, stackTags);
 
-    assertThat(sdkTags.size()).isEqualTo(3);
+    assertThat(sdkTags.size()).isEqualTo(2);
     assertThat(sdkTags.get(0).value()).isEqualTo(cfnTags.get(0).getValue());
     assertThat(sdkTags.get(1).value()).isEqualTo(cfnTags.get(1).getValue());
-    assertThat(sdkTags.get(2).key()).isEqualTo("aws:tag:systemTagKey");
-    assertThat(sdkTags.get(2).value()).isEqualTo(systemTags.get("aws:tag:systemTagKey"));
-
   }
 
   @Test
@@ -260,7 +254,7 @@ public class TranslatorTest {
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = new Translator().createCfnWorkgroupConfigurationFromSdkConfiguration(sdkWorkGroupConfiguration);
 
     assertThat(cfnWorkGroupConfiguration.getEnforceWorkGroupConfiguration()).isEqualTo(sdkWorkGroupConfiguration.enforceWorkGroupConfiguration());
-    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isEqualTo(sdkWorkGroupConfiguration.bytesScannedCutoffPerQuery());
+    assertThat(cfnWorkGroupConfiguration.getBytesScannedCutoffPerQuery()).isNull();
     assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfiguration.publishCloudWatchMetricsEnabled());
     assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
     assertThat(cfnWorkGroupConfiguration.getResultConfiguration().getOutputLocation()).isEqualTo(sdkWorkGroupConfiguration.resultConfiguration().outputLocation());

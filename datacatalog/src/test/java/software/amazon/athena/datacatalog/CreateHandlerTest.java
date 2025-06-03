@@ -1,6 +1,5 @@
 package software.amazon.athena.datacatalog;
 
-import org.mockito.ArgumentCaptor;
 import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.services.athena.model.AthenaRequest;
 import software.amazon.awssdk.services.athena.model.AthenaResponse;
@@ -18,11 +17,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -133,35 +127,5 @@ public class CreateHandlerTest extends BaseHandlerTest {
                 .message("Invalid request provided: DataCatalog has already been created").build());
         // Call
         assertThrows(CfnAlreadyExistsException.class, () -> testHandleRequest(request));
-    }
-
-    @Test
-    void testSuccessStateWithSystemTags() {
-        final ResourceModel resourceModel = buildTestResourceModel();
-        Map<String, String> systemTags = new HashMap<>();
-        systemTags.put("aws:tag:somekey", "somevalue");
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                                                                    .desiredResourceState(resourceModel)
-                                                                    .systemTags(systemTags)
-                                                                    .build();
-        // Mock
-        when(proxyClient.client().createDataCatalog(any(CreateDataCatalogRequest.class)))
-              .thenReturn(CreateDataCatalogResponse.builder().build());
-
-        // Call
-        final ProgressEvent<ResourceModel, CallbackContext> response = testHandleRequest(request);
-
-      // Assert
-      assertSuccessState(response);
-      CreateDataCatalogRequest createDataCatalogRequest =
-              captureRequests(verify(proxyClient.client())::createDataCatalog, CreateDataCatalogRequest.class).get(0);
-      assertThat(createDataCatalogRequest.tags().containsAll(systemTags.entrySet()));
-    }
-
-    private <T extends AthenaRequest, F extends AthenaResponse> List<T> captureRequests(
-            Function<T, F> function, Class<T> clazz) {
-        ArgumentCaptor<T> requestCaptor = ArgumentCaptor.forClass(clazz);
-        function.apply(requestCaptor.capture());
-        return requestCaptor.getAllValues();
     }
 }

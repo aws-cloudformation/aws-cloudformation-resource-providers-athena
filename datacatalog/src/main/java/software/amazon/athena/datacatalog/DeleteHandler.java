@@ -51,11 +51,9 @@ public class DeleteHandler extends BaseHandlerAthena {
                 ProgressEvent.ProgressEventBuilder<ResourceModel, CallbackContext> progressEventBuilder = ProgressEvent.<ResourceModel, CallbackContext>builder();
                 try {
                     DataCatalog dataCatalog = getDataCatalog(client, model);
-                    if (dataCatalog.type().equals(DataCatalogType.FEDERATED)) {
-                        if (!dataCatalog.status().equals(DataCatalogStatus.DELETE_COMPLETE)) {
-                            operationStatus = OperationStatus.FAILED;
-                            progressEventBuilder.message(dataCatalog.error());
-                        }
+                    if (dataCatalog.type().equals(DataCatalogType.FEDERATED) && !dataCatalog.status().equals(DataCatalogStatus.DELETE_COMPLETE)) {
+                        operationStatus = OperationStatus.FAILED;
+                        progressEventBuilder.message(dataCatalog.error());
                     }
                 }
                 catch (InvalidRequestException ignored) {} // GetDataCatalog should fail for non-FEDERATED after DeleteDataCatalog

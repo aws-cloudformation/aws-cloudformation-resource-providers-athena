@@ -35,9 +35,7 @@ public class CreateHandler extends BaseHandlerAthena {
         return proxy.initiate("athena::createDataCatalog", athenaProxyClient,
             request.getDesiredResourceState(), callbackContext)
             .translateToServiceRequest(
-                    model -> Translator.createDataCatalogRequest(model,
-                                                                 request.getDesiredResourceTags(),
-                                                                 request.getSystemTags()))
+                    model -> Translator.createDataCatalogRequest(model, request.getDesiredResourceTags()))
             .makeServiceCall(this::createDataCatalog)
             .stabilize((createRequest, createResponse, client, model, context) -> {
                 if (model.getType().equals(DataCatalogType.FEDERATED.name())) {
