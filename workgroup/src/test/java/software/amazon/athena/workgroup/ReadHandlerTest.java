@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.athena.model.InternalServerException;
 import software.amazon.awssdk.services.athena.model.InvalidRequestException;
 import software.amazon.awssdk.services.athena.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.athena.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.athena.model.ManagedQueryResultsConfiguration;
 import software.amazon.awssdk.services.athena.model.ResultConfiguration;
 import software.amazon.awssdk.services.athena.model.WorkGroup;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfiguration;
@@ -379,5 +380,55 @@ class ReadHandlerTest {
     Tag cfnTag = cfnTags.get(0);
     assertEquals(tagKey, cfnTag.getKey());
     assertEquals(tagValue, cfnTag.getValue());
+  }
+
+  @Test
+  void testSuccessStateWithManagedStorageConfiguration() {
+    // Prepare inputs
+    final ResourceModel resourceModel = ResourceModel.builder().name("managed storage workgroup").build();
+
+    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(resourceModel).build();
+
+    final WorkGroup workGroup = WorkGroup.builder()
+            .name("managed storage workgroup").description("managed storage workgroup")
+            .state("enabled")
+            .creationTime(Instant.now())
+            .configuration(WorkGroupConfiguration.builder()
+                    .enforceWorkGroupConfiguration(true)
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .requesterPaysEnabled(true)
+                    .publishCloudWatchMetricsEnabled(true)
+                    .managedQueryResultsConfiguration(ManagedQueryResultsConfiguration.builder()
+                            .enabled(true)
+                            .build())
+                    .build())
+            .build();
+
+    // Mock
+    doReturn(ListTagsForResourceResponse.builder().build()).when(proxy).injectCredentialsAndInvokeV2(any(ListTagsForResourceRequest.class), any());
+    doReturn(GetWorkGroupResponse.builder().workGroup(workGroup).build()).when(proxy).injectCredentialsAndInvokeV2(any(GetWorkGroupRequest.class), any());
+
+    // Call
+    final ProgressEvent<ResourceModel, CallbackContext> response = new ReadHandler().handleRequest(proxy, request, null, logger);
+
+    // Assert
+    assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+    assertThat(response.getCallbackContext()).isNull();
+    assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+    assertThat(response.getResourceModel().getName()).isEqualTo(workGroup.name());
+    assertThat(response.getResourceModel().getDescription()).isEqualTo(workGroup.description());
+    assertThat(response.getResourceModel().getState()).isEqualTo(workGroup.stateAsString());
+    assertThat(response.getResourceModel().getCreationTime()).isEqualTo(Long.toString(workGroup.creationTime().getEpochSecond()));
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getBytesScannedCutoffPerQuery())
+            .isEqualTo(workGroup.configuration().bytesScannedCutoffPerQuery());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getEnforceWorkGroupConfiguration())
+            .isEqualTo(workGroup.configuration().enforceWorkGroupConfiguration());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getRequesterPaysEnabled())
+            .isEqualTo(workGroup.configuration().requesterPaysEnabled());
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getPublishCloudWatchMetricsEnabled())
+            .isEqualTo(workGroup.configuration().publishCloudWatchMetricsEnabled());
+    assertThat(response.getMessage()).isNull();
+    assertThat(response.getErrorCode()).isNull();
+    assertThat(response.getResourceModel().getWorkGroupConfiguration().getManagedQueryResultsConfiguration().getEnabled()).isEqualTo(true);
   }
 }

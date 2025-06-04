@@ -310,4 +310,46 @@ public class CreateHandlerTest {
     assertThrows(CfnInvalidRequestException.class, () ->
             new CreateHandler().handleRequest(proxy, request, null, logger));
   }
+
+  @Test
+  void testSuccessStateWithManagedStorageConfiguration() {
+    // Prepare inputs
+    Tag tag = Tag.builder().key("owner").value("jedi").build();
+
+    final ResourceModel resourceModel = ResourceModel.builder()
+            .name("managedStorage")
+            .description("Managed Storage workgroup")
+            .tags(Lists.newArrayList(tag))
+            .workGroupConfiguration(WorkGroupConfiguration.builder()
+                    .enforceWorkGroupConfiguration(false)
+                    .publishCloudWatchMetricsEnabled(true)
+                    .requesterPaysEnabled(true)
+                    .managedQueryResultsConfiguration(ManagedQueryResultsConfiguration.builder()
+                            .enabled(true)
+                            .encryptionConfiguration(ManagedStorageEncryptionConfiguration.builder()
+                                    .kmsKey("testKey")
+                                    .build())
+                            .build())
+                    .engineVersion(SQL_ENGINE)
+                    .build())
+            .build();
+    final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(resourceModel)
+            .build();
+    // Mock
+    doReturn(CreateWorkGroupResponse.builder().build())
+            .when(proxy)
+            .injectCredentialsAndInvokeV2(any(), any());
+
+    // Call
+    final ProgressEvent<ResourceModel, CallbackContext> response
+            = new CreateHandler().handleRequest(proxy, request, null, logger);
+
+    // Assert
+    assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+    assertThat(response.getCallbackContext()).isNull();
+    assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+    assertThat(response.getMessage()).isNull();
+    assertThat(response.getErrorCode()).isNull();
+  }
 }
