@@ -652,8 +652,8 @@ public class UpdateHandlerTest {
   void testSuccessStateWithManagedStorageUpdates() {
     // Prepare inputs
     final ResourceModel resourceModel = ResourceModel.builder()
-            .name("Primary")
-            .description("Primary workgroup update description")
+            .name("ManagedStorage")
+            .description("Test managed storage description")
             .workGroupConfigurationUpdates(WorkGroupConfigurationUpdates.builder()
                     .enforceWorkGroupConfiguration(true)
                     .bytesScannedCutoffPerQuery(10_000_000_000L)
@@ -664,13 +664,11 @@ public class UpdateHandlerTest {
                             .encryptionConfiguration(ManagedStorageEncryptionConfiguration.builder()
                                     .kmsKey("eiifcckijivunlgvvggjeiheertfetujenrnndugggnh")
                                     .build())
-                            .timeToLive("1 Day")
                             .build())
                     .build())
-            .state("disabled")
             .build();
     final ResourceModel oldModel = ResourceModel.builder()
-            .name("Primary")
+            .name("ManagedStorage")
             .build();
 
     final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()

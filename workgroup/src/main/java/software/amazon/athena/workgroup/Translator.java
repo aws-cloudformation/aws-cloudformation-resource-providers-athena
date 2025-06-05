@@ -2,11 +2,14 @@ package software.amazon.athena.workgroup;
 
 import software.amazon.awssdk.services.athena.model.AclConfiguration;
 import software.amazon.awssdk.services.athena.model.CustomerContentEncryptionConfiguration;
+import software.amazon.awssdk.services.athena.model.ManagedQueryResultsConfiguration;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import software.amazon.awssdk.services.athena.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.EngineVersion;
+import software.amazon.awssdk.services.athena.model.ManagedQueryResultsConfigurationUpdates;
+import software.amazon.awssdk.services.athena.model.ManagedQueryResultsEncryptionConfiguration;
 import software.amazon.awssdk.services.athena.model.ResultConfiguration;
 import software.amazon.awssdk.services.athena.model.ResultConfigurationUpdates;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfiguration;
@@ -58,6 +61,8 @@ class Translator {
             .executionRole(cfnConfiguration.getExecutionRole())
             .customerContentEncryptionConfiguration(cfnConfiguration.getCustomerContentEncryptionConfiguration() != null ?
                     createSdkCustomerContentEncryptionConfigurationFromCfnConfiguration(cfnConfiguration.getCustomerContentEncryptionConfiguration()) : null)
+            .managedQueryResultsConfiguration(cfnConfiguration.getManagedQueryResultsConfiguration() != null ?
+                    createSdkManagedQueryResultsConfigurationFromCfnConfiguration(cfnConfiguration.getManagedQueryResultsConfiguration()) : null)
             .build();
   }
 
@@ -72,6 +77,18 @@ class Translator {
           software.amazon.athena.workgroup.CustomerContentEncryptionConfiguration customerContentEncryptionConfiguration) {
     return CustomerContentEncryptionConfiguration.builder()
             .kmsKey(customerContentEncryptionConfiguration.getKmsKey())
+            .build();
+  }
+
+  private ManagedQueryResultsConfiguration createSdkManagedQueryResultsConfigurationFromCfnConfiguration(
+          software.amazon.athena.workgroup.ManagedQueryResultsConfiguration managedQueryResultsConfiguration) {
+    return ManagedQueryResultsConfiguration.builder()
+            .enabled(managedQueryResultsConfiguration.getEnabled())
+            .encryptionConfiguration(
+                    managedQueryResultsConfiguration.getEncryptionConfiguration() != null ?
+                    ManagedQueryResultsEncryptionConfiguration.builder()
+                    .kmsKey(managedQueryResultsConfiguration.getEncryptionConfiguration().getKmsKey())
+                    .build() : null)
             .build();
   }
 
@@ -113,6 +130,8 @@ class Translator {
             .customerContentEncryptionConfiguration(configuration.getCustomerContentEncryptionConfiguration() != null ?
                     createSdkCustomerContentEncryptionConfigurationFromCfnConfiguration(configuration.getCustomerContentEncryptionConfiguration()) : null)
             .removeCustomerContentEncryptionConfiguration(configuration.getRemoveCustomerContentEncryptionConfiguration())
+            .managedQueryResultsConfigurationUpdates(configuration.getManagedQueryResultsConfiguration() != null ?
+                    createSdkManagedQueryResultsConfigurationUpdatesFromCfnConfiguration(configuration.getManagedQueryResultsConfiguration()) : null)
             .build();
   }
 
@@ -140,6 +159,9 @@ class Translator {
             .requesterPaysEnabled(requestedConfig.getRequesterPaysEnabled() != null ? requestedConfig.getRequesterPaysEnabled() : defaults.requesterPaysEnabled())
             .resultConfigurationUpdates(createSdkResultConfigurationUpdatesFromCfnConfiguration(requestedConfig.getResultConfiguration()))
             .additionalConfiguration(requestedConfig.getAdditionalConfiguration())
+            .managedQueryResultsConfigurationUpdates(requestedConfig.getManagedQueryResultsConfiguration() != null ?
+                    createSdkManagedQueryResultsConfigurationUpdatesFromCfnConfiguration(requestedConfig.getManagedQueryResultsConfiguration()) :
+                    defaults.managedQueryResultsConfigurationUpdates())
             .executionRole(requestedConfig.getExecutionRole());
     if (requestedConfig.getBytesScannedCutoffPerQuery() == null) {
       configUpdates.removeBytesScannedCutoffPerQuery(true);
@@ -175,6 +197,18 @@ class Translator {
     return updatesBuilder.build();
   }
 
+  private ManagedQueryResultsConfigurationUpdates createSdkManagedQueryResultsConfigurationUpdatesFromCfnConfiguration(
+          software.amazon.athena.workgroup.ManagedQueryResultsConfiguration managedQueryResultsConfiguration) {
+    return ManagedQueryResultsConfigurationUpdates.builder()
+            .enabled(managedQueryResultsConfiguration.getEnabled())
+            .encryptionConfiguration(
+                    managedQueryResultsConfiguration.getEncryptionConfiguration() != null ?
+                    ManagedQueryResultsEncryptionConfiguration.builder()
+                    .kmsKey(managedQueryResultsConfiguration.getEncryptionConfiguration().getKmsKey())
+                    .build() : null)
+            .build();
+  }
+
   software.amazon.athena.workgroup.WorkGroupConfiguration createCfnWorkgroupConfigurationFromSdkConfiguration(WorkGroupConfiguration sdkConfiguration) {
     return software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
             .bytesScannedCutoffPerQuery(sdkConfiguration.bytesScannedCutoffPerQuery())
@@ -189,6 +223,8 @@ class Translator {
             .executionRole(sdkConfiguration.executionRole())
             .customerContentEncryptionConfiguration(sdkConfiguration.customerContentEncryptionConfiguration() != null ?
                     createCfnCustomerContentEncryptionConfigurationFromSdkConfiguration(sdkConfiguration.customerContentEncryptionConfiguration()) : null)
+            .managedQueryResultsConfiguration(sdkConfiguration.managedQueryResultsConfiguration() != null ?
+                    createCfnManagedQueryResultsConfigurationFromSdkConfiguration(sdkConfiguration.managedQueryResultsConfiguration()) : null)
             .build();
   }
 
@@ -196,6 +232,17 @@ class Translator {
           CustomerContentEncryptionConfiguration customerContentEncryptionConfiguration) {
     return software.amazon.athena.workgroup.CustomerContentEncryptionConfiguration.builder()
             .kmsKey(customerContentEncryptionConfiguration.kmsKey())
+            .build();
+  }
+
+  private software.amazon.athena.workgroup.ManagedQueryResultsConfiguration createCfnManagedQueryResultsConfigurationFromSdkConfiguration(
+          ManagedQueryResultsConfiguration managedQueryResultsConfiguration) {
+    return software.amazon.athena.workgroup.ManagedQueryResultsConfiguration.builder()
+            .enabled(managedQueryResultsConfiguration.enabled())
+            .encryptionConfiguration(managedQueryResultsConfiguration.encryptionConfiguration() != null ?
+                    ManagedStorageEncryptionConfiguration.builder()
+                                    .kmsKey(managedQueryResultsConfiguration.encryptionConfiguration().kmsKey())
+                                    .build() : null)
             .build();
   }
 

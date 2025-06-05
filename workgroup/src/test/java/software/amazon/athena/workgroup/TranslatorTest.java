@@ -107,6 +107,39 @@ public class TranslatorTest {
   }
 
   @Test
+  void testCreateSdkWorkgroupConfigurationFromCfnConfigurationForManagedStorageWorkgroup() {
+    software.amazon.athena.workgroup.EngineVersion sqlConfiguration = software.amazon.athena.workgroup.EngineVersion.builder()
+            .selectedEngineVersion("AUTO")
+            .effectiveEngineVersion("Athena engine version 2")
+            .build();
+    software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration =
+            getBareMinCfnWorkGroupConfiguration()
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .engineVersion(sqlConfiguration)
+                    .managedQueryResultsConfiguration(ManagedQueryResultsConfiguration.builder()
+                            .enabled(true)
+                            .encryptionConfiguration(ManagedStorageEncryptionConfiguration.builder()
+                                    .kmsKey("TestKey")
+                                    .build())
+                            .build())
+                    .build();
+    WorkGroupConfiguration sdkWorkGroupConfiguration =
+            new Translator().createSdkWorkgroupConfigurationFromCfnConfiguration(cfnWorkGroupConfiguration);
+    assertThat(cfnWorkGroupConfiguration.getEnforceWorkGroupConfiguration()).isEqualTo(sdkWorkGroupConfiguration.enforceWorkGroupConfiguration());
+    assertThat(cfnWorkGroupConfiguration.getPublishCloudWatchMetricsEnabled()).isEqualTo(sdkWorkGroupConfiguration.publishCloudWatchMetricsEnabled());
+    assertThat(cfnWorkGroupConfiguration.getRequesterPaysEnabled()).isEqualTo(sdkWorkGroupConfiguration.requesterPaysEnabled());
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion().getSelectedEngineVersion())
+            .isEqualTo(sdkWorkGroupConfiguration.engineVersion().selectedEngineVersion());
+    assertThat(cfnWorkGroupConfiguration.getEngineVersion().getEffectiveEngineVersion())
+            .isEqualTo(sdkWorkGroupConfiguration.engineVersion().effectiveEngineVersion());
+    assertThat(cfnWorkGroupConfiguration.getExecutionRole()).isEqualTo(sdkWorkGroupConfiguration.executionRole());
+    assertThat(cfnWorkGroupConfiguration.getManagedQueryResultsConfiguration().getEnabled())
+            .isEqualTo(sdkWorkGroupConfiguration.managedQueryResultsConfiguration().enabled());
+    assertThat(cfnWorkGroupConfiguration.getManagedQueryResultsConfiguration().getEncryptionConfiguration().getKmsKey())
+            .isEqualTo(sdkWorkGroupConfiguration.managedQueryResultsConfiguration().encryptionConfiguration().kmsKey());
+  }
+
+  @Test
   void testCreateSdkWorkgroupConfigurationFromCfnConfigurationWithResultConfigurationNullable() {
     software.amazon.athena.workgroup.WorkGroupConfiguration cfnWorkGroupConfiguration = software.amazon.athena.workgroup.WorkGroupConfiguration.builder()
             .enforceWorkGroupConfiguration(true)
@@ -188,6 +221,32 @@ public class TranslatorTest {
             .isEqualTo(sdkWorkGroupConfigurationUpdates.customerContentEncryptionConfiguration().kmsKey());
     assertThat(cfnWorkGroupConfiguration.getRemoveCustomerContentEncryptionConfiguration())
             .isEqualTo(sdkWorkGroupConfigurationUpdates.removeCustomerContentEncryptionConfiguration());
+  }
+
+  @Test
+  void testCreateSdkConfigurationUpdatesFromCfnConfigurationUpdatesForManagedStorageWorkgroup() {
+    software.amazon.athena.workgroup.EngineVersion engineVersion = software.amazon.athena.workgroup.EngineVersion.builder()
+            .selectedEngineVersion("AUTO")
+            .effectiveEngineVersion("Athena engine version 2")
+            .build();
+    software.amazon.athena.workgroup.WorkGroupConfigurationUpdates cfnWorkGroupConfiguration =
+            software.amazon.athena.workgroup.WorkGroupConfigurationUpdates.builder()
+                    .bytesScannedCutoffPerQuery(10_000_000_000L)
+                    .managedQueryResultsConfiguration(ManagedQueryResultsConfiguration.builder()
+                            .enabled(true)
+                            .encryptionConfiguration(ManagedStorageEncryptionConfiguration.builder()
+                                    .kmsKey("testKey")
+                                    .build())
+                            .build())
+                    .engineVersion(engineVersion)
+                    .removeCustomerContentEncryptionConfiguration(true)
+                    .build();
+    WorkGroupConfigurationUpdates sdkWorkGroupConfigurationUpdates =
+            new Translator().createSdkConfigurationUpdatesFromCfnConfigurationUpdates(cfnWorkGroupConfiguration);
+    assertThat(cfnWorkGroupConfiguration.getManagedQueryResultsConfiguration().getEnabled())
+            .isEqualTo(sdkWorkGroupConfigurationUpdates.managedQueryResultsConfigurationUpdates().enabled());
+    assertThat(cfnWorkGroupConfiguration.getManagedQueryResultsConfiguration().getEncryptionConfiguration().getKmsKey())
+            .isEqualTo(sdkWorkGroupConfigurationUpdates.managedQueryResultsConfigurationUpdates().encryptionConfiguration().kmsKey());
   }
 
   @Test

@@ -1,0 +1,26 @@
+{
+    "CreateInputs": {
+        "Name": "WorkgroupContractTests",
+        "State": "ENABLED",
+        "WorkGroupConfiguration": {
+            "ManagedQueryResultsConfiguration": {
+                "Enabled": true,
+                "EncryptionConfiguration": {
+                    "KmsKey": "{{awsathenaworkgroupcto3}}"
+                }
+            },
+            "EngineVersion": {
+                "SelectedEngineVersion": "AUTO"
+            },
+            "BytesScannedCutoffPerQuery": 100000000
+        },
+        "WorkGroupConfigurationUpdates": {
+            "ManagedQueryResultsConfiguration": {
+                "Enabled": false
+            },
+            "EngineVersion": {
+                "SelectedEngineVersion": "AUTO"
+            }
+        }
+    }
+}
