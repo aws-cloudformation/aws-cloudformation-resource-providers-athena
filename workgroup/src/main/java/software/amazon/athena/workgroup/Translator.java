@@ -14,6 +14,12 @@ import software.amazon.awssdk.services.athena.model.ResultConfiguration;
 import software.amazon.awssdk.services.athena.model.ResultConfigurationUpdates;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfiguration;
 import software.amazon.awssdk.services.athena.model.WorkGroupConfigurationUpdates;
+import software.amazon.awssdk.services.athena.model.MonitoringConfiguration;
+import software.amazon.awssdk.services.athena.model.CloudWatchLoggingConfiguration;
+import software.amazon.awssdk.services.athena.model.ManagedLoggingConfiguration;
+import software.amazon.awssdk.services.athena.model.S3LoggingConfiguration;
+import software.amazon.awssdk.services.athena.model.EngineConfiguration;
+import software.amazon.awssdk.services.athena.model.Classification;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,6 +69,10 @@ class Translator {
                     createSdkCustomerContentEncryptionConfigurationFromCfnConfiguration(cfnConfiguration.getCustomerContentEncryptionConfiguration()) : null)
             .managedQueryResultsConfiguration(cfnConfiguration.getManagedQueryResultsConfiguration() != null ?
                     createSdkManagedQueryResultsConfigurationFromCfnConfiguration(cfnConfiguration.getManagedQueryResultsConfiguration()) : null)
+            .engineConfiguration(cfnConfiguration.getEngineConfiguration() != null ?
+                    createSdkEngineConfigurationFromCfnConfiguration(cfnConfiguration.getEngineConfiguration()) : null)
+            .monitoringConfiguration(cfnConfiguration.getMonitoringConfiguration() != null ?
+                    createSdkMonitoringConfigurationFromCfnConfiguration(cfnConfiguration.getMonitoringConfiguration()) : null)
             .build();
   }
 
@@ -70,6 +80,66 @@ class Translator {
     return EngineVersion.builder()
             .selectedEngineVersion(engineVersion.getSelectedEngineVersion())
             .effectiveEngineVersion(engineVersion.getEffectiveEngineVersion())
+            .build();
+  }
+
+  EngineConfiguration createSdkEngineConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.EngineConfiguration engineConfiguration) {
+    return EngineConfiguration.builder()
+            .classifications(engineConfiguration.getClassifications() != null ?
+                    createSdkClassificationsFromCfnClassifications(engineConfiguration.getClassifications()) : null)
+            .build();
+  }
+
+  List<Classification> createSdkClassificationsFromCfnClassifications(List<software.amazon.athena.workgroup.Classification> cfnClassifications) {
+    if (cfnClassifications == null) {
+      return null;
+    }
+    List<Classification> sdkClassifications = new ArrayList<>();
+    cfnClassifications.forEach(cfnClassification -> {
+      sdkClassifications.add(createSdkClassificationFromCfnClassification(cfnClassification));
+    });
+    return sdkClassifications;
+  }
+
+  Classification createSdkClassificationFromCfnClassification(software.amazon.athena.workgroup.Classification cfnClassification) {
+    return Classification.builder()
+            .name(cfnClassification.getName())
+            .properties(cfnClassification.getProperties())
+            .build();
+  }
+
+  MonitoringConfiguration createSdkMonitoringConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.MonitoringConfiguration cfnMonitoringConfiguration) {
+    return MonitoringConfiguration.builder()
+            .cloudWatchLoggingConfiguration(cfnMonitoringConfiguration.getCloudWatchLoggingConfiguration() != null ?
+                    createSdkCloudWatchLoggingConfigurationFromCfnConfiguration(cfnMonitoringConfiguration.getCloudWatchLoggingConfiguration()) : null)
+            .managedLoggingConfiguration(cfnMonitoringConfiguration.getManagedLoggingConfiguration() != null ?
+                    createSdkManagedLoggingConfigurationFromCfnConfiguration(cfnMonitoringConfiguration.getManagedLoggingConfiguration()) : null)
+            .s3LoggingConfiguration(cfnMonitoringConfiguration.getS3LoggingConfiguration() != null ?
+                    createSdkS3LoggingConfigurationFromCfnConfiguration(cfnMonitoringConfiguration.getS3LoggingConfiguration()) : null)
+            .build();
+  }
+
+  CloudWatchLoggingConfiguration createSdkCloudWatchLoggingConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.CloudWatchLoggingConfiguration cfnCloudWatchLoggingConfiguration) {
+    return CloudWatchLoggingConfiguration.builder()
+            .enabled(cfnCloudWatchLoggingConfiguration.getEnabled())
+            .logGroup(cfnCloudWatchLoggingConfiguration.getLogGroup())
+            .logStreamNamePrefix(cfnCloudWatchLoggingConfiguration.getLogStreamNamePrefix())
+            .logTypes(convertCfnLogTypesToSdkLogTypes(cfnCloudWatchLoggingConfiguration.getLogTypes()))
+            .build();
+  }
+
+  ManagedLoggingConfiguration createSdkManagedLoggingConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.ManagedLoggingConfiguration cfnManagedLoggingConfiguration) {
+    return ManagedLoggingConfiguration.builder()
+            .enabled(cfnManagedLoggingConfiguration.getEnabled())
+            .kmsKey(cfnManagedLoggingConfiguration.getKmsKey())
+            .build();
+  }
+
+  S3LoggingConfiguration createSdkS3LoggingConfigurationFromCfnConfiguration(software.amazon.athena.workgroup.S3LoggingConfiguration cfnS3LoggingConfiguration) {
+    return S3LoggingConfiguration.builder()
+            .enabled(cfnS3LoggingConfiguration.getEnabled())
+            .kmsKey(cfnS3LoggingConfiguration.getKmsKey())
+            .logLocation(cfnS3LoggingConfiguration.getLogLocation())
             .build();
   }
 
@@ -132,6 +202,10 @@ class Translator {
             .removeCustomerContentEncryptionConfiguration(configuration.getRemoveCustomerContentEncryptionConfiguration())
             .managedQueryResultsConfigurationUpdates(configuration.getManagedQueryResultsConfiguration() != null ?
                     createSdkManagedQueryResultsConfigurationUpdatesFromCfnConfiguration(configuration.getManagedQueryResultsConfiguration()) : null)
+            .engineConfiguration(configuration.getEngineConfiguration() != null ?
+                    createSdkEngineConfigurationFromCfnConfiguration(configuration.getEngineConfiguration()) : null)
+            .monitoringConfiguration(configuration.getMonitoringConfiguration() != null ?
+                    createSdkMonitoringConfigurationFromCfnConfiguration(configuration.getMonitoringConfiguration()) : null)
             .build();
   }
 
@@ -162,7 +236,11 @@ class Translator {
             .managedQueryResultsConfigurationUpdates(requestedConfig.getManagedQueryResultsConfiguration() != null ?
                     createSdkManagedQueryResultsConfigurationUpdatesFromCfnConfiguration(requestedConfig.getManagedQueryResultsConfiguration()) :
                     defaults.managedQueryResultsConfigurationUpdates())
-            .executionRole(requestedConfig.getExecutionRole());
+            .executionRole(requestedConfig.getExecutionRole())
+            .engineConfiguration(requestedConfig.getEngineConfiguration() != null ?
+                    createSdkEngineConfigurationFromCfnConfiguration(requestedConfig.getEngineConfiguration()) : null)
+            .monitoringConfiguration(requestedConfig.getMonitoringConfiguration() != null ?
+                    createSdkMonitoringConfigurationFromCfnConfiguration(requestedConfig.getMonitoringConfiguration()) : null);
     if (requestedConfig.getBytesScannedCutoffPerQuery() == null) {
       configUpdates.removeBytesScannedCutoffPerQuery(true);
     } else {
@@ -225,6 +303,10 @@ class Translator {
                     createCfnCustomerContentEncryptionConfigurationFromSdkConfiguration(sdkConfiguration.customerContentEncryptionConfiguration()) : null)
             .managedQueryResultsConfiguration(sdkConfiguration.managedQueryResultsConfiguration() != null ?
                     createCfnManagedQueryResultsConfigurationFromSdkConfiguration(sdkConfiguration.managedQueryResultsConfiguration()) : null)
+            .engineConfiguration(sdkConfiguration.engineConfiguration() != null ?
+                    createCfnEngineConfigurationFromSdkConfiguration(sdkConfiguration.engineConfiguration()) : null)
+            .monitoringConfiguration(sdkConfiguration.monitoringConfiguration() != null ?
+                    createCfnMonitoringConfigurationFromSdkConfiguration(sdkConfiguration.monitoringConfiguration()) : null)
             .build();
   }
 
@@ -250,6 +332,74 @@ class Translator {
     return software.amazon.athena.workgroup.EngineVersion.builder()
             .selectedEngineVersion(engineVersion.selectedEngineVersion())
             .effectiveEngineVersion(engineVersion.effectiveEngineVersion())
+            .build();
+  }
+
+  software.amazon.athena.workgroup.EngineConfiguration createCfnEngineConfigurationFromSdkConfiguration(EngineConfiguration sdkEngineConfiguration) {
+    return software.amazon.athena.workgroup.EngineConfiguration.builder()
+            .classifications(sdkEngineConfiguration.classifications() != null ?
+                    createCfnClassificationsFromSdkClassifications(sdkEngineConfiguration.classifications()) : null)
+            .build();
+  }
+
+  List<software.amazon.athena.workgroup.Classification> createCfnClassificationsFromSdkClassifications(List<Classification> sdkClassifications) {
+    if (sdkClassifications == null) {
+      return null;
+    }
+    List<software.amazon.athena.workgroup.Classification> cfnClassifications = new ArrayList<>();
+    sdkClassifications.forEach(sdkClassification -> {
+      cfnClassifications.add(createCfnClassificationFromSdkClassification(sdkClassification));
+    });
+    return cfnClassifications;
+  }
+
+  software.amazon.athena.workgroup.Classification createCfnClassificationFromSdkClassification(Classification sdkClassification) {
+    return software.amazon.athena.workgroup.Classification.builder()
+            .name(sdkClassification.name())
+            .properties(sdkClassification.properties())
+            .build();
+  }
+
+  software.amazon.athena.workgroup.MonitoringConfiguration createCfnMonitoringConfigurationFromSdkConfiguration(MonitoringConfiguration sdkMonitoringConfiguration) {
+    return software.amazon.athena.workgroup.MonitoringConfiguration.builder()
+            .cloudWatchLoggingConfiguration(sdkMonitoringConfiguration.cloudWatchLoggingConfiguration() != null ?
+                    createCfnCloudWatchLoggingConfigurationFromSdkConfiguration(sdkMonitoringConfiguration.cloudWatchLoggingConfiguration()) : null)
+            .managedLoggingConfiguration(sdkMonitoringConfiguration.managedLoggingConfiguration() != null ?
+                    createCfnManagedLoggingConfigurationFromSdkConfiguration(sdkMonitoringConfiguration.managedLoggingConfiguration()) : null)
+            .s3LoggingConfiguration(sdkMonitoringConfiguration.s3LoggingConfiguration() != null ?
+                    createCfnS3LoggingConfigurationFromSdkConfiguration(sdkMonitoringConfiguration.s3LoggingConfiguration()) : null)
+            .build();
+  }
+
+  software.amazon.athena.workgroup.CloudWatchLoggingConfiguration createCfnCloudWatchLoggingConfigurationFromSdkConfiguration(CloudWatchLoggingConfiguration sdkCloudWatchLoggingConfiguration) {
+    return software.amazon.athena.workgroup.CloudWatchLoggingConfiguration.builder()
+            .enabled(sdkCloudWatchLoggingConfiguration.enabled())
+            .logGroup(sdkCloudWatchLoggingConfiguration.logGroup())
+            .logStreamNamePrefix(sdkCloudWatchLoggingConfiguration.logStreamNamePrefix())
+            .logTypes(convertSdkLogTypesToCfnLogTypes(sdkCloudWatchLoggingConfiguration.logTypes()))
+            .build();
+  }
+
+  private Map<String, List<String>> convertCfnLogTypesToSdkLogTypes(Map<String, List<String>> cfnLogTypes) {
+    return cfnLogTypes;
+  }
+
+  private Map<String, List<String>> convertSdkLogTypesToCfnLogTypes(Map<String, List<String>> sdkLogTypes) {
+    return sdkLogTypes;
+  }
+
+  software.amazon.athena.workgroup.ManagedLoggingConfiguration createCfnManagedLoggingConfigurationFromSdkConfiguration(ManagedLoggingConfiguration sdkManagedLoggingConfiguration) {
+    return software.amazon.athena.workgroup.ManagedLoggingConfiguration.builder()
+            .enabled(sdkManagedLoggingConfiguration.enabled())
+            .kmsKey(sdkManagedLoggingConfiguration.kmsKey())
+            .build();
+  }
+
+  software.amazon.athena.workgroup.S3LoggingConfiguration createCfnS3LoggingConfigurationFromSdkConfiguration(S3LoggingConfiguration sdkS3LoggingConfiguration) {
+    return software.amazon.athena.workgroup.S3LoggingConfiguration.builder()
+            .enabled(sdkS3LoggingConfiguration.enabled())
+            .kmsKey(sdkS3LoggingConfiguration.kmsKey())
+            .logLocation(sdkS3LoggingConfiguration.logLocation())
             .build();
   }
 
